@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITECH SUPPORT - Ayuda y soporte</title>
+    <link rel="icon" type="image/png" href="img/faviconitech.png">
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="css/custom.css" rel="stylesheet">
+</head>
+<body id="page-top">
+    <div id="wrapper">
+        <ul class="navbar-nav sidebar sidebar-light accordion" id="accordionSidebar">
+            <div class="logo-container">
+                <a href="index.html">
+                    <img src="img/logo-itech-support.png" alt="ITECH SUPPORT"> 
+                </a>
+            </div>
+            <hr class="sidebar-divider my-0">
+            <li class="nav-item">
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-home"></i>
+                    <span>Inicio</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="gestion-reparacion.html">
+                    <i class="fas fa-tools"></i>
+                    <span>Gestión Reparación</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="verificar.html">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Verificar</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="ventas-informes.html">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Ventas e informes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="clientes.html">
+                    <i class="fas fa-users"></i>
+                    <span>Clientes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="inventario.html">
+                    <i class="fas fa-boxes"></i>
+                    <span>Inventario</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="pedidos.html">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Pedidos</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="pago-facturacion.html">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Pago y Facturación</span>
+                </a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="ayuda-soporte.html">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Ayuda y soporte</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="configuracion.html">
+                    <i class="fas fa-cog"></i>
+                    <span>Ajustes</span>
+                </a>
+            </li>
+            <hr class="sidebar-divider d-none d-md-block">
+            <li class="nav-item">
+                <a class="nav-link" href="login.html">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Cerrar sesión</span>
+                </a>
+            </li>
+        </ul>
+        <div id="content-wrapper">
+            <div id="content">
+                <nav class="navbar-title">
+                    <button id="sidebarToggleCustom" class="btn-toggle-sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>Itech Support</h1>
+                </nav>
+                <div class="card-box">
+                    <div class="card-body">
+                        <h1 class="text-h2">¿Necesitas Ayuda?</h1>
+                            <p>Para cualquier consulta o soporte técnico, no dudes en contactarnos a través de nuestro chat en línea o por correo electrónico. Estamos aquí para ayudarte.</p>
+                        <div class="chatbot-container">
+                            <div class="chatbot-toggle" onclick="toggleChat()">
+                                <img src="img/chat-icon.png" alt="Chat Icon">
+                            </div>
+                            <div class="chatbot-box" id="chatBox">
+                              <div class="chatbot-header">
+                                Chat de Soporte
+                                <span class="chatbot-close" onclick="toggleChat()">✖</span>
+                              </div>
+                                <div class="chatbot-messages">
+                                    <div class="chatbot-message bot">¡Hola! ¿En qué puedo ayudarte?</div>
+                                </div>
+                              <div class="chatbot-input">
+                                <input type="text" placeholder="Escribe un mensaje..." Enabled />
+                              </div>
+                            </div>
+                        </div>                          
+                    </div>
+                </div>
+            </div>
+        </div>                   
+    </div>
+
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="js/sb-admin-2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/custom.js"></script>
+</body>
+</html>
