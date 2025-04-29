@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const formCliente = document.getElementById('formCliente');
     const inputBusqueda = document.getElementById('clienteBusqueda');
     const btnBuscar = document.getElementById('btnCliente');
-    const exportarBtn = document.getElementById('exportarClientes'); // Asegúrate de tener este botón
+    const exportarBtn = document.getElementById('exportarClientes');
 
     let modoEdicion = false;
     let clienteEditandoIndex = null;
