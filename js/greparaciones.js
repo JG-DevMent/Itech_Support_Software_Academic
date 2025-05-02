@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Elementos para notificación
     const btnNotificar = document.getElementById("btnNotificar");
+    const btnLimpiarForm = document.getElementById("btnLimpiarForm");
     const btnEnviarNotificacion = document.getElementById("btnEnviarNotificacion");
     const btnBuscarCliente = document.getElementById("btnBuscarCliente");
     const inputCliente = document.getElementById("cliente");
@@ -32,6 +33,21 @@ document.addEventListener("DOMContentLoaded", () => {
         const visible = contenedorFiltros.style.display === "flex";
         contenedorFiltros.style.display = visible ? "none" : "flex";
         toggleBtn.textContent = visible ? "👓 Mostrar Filtros" : "❌ Ocultar Filtros";
+    });
+    
+    // Función para limpiar el formulario
+    btnLimpiarForm.addEventListener("click", function() {
+        // Limpiar el formulario
+        form.reset();
+        // Limpiar información del cliente
+        infoCliente.innerHTML = "";
+        clienteActual = { nombre: "", email: "", telefono: "" };
+        // Limpiar materiales seleccionados
+        localStorage.removeItem("materialesReparacionTemp");
+        // Actualizar la tabla de materiales si existe
+        if (typeof actualizarTablaMateriales === 'function') {
+            actualizarTablaMateriales();
+        }
     });
     
     // Función para buscar cliente por cédula
@@ -93,6 +109,10 @@ document.addEventListener("DOMContentLoaded", () => {
     form.addEventListener("submit", function (e) {
         e.preventDefault();
 
+        // Obtener los materiales seleccionados del localStorage
+        const materialesSeleccionados = JSON.parse(localStorage.getItem("materialesReparacionTemp")) || [];
+        const costoMateriales = materialesSeleccionados.reduce((suma, producto) => suma + producto.subtotal, 0);
+
         const nuevaReparacion = {
             cliente: document.getElementById("cliente").value,
             nombreCliente: clienteActual.nombre,
@@ -105,16 +125,45 @@ document.addEventListener("DOMContentLoaded", () => {
             descripcion: document.getElementById("descripcion").value,
             costo: document.getElementById("costo").value,
             fecha: document.getElementById("fecha").value,
-            estado: document.getElementById("estado").value
+            estado: document.getElementById("estado").value,
+            materiales: materialesSeleccionados,
+            costoMateriales: costoMateriales
         };
 
         listaReparaciones.push(nuevaReparacion);
         localStorage.setItem("reparaciones", JSON.stringify(listaReparaciones));
+        
+        // Actualizar el inventario si se han seleccionado materiales
+        if (materialesSeleccionados.length > 0) {
+            actualizarInventarioDespuesDeReparacion(materialesSeleccionados);
+        }
+        
+        // Limpiar el formulario y los materiales seleccionados
         form.reset();
         infoCliente.innerHTML = "";
         clienteActual = { nombre: "", email: "", telefono: "" };
+        localStorage.removeItem("materialesReparacionTemp");
         renderTabla();
+        
+        // Notificar al usuario
+        alert("Reparación registrada exitosamente.");
     });
+    
+    // Función para actualizar el inventario después de registrar una reparación
+    function actualizarInventarioDespuesDeReparacion(materiales) {
+        const inventario = JSON.parse(localStorage.getItem("inventarioITECH")) || [];
+        
+        // Restar la cantidad utilizada del inventario
+        materiales.forEach(material => {
+            const productoIndex = inventario.findIndex(item => item.sku === material.sku);
+            if (productoIndex !== -1) {
+                inventario[productoIndex].existencias = parseInt(inventario[productoIndex].existencias) - material.cantidad;
+            }
+        });
+        
+        // Guardar el inventario actualizado
+        localStorage.setItem("inventarioITECH", JSON.stringify(inventario));
+    }
 
     // Función para notificar al cliente
     btnNotificar.addEventListener("click", function() {
@@ -178,6 +227,13 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderTabla() {
         tablaCuerpo.innerHTML = "";
         listaReparaciones.forEach((rep, index) => {
+            // Verificar si la reparación tiene materiales
+            const tieneMateriales = rep.materiales && rep.materiales.length > 0;
+            const costoMateriales = tieneMateriales ? rep.costoMateriales : 0;
+            const infoMateriales = tieneMateriales ? 
+                `<br><small class="text-info">Materiales: ${rep.materiales.length} items ($${costoMateriales.toFixed(2)})</small>` : 
+                '';
+            
             let row = `
                 <tr>
                     <td>${index + 1}</td>
@@ -186,7 +242,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td>${rep.marcaModelo}</td>
                     <td>${rep.imei}</td>
                     <td>${rep.problema}</td>
-                    <td>${rep.descripcion}</td>
+                    <td>${rep.descripcion}${infoMateriales}</td>
                     <td>${rep.costo}</td>
                     <td>${rep.fecha}</td>
                     <td>${rep.estado}</td>
@@ -200,13 +256,18 @@ document.addEventListener("DOMContentLoaded", () => {
                         <button class="btn btn-sm btn-info" onclick="notificarCliente(${index})">
                             <i class="fas fa-bell"></i>
                         </button>
+                        ${tieneMateriales ? `
+                        <button class="btn btn-sm btn-success" onclick="verMateriales(${index})">
+                            <i class="fas fa-boxes"></i>
+                        </button>
+                        ` : ''}
                     </td>
                 </tr>
             `;
             tablaCuerpo.innerHTML += row;
         });
     }
-
+    
     //Exponer funciones al global para poder usarlas en los botones de editar y eliminar
     window.editarReparacion = function (index) {
         const rep = listaReparaciones[index];
@@ -230,6 +291,18 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("costo").value = rep.costo;
         document.getElementById("fecha").value = rep.fecha;
         document.getElementById("estado").value = rep.estado;
+        
+        // Cargar los materiales en el formulario si existen
+        if (rep.materiales && rep.materiales.length > 0) {
+            localStorage.setItem("materialesReparacionTemp", JSON.stringify(rep.materiales));
+            
+            // Disparar un evento personalizado para avisar al módulo de materiales
+            const event = new CustomEvent('materialesReparacionCargados');
+            document.dispatchEvent(event);
+        } else {
+            // Limpiar cualquier material anterior
+            localStorage.removeItem("materialesReparacionTemp");
+        }
 
         listaReparaciones.splice(index, 1);
         localStorage.setItem("reparaciones", JSON.stringify(listaReparaciones));
@@ -312,6 +385,111 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("btnEnviarNotificacion").removeEventListener("click", handleEnviarNotificacion);
         });
     };
+    
+    // Función para ver los materiales de una reparación
+    window.verMateriales = function(index) {
+        const rep = listaReparaciones[index];
+        if (!rep.materiales || rep.materiales.length === 0) {
+            alert("Esta reparación no tiene materiales registrados.");
+            return;
+        }
+        
+        // Crear una tabla HTML con los materiales
+        let tablaMateriales = '<table class="table table-sm table-bordered">';
+        tablaMateriales += '<thead class="thead-light"><tr><th>Producto</th><th>SKU</th><th>Cantidad</th><th>Precio Unit.</th><th>Subtotal</th></tr></thead><tbody>';
+        
+        rep.materiales.forEach(material => {
+            tablaMateriales += `<tr>
+                <td>${material.nombre}</td>
+                <td>${material.sku}</td>
+                <td>${material.cantidad}</td>
+                <td>$${material.precioUnitario.toFixed(2)}</td>
+                <td>$${material.subtotal.toFixed(2)}</td>
+            </tr>`;
+        });
+        
+        tablaMateriales += `<tr class="table-info">
+            <td colspan="4" class="text-right"><strong>Total Materiales:</strong></td>
+            <td><strong>$${rep.costoMateriales.toFixed(2)}</strong></td>
+        </tr>`;
+        tablaMateriales += '</tbody></table>';
+        
+        // Generar un ID único para la ventana para evitar conflictos
+        const ventanaId = `materiales_${Date.now()}`;
+        
+        // Mostrar en una ventana emergente con estilos mejorados
+        const ventana = window.open('', ventanaId, 'width=700,height=500');
+        ventana.document.write(`
+            <!DOCTYPE html>
+            <html lang="es">
+            <head>
+                <meta charset="UTF-8">
+                <title>Materiales de Reparación #${index + 1}</title>
+                <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+                <style>
+                    body { 
+                        padding: 20px; 
+                        font-family: Arial, sans-serif;
+                    }
+                    .header {
+                        border-bottom: 2px solid #f0f0f0;
+                        margin-bottom: 20px;
+                        padding-bottom: 10px;
+                    }
+                    .footer {
+                        margin-top: 20px;
+                        text-align: center;
+                    }
+                    @media print {
+                        .no-print {
+                            display: none;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h3>Materiales utilizados en reparación #${index + 1}</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Cliente:</strong> ${rep.nombreCliente || rep.cliente}</p>
+                                <p><strong>Fecha:</strong> ${rep.fecha}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Dispositivo:</strong> ${rep.dispositivo} ${rep.marcaModelo}</p>
+                                <p><strong>Estado:</strong> ${rep.estado}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="content">
+                        ${tablaMateriales}
+                    </div>
+                    
+                    <div class="footer">
+                        <button onclick="window.print()" class="btn btn-primary no-print">
+                            <i class="fas fa-print"></i> Imprimir
+                        </button>
+                        <button onclick="window.close()" class="btn btn-secondary ml-2 no-print">
+                            <i class="fas fa-times"></i> Cerrar
+                        </button>
+                    </div>
+                </div>
+                
+                <script>
+                    // Cerrar automáticamente la ventana después de imprimir
+                    window.addEventListener('afterprint', function() {
+                        setTimeout(function() {
+                            window.close();
+                        }, 1000);
+                    });
+                </script>
+            </body>
+            </html>
+        `);
+        ventana.document.close();
+    };
 
     // Exportar a Excel
     document.getElementById("btnExportar")?.addEventListener("click", function () {
@@ -319,24 +497,62 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     function exportarAExcel(data) {
-        const headers = ["Cliente", "Cédula", "Email", "Teléfono", "Dispositivo", "Marca/Modelo", "IMEI/Serial", "Problema", "Descripción", "Costo", "Fecha", "Estado"];
-        const rows = data.map(obj => [
-            obj.nombreCliente || "No especificado", 
-            obj.cliente, 
-            obj.emailCliente || "No especificado", 
-            obj.telefonoCliente || "No especificado", 
-            obj.dispositivo, 
-            obj.marcaModelo, 
-            obj.imei, 
-            obj.problema, 
-            obj.descripcion, 
-            obj.costo, 
-            obj.fecha, 
-            obj.estado
-        ]);
+        const headers = ["Cliente", "Cédula", "Email", "Teléfono", "Dispositivo", "Marca/Modelo", "IMEI/Serial", "Problema", "Descripción", "Costo Reparación", "Costo Materiales", "Costo Total", "Fecha", "Estado", "Cant. Materiales"];
+        const rows = data.map(obj => {
+            const tieneMateriales = obj.materiales && obj.materiales.length > 0;
+            const costoMateriales = tieneMateriales ? obj.costoMateriales : 0;
+            const costoTotal = parseFloat(obj.costo) + costoMateriales;
+            const cantMateriales = tieneMateriales ? obj.materiales.length : 0;
+            
+            return [
+                obj.nombreCliente || "No especificado", 
+                obj.cliente, 
+                obj.emailCliente || "No especificado", 
+                obj.telefonoCliente || "No especificado", 
+                obj.dispositivo, 
+                obj.marcaModelo, 
+                obj.imei, 
+                obj.problema, 
+                obj.descripcion, 
+                obj.costo,
+                costoMateriales.toFixed(2),
+                costoTotal.toFixed(2),
+                obj.fecha, 
+                obj.estado,
+                cantMateriales
+            ];
+        });
+        
+        // Creamos la hoja principal con el resumen de reparaciones
         const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Reparaciones");
+        
+        // Si hay reparaciones con materiales, creamos una segunda hoja con el detalle
+        const reparacionesConMateriales = data.filter(rep => rep.materiales && rep.materiales.length > 0);
+        if (reparacionesConMateriales.length > 0) {
+            const headersDetalle = ["ID Reparación", "Cliente", "Dispositivo", "Nombre Material", "SKU", "Cantidad", "Precio Unitario", "Subtotal"];
+            const rowsDetalle = [];
+            
+            reparacionesConMateriales.forEach((rep, index) => {
+                rep.materiales.forEach(mat => {
+                    rowsDetalle.push([
+                        index + 1,
+                        rep.nombreCliente || rep.cliente,
+                        `${rep.dispositivo} ${rep.marcaModelo}`,
+                        mat.nombre,
+                        mat.sku,
+                        mat.cantidad,
+                        mat.precioUnitario,
+                        mat.subtotal
+                    ]);
+                });
+            });
+            
+            const worksheetDetalle = XLSX.utils.aoa_to_sheet([headersDetalle, ...rowsDetalle]);
+            XLSX.utils.book_append_sheet(workbook, worksheetDetalle, "Detalle Materiales");
+        }
+        
         XLSX.writeFile(workbook, "reparaciones.xlsx");
     }
 

@@ -1,0 +1,261 @@
+/**
+ * Integración de Inventario con Reparaciones
+ * Este archivo maneja la selección de productos del inventario para usarlos en reparaciones
+ */
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Referencias a elementos DOM
+    const btnBuscarProducto = document.getElementById("btnBuscarProducto");
+    const inputBuscarProducto = document.getElementById("buscarProducto");
+    const tablaProductosInventario = document.getElementById("tablaProductosInventario").getElementsByTagName("tbody")[0];
+    const tablaProductosSeleccionados = document.getElementById("tablaProductosSeleccionados").getElementsByTagName("tbody")[0];
+    const totalMaterialesElement = document.getElementById("totalMateriales");
+    const costoEstimadoInput = document.getElementById("costo");
+    
+    // Clave para almacenar/recuperar productos seleccionados en localStorage
+    const materialesReparacionKey = "materialesReparacionTemp";
+    
+    // Variables globales
+    let productoSeleccionado = null;
+    let productosSeleccionados = [];
+    
+    // Inicializar valores
+    cargarProductosSeleccionados();
+    actualizarTotalMateriales();
+    
+    // Evento para buscar productos en el inventario cuando se hace clic en el botón de búsqueda
+    btnBuscarProducto.addEventListener("click", () => {
+        const termino = inputBuscarProducto.value.trim().toLowerCase();
+        cargarProductosInventario(termino);
+        $('#seleccionProductoModal').modal('show');
+    });
+    
+    // También permitir buscar con Enter
+    inputBuscarProducto.addEventListener("keyup", (e) => {
+        if (e.key === "Enter") {
+            btnBuscarProducto.click();
+        }
+    });
+    
+    // Evento para la búsqueda dentro del modal
+    document.getElementById("buscarProductoModal").addEventListener("keyup", function() {
+        const termino = this.value.trim().toLowerCase();
+        cargarProductosInventario(termino);
+    });
+    
+    // Función para cargar productos del inventario que coincidan con el término de búsqueda
+    function cargarProductosInventario(termino = "") {
+        tablaProductosInventario.innerHTML = "";
+        const inventario = JSON.parse(localStorage.getItem("inventarioITECH")) || [];
+        
+        const productosFiltrados = inventario.filter(producto => 
+            producto.nombre.toLowerCase().includes(termino) || 
+            producto.sku.toLowerCase().includes(termino) || 
+            producto.imei.toLowerCase().includes(termino)
+        );
+        
+        if (productosFiltrados.length === 0) {
+            const row = tablaProductosInventario.insertRow();
+            const cell = row.insertCell(0);
+            cell.colSpan = 6;
+            cell.textContent = "No se encontraron productos que coincidan con la búsqueda";
+            cell.className = "text-center";
+            return;
+        }
+        
+        productosFiltrados.forEach((producto, index) => {
+            const row = tablaProductosInventario.insertRow();
+            
+            // Verificar si el producto ya está en la lista de seleccionados para evitar duplicados
+            const yaSeleccionado = productosSeleccionados.some(item => item.sku === producto.sku);
+            
+            row.innerHTML = `
+                <td>${producto.nombre}</td>
+                <td>${producto.sku}</td>
+                <td>${producto.imei}</td>
+                <td>$${producto.precio}</td>
+                <td>${producto.existencias}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary btn-seleccionar" data-index="${index}" 
+                            ${yaSeleccionado || parseInt(producto.existencias) === 0 ? 'disabled' : ''}>
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </td>
+            `;
+            
+            if (yaSeleccionado) {
+                row.classList.add("table-secondary");
+            }
+            
+            if (parseInt(producto.existencias) === 0) {
+                row.classList.add("table-danger");
+            }
+        });
+        
+        // Evento para seleccionar un producto
+        const botonesSeleccionar = tablaProductosInventario.querySelectorAll(".btn-seleccionar");
+        botonesSeleccionar.forEach(btn => {
+            btn.addEventListener("click", function() {
+                const index = this.getAttribute("data-index");
+                productoSeleccionado = productosFiltrados[index];
+                
+                // Mostrar el modal para establecer la cantidad
+                document.getElementById("nombreProductoSeleccionado").textContent = productoSeleccionado.nombre;
+                document.getElementById("existenciasDisponibles").textContent = productoSeleccionado.existencias;
+                document.getElementById("productoSeleccionadoId").value = index;
+                document.getElementById("cantidadProducto").max = productoSeleccionado.existencias;
+                document.getElementById("cantidadProducto").value = 1;
+                
+                $('#seleccionProductoModal').modal('hide');
+                $('#cantidadProductoModal').modal('show');
+            });
+        });
+    }
+    
+    // Evento para confirmar la cantidad del producto seleccionado
+    document.getElementById("btnConfirmarCantidad").addEventListener("click", function() {
+        const cantidad = parseInt(document.getElementById("cantidadProducto").value);
+        
+        if (isNaN(cantidad) || cantidad <= 0 || cantidad > parseInt(productoSeleccionado.existencias)) {
+            alert("Por favor, ingrese una cantidad válida");
+            return;
+        }
+        
+        // Agregar el producto con la cantidad especificada
+        agregarProductoSeleccionado(productoSeleccionado, cantidad);
+        
+        // Cerrar el modal
+        $('#cantidadProductoModal').modal('hide');
+    });
+    
+    // Función para agregar un producto a la lista de seleccionados
+    function agregarProductoSeleccionado(producto, cantidad) {
+        // Calcular subtotal
+        const precioUnitario = parseFloat(producto.precio);
+        const subtotal = precioUnitario * cantidad;
+        
+        // Crear objeto con información del producto seleccionado
+        const productoConCantidad = {
+            nombre: producto.nombre,
+            sku: producto.sku,
+            cantidad: cantidad,
+            precioUnitario: precioUnitario,
+            subtotal: subtotal
+        };
+        
+        // Añadir a la lista
+        productosSeleccionados.push(productoConCantidad);
+        
+        // Guardar en localStorage
+        localStorage.setItem(materialesReparacionKey, JSON.stringify(productosSeleccionados));
+        
+        // Actualizar la tabla
+        actualizarTablaProductosSeleccionados();
+        
+        // Actualizar el total
+        actualizarTotalMateriales();
+    }
+    
+    // Función para actualizar la tabla de productos seleccionados
+    function actualizarTablaProductosSeleccionados() {
+        tablaProductosSeleccionados.innerHTML = "";
+        
+        if (productosSeleccionados.length === 0) {
+            const row = tablaProductosSeleccionados.insertRow();
+            const cell = row.insertCell(0);
+            cell.colSpan = 6;
+            cell.textContent = "No hay materiales seleccionados";
+            cell.className = "text-center";
+            return;
+        }
+        
+        productosSeleccionados.forEach((producto, index) => {
+            const row = tablaProductosSeleccionados.insertRow();
+            row.innerHTML = `
+                <td>${producto.nombre}</td>
+                <td>${producto.sku}</td>
+                <td>${producto.cantidad}</td>
+                <td>$${producto.precioUnitario.toFixed(2)}</td>
+                <td>$${producto.subtotal.toFixed(2)}</td>
+                <td>
+                    <button class="btn btn-sm btn-danger btn-eliminar-producto" data-index="${index}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+        });
+        
+        // Eventos para eliminar productos
+        const botonesEliminar = tablaProductosSeleccionados.querySelectorAll(".btn-eliminar-producto");
+        botonesEliminar.forEach(btn => {
+            btn.addEventListener("click", function() {
+                const index = parseInt(this.getAttribute("data-index"));
+                eliminarProductoSeleccionado(index);
+            });
+        });
+    }
+    
+    // Función global para actualizar la tabla de materiales (accesible desde otros archivos)
+    window.actualizarTablaMateriales = function() {
+        productosSeleccionados = [];
+        actualizarTablaProductosSeleccionados();
+        actualizarTotalMateriales();
+    };
+    
+    // Función para eliminar un producto de la lista de seleccionados
+    function eliminarProductoSeleccionado(index) {
+        productosSeleccionados.splice(index, 1);
+        localStorage.setItem(materialesReparacionKey, JSON.stringify(productosSeleccionados));
+        actualizarTablaProductosSeleccionados();
+        actualizarTotalMateriales();
+    }
+    
+    // Función para calcular y actualizar el total de materiales
+    function actualizarTotalMateriales() {
+        const total = productosSeleccionados.reduce((suma, producto) => suma + producto.subtotal, 0);
+        totalMaterialesElement.textContent = `$${total.toFixed(2)}`;
+        
+        // Actualizar automáticamente el costo estimado con el total de materiales
+        if (costoEstimadoInput) {
+            // Siempre actualizar el costo estimado con el total de materiales
+            costoEstimadoInput.value = total.toFixed(2);
+        }
+    }
+    
+    // Función para cargar productos seleccionados desde localStorage
+    function cargarProductosSeleccionados() {
+        const guardados = localStorage.getItem(materialesReparacionKey);
+        if (guardados) {
+            productosSeleccionados = JSON.parse(guardados);
+            actualizarTablaProductosSeleccionados();
+        }
+    }
+    
+    // Limpiar los materiales seleccionados cuando se envía el formulario
+    document.getElementById("formReparacion").addEventListener("submit", function() {
+        // Actualizar la reparación para incluir los materiales
+        const costoMateriales = productosSeleccionados.reduce((suma, producto) => suma + producto.subtotal, 0);
+        
+        // Aquí se podría añadir lógica adicional para guardar los materiales con la reparación
+        
+        // Limpiar después de guardar
+        localStorage.removeItem(materialesReparacionKey);
+        productosSeleccionados = [];
+        actualizarTablaProductosSeleccionados();
+        actualizarTotalMateriales();
+    });
+    
+    // También limpiar cuando se usa el botón de limpiar formulario
+    document.getElementById("btnLimpiarForm").addEventListener("click", function() {
+        localStorage.removeItem(materialesReparacionKey);
+        productosSeleccionados = [];
+        actualizarTablaProductosSeleccionados();
+        actualizarTotalMateriales();
+    });
+    
+    // Escuchar el evento personalizado para cargar materiales cuando se edita una reparación
+    document.addEventListener('materialesReparacionCargados', function() {
+        cargarProductosSeleccionados();
+        actualizarTotalMateriales();
+    });
+});
