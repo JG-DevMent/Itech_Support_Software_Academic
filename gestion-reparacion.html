@@ -138,50 +138,16 @@
                                 <textarea id="descripcion" class="form-control" rows="3" placeholder="Detalles de la reparación" required></textarea>
                             </div>
                             
-                            <!-- Nueva sección para materiales/refacciones del inventario -->
-                            <div class="card mb-3">
-                                <div class="card-header bg-light">
-                                    <h6 class="m-0 font-weight-bold">Materiales y Refacciones</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row mb-3">
-                                        <div class="col-md-12">
-                                            <div class="input-group">
-                                                <input type="text" id="buscarProducto" class="form-control" placeholder="Buscar producto en inventario...">
-                                                <div class="input-group-append">
-                                                    <button type="button" class="btn btn-primary" id="btnBuscarProducto">
-                                                        <i class="fas fa-search"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Tabla de productos seleccionados -->
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered table-sm" id="tablaProductosSeleccionados">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>Producto</th>
-                                                    <th>SKU</th>
-                                                    <th>Cantidad</th>
-                                                    <th>Precio Unitario</th>
-                                                    <th>Subtotal</th>
-                                                    <th>Acciones</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <!-- Productos añadidos dinámicamente -->
-                                            </tbody>
-                                            <tfoot>
-                                                <tr>
-                                                    <td colspan="4" class="text-right font-weight-bold">Total Materiales:</td>
-                                                    <td id="totalMateriales" class="font-weight-bold">$0.00</td>
-                                                    <td></td>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
-                                    </div>
+                            <!-- Botón para abrir modal de Materiales y Refacciones -->
+                            <div class="form-group">
+                                <button type="button" class="btn btn-outline-primary" id="btnMaterialesModal" data-toggle="modal" data-target="#materialesModal">
+                                    <i class="fas fa-tools mr-2"></i>Gestionar Materiales y Refacciones
+                                </button>
+                                <small class="form-text text-muted">Haga clic para buscar y añadir materiales a la reparación.</small>
+                                <!-- Indicador de materiales seleccionados -->
+                                <div id="resumenMateriales" class="mt-2">
+                                    <span class="badge badge-info" id="cantidadMateriales">0 materiales seleccionados</span>
+                                    <span class="badge badge-success" id="costoMaterialesResumen">$0.00</span>
                                 </div>
                             </div>
                             
@@ -309,7 +275,7 @@
     </div>
     
     <!-- Modal de Selección de Productos de Inventario -->
-    <div class="modal fade" id="seleccionProductoModal" tabindex="-1" role="dialog" aria-labelledby="seleccionProductoModalLabel" aria-hidden="true">
+    <div class="modal fade" id="seleccionProductoModal" tabindex="-1" role="dialog" aria-labelledby="seleccionProductoModalLabel" aria-hidden="true" data-backdrop="static">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -350,7 +316,7 @@
     </div>
     
     <!-- Modal para Establecer Cantidad -->
-    <div class="modal fade" id="cantidadProductoModal" tabindex="-1" role="dialog" aria-labelledby="cantidadProductoModalLabel" aria-hidden="true">
+    <div class="modal fade" id="cantidadProductoModal" tabindex="-1" role="dialog" aria-labelledby="cantidadProductoModalLabel" aria-hidden="true" data-backdrop="static">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -385,5 +351,64 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Modal de Materiales y Refacciones -->
+    <div class="modal fade" id="materialesModal" tabindex="-1" role="dialog" aria-labelledby="materialesModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title" id="materialesModalLabel">
+                        <i class="fas fa-tools mr-2"></i>Materiales y Refacciones
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <input type="text" id="buscarProducto" class="form-control" placeholder="Buscar producto en inventario...">
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-primary" id="btnBuscarProducto">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tabla de productos seleccionados -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm" id="tablaProductosSeleccionados">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>SKU</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio Unitario</th>
+                                    <th>Subtotal</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Productos añadidos dinámicamente -->
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4" class="text-right font-weight-bold">Total Materiales:</td>
+                                    <td id="totalMateriales" class="font-weight-bold">$0.00</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

@@ -4,6 +4,11 @@
  */
 
 document.addEventListener("DOMContentLoaded", () => {
+    // Asegurarse de que no haya modales abiertos al iniciar
+    $('.modal').modal('hide');
+    $('body').removeClass('modal-open');
+    $('.modal-backdrop').remove();
+    
     // Referencias a elementos DOM
     const btnBuscarProducto = document.getElementById("btnBuscarProducto");
     const inputBuscarProducto = document.getElementById("buscarProducto");
@@ -11,6 +16,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const tablaProductosSeleccionados = document.getElementById("tablaProductosSeleccionados").getElementsByTagName("tbody")[0];
     const totalMaterialesElement = document.getElementById("totalMateriales");
     const costoEstimadoInput = document.getElementById("costo");
+    const btnMaterialesModal = document.getElementById("btnMaterialesModal");
+    
+    // Elementos de resumen para el formulario principal
+    const cantidadMaterialesElement = document.getElementById("cantidadMateriales");
+    const costoMaterialesResumenElement = document.getElementById("costoMaterialesResumen");
     
     // Clave para almacenar/recuperar productos seleccionados en localStorage
     const materialesReparacionKey = "materialesReparacionTemp";
@@ -22,12 +32,25 @@ document.addEventListener("DOMContentLoaded", () => {
     // Inicializar valores
     cargarProductosSeleccionados();
     actualizarTotalMateriales();
+    actualizarResumenMateriales();
+    
+    // Evento para el botón de materiales en el formulario principal
+    btnMaterialesModal.addEventListener("click", function() {
+        $('#materialesModal').modal('show');
+    });
     
     // Evento para buscar productos en el inventario cuando se hace clic en el botón de búsqueda
     btnBuscarProducto.addEventListener("click", () => {
         const termino = inputBuscarProducto.value.trim().toLowerCase();
         cargarProductosInventario(termino);
-        $('#seleccionProductoModal').modal('show');
+        
+        // Ocultar modal actual antes de mostrar el siguiente
+        $('#materialesModal').modal('hide');
+        
+        // Usar un pequeño retraso para asegurar transición suave entre modales
+        setTimeout(() => {
+            $('#seleccionProductoModal').modal('show');
+        }, 500);
     });
     
     // También permitir buscar con Enter
@@ -37,11 +60,51 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     
+    // Cuando se cierra el modal de selección de productos, volver a mostrar el modal de materiales
+    $('#seleccionProductoModal').on('hidden.bs.modal', function(e) {
+        // Solo si no se va a abrir el modal de cantidad, volver al modal de materiales
+        if (!$(e.target).data('openingCantidadModal')) {
+            setTimeout(() => {
+                $('#materialesModal').modal('show');
+            }, 500);
+        }
+    });
+    
+    // Cuando se cierra el modal de cantidad, volver a mostrar el modal de materiales
+    $('#cantidadProductoModal').on('hidden.bs.modal', function() {
+        setTimeout(() => {
+            $('#materialesModal').modal('show');
+        }, 500);
+    });
+    
     // Evento para la búsqueda dentro del modal
     document.getElementById("buscarProductoModal").addEventListener("keyup", function() {
         const termino = this.value.trim().toLowerCase();
         cargarProductosInventario(termino);
     });
+    
+    // Actualizar el resumen cuando el modal se cierra
+    $('#materialesModal').on('hidden.bs.modal', function() {
+        actualizarResumenMateriales();
+    });
+    
+    // Función para actualizar el resumen de materiales en el formulario principal
+    function actualizarResumenMateriales() {
+        const cantidad = productosSeleccionados.length;
+        const total = productosSeleccionados.reduce((suma, producto) => suma + producto.subtotal, 0);
+        
+        cantidadMaterialesElement.textContent = `${cantidad} material${cantidad !== 1 ? 'es' : ''} seleccionado${cantidad !== 1 ? 's' : ''}`;
+        costoMaterialesResumenElement.textContent = `$${total.toFixed(2)}`;
+        
+        // Cambiar el color del badge según si hay materiales o no
+        if (cantidad > 0) {
+            cantidadMaterialesElement.classList.remove('badge-info');
+            cantidadMaterialesElement.classList.add('badge-primary');
+        } else {
+            cantidadMaterialesElement.classList.remove('badge-primary');
+            cantidadMaterialesElement.classList.add('badge-info');
+        }
+    }
     
     // Función para cargar productos del inventario que coincidan con el término de búsqueda
     function cargarProductosInventario(termino = "") {
@@ -106,8 +169,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById("cantidadProducto").max = productoSeleccionado.existencias;
                 document.getElementById("cantidadProducto").value = 1;
                 
+                // Marcar que estamos abriendo el modal de cantidad para la lógica de transición
+                $('#seleccionProductoModal').data('openingCantidadModal', true);
+                
+                // Cerrar el modal de selección y abrir el de cantidad
                 $('#seleccionProductoModal').modal('hide');
-                $('#cantidadProductoModal').modal('show');
+                
+                // Esperar a que se cierre el modal anterior
+                setTimeout(() => {
+                    $('#cantidadProductoModal').modal('show');
+                    // Limpiar el flag una vez mostrado el modal
+                    $('#seleccionProductoModal').data('openingCantidadModal', false);
+                }, 500);
             });
         });
     }
@@ -124,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Agregar el producto con la cantidad especificada
         agregarProductoSeleccionado(productoSeleccionado, cantidad);
         
-        // Cerrar el modal
+        // Cerrar el modal - el evento hidden.bs.modal se encargará de volver al modal de materiales
         $('#cantidadProductoModal').modal('hide');
     });
     
@@ -220,6 +293,9 @@ document.addEventListener("DOMContentLoaded", () => {
             // Siempre actualizar el costo estimado con el total de materiales
             costoEstimadoInput.value = total.toFixed(2);
         }
+        
+        // Actualizar también el resumen en el formulario principal
+        actualizarResumenMateriales();
     }
     
     // Función para cargar productos seleccionados desde localStorage
@@ -228,6 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (guardados) {
             productosSeleccionados = JSON.parse(guardados);
             actualizarTablaProductosSeleccionados();
+            actualizarResumenMateriales();
         }
     }
     
@@ -243,6 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
         productosSeleccionados = [];
         actualizarTablaProductosSeleccionados();
         actualizarTotalMateriales();
+        actualizarResumenMateriales();
     });
     
     // También limpiar cuando se usa el botón de limpiar formulario
@@ -251,11 +329,13 @@ document.addEventListener("DOMContentLoaded", () => {
         productosSeleccionados = [];
         actualizarTablaProductosSeleccionados();
         actualizarTotalMateriales();
+        actualizarResumenMateriales();
     });
     
     // Escuchar el evento personalizado para cargar materiales cuando se edita una reparación
     document.addEventListener('materialesReparacionCargados', function() {
         cargarProductosSeleccionados();
         actualizarTotalMateriales();
+        actualizarResumenMateriales();
     });
 });
