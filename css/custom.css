@@ -370,6 +370,14 @@ h3 {
     border-radius: 8px;
 }
 
+.input-group {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+}
+
 #resultadoReparacion {
     margin-top: 20px;
 }
