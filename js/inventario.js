@@ -18,20 +18,22 @@ document.addEventListener('DOMContentLoaded', () => {
           .forEach((item, index) => {
               const fila = document.createElement('tr');
               fila.innerHTML = `
-                  <td>${item.nombre}</td>
-                  <td>${item.precio}</td>
-                  <td>${item.costo}</td>
-                  <td>${item.sku}</td>
-                  <td>${item.imei}</td>
-                  <td>${item.garantia}</td>
-                  <td>${item.existencias}</td>
-                  <td>
-                      <button class="btn btn-warning btn-sm editar" data-index="${index}">
-                          <i class="fas fa-edit"></i>
-                      </button>
-                      <button class="btn btn-danger btn-sm eliminar" data-index="${index}">
-                          <i class="fas fa-trash"></i>
-                      </button>
+                  <td data-title="Producto">${item.nombre}</td>
+                  <td data-title="Precio">${item.precio}</td>
+                  <td data-title="Costo">${item.costo}</td>
+                  <td data-title="SKU">${item.sku}</td>
+                  <td data-title="IMEI">${item.imei}</td>
+                  <td data-title="Garantía">${item.garantia}</td>
+                  <td data-title="Existencias">${item.existencias}</td>
+                  <td data-title="Acciones">
+                      <div class="btn-group-actions">
+                          <button class="btn btn-warning btn-sm editar" data-index="${index}">
+                              <i class="fas fa-edit"></i>
+                          </button>
+                          <button class="btn btn-danger btn-sm eliminar" data-index="${index}">
+                              <i class="fas fa-trash"></i>
+                          </button>
+                      </div>
                   </td>
               `;
               tablaBody.appendChild(fila);

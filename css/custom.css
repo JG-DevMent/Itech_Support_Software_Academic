@@ -234,11 +234,850 @@ h3 {
     justify-content: center;
 }
 
-/* Ajuste para móviles */
-@media (max-width: 768px) {
-    .grafica-card {
+/* Estilos para tablas */
+.table thead th, .tabla-resultados th {
+    background-color: var(--secondary);
+    color: white;
+}
+
+.table td, .table th {
+    vertical-align: middle;
+    font-size: 0.9rem;
+}
+
+.table {
+    border-collapse: collapse;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f8f9fc;
+}
+
+.table-bordered td, .table-bordered th {
+    border: 1px solid #e3e6f0;
+}
+
+.table-responsive {
     width: 100%;
-    aspect-ratio: 1 / 1;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+
+/* Estilos para los botones del formulario de reparación */
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.button-group .btn {
+    margin: 0;
+    flex: 1 1 auto;
+    min-width: 150px;
+}
+
+@media (min-width: 769px) {
+    .button-group .btn {
+        max-width: 250px;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Ajustes para el modal de cantidad */
+    #cantidadProductoModal .card-body {
+        padding: 0.5rem;
+    }
+    
+    #cantidadProductoModal .row {
+        margin-left: -5px;
+        margin-right: -5px;
+    }
+    
+    #cantidadProductoModal .col-md-12,
+    #cantidadProductoModal .col-md-6 {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+    
+    #cantidadProductoModal .card-producto,
+    #cantidadProductoModal .card-existencias,
+    #cantidadProductoModal .card-subtotal {
+        margin-bottom: 10px;
+    }
+    
+    #cantidadProductoModal .titulo-card-producto,
+    #cantidadProductoModal .titulo-card-existencias,
+    #cantidadProductoModal .titulo-card-subtotal {
+        font-size: 0.85rem;
+    }
+    
+    #cantidadProductoModal .h5 {
+        font-size: 1rem;
+    }
+    
+    #cantidadProductoModal .input-group {
+        flex-wrap: nowrap;
+    }
+    
+    #cantidadProductoModal .input-group-prepend,
+    #cantidadProductoModal .input-group-append {
+        display: flex;
+    }
+    
+    #cantidadProductoModal .span-unidades {
+        padding: 5px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Estilos para los grupos de entrada input-group */
+.input-group {
+    display: flex;
+    align-items: stretch;
+}
+
+.input-group .form-control,
+.input-group input {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    height: 100%;
+}
+
+.input-group-append,
+.input-group-prepend {
+    display: flex;
+    align-items: stretch;
+}
+
+.input-group-append .btn,
+.input-group-prepend .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    height: 100%;
+    padding: 0 15px;
+}
+
+/* Estilos específicos para el botón de búsqueda */
+.input-group-append .btn-primary {
+    margin-left: -1px; /* Elimina el espacio entre el input y el botón */
+}
+
+/* Ajustes para dispositivos móviles */
+@media (max-width: 768px) {
+    /* ... other existing code ... */
+    
+    /* Reemplazamos los estilos anteriores por estos más específicos */
+    .input-group {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        align-items: stretch !important;
+    }
+    
+    .input-group .form-control,
+    .input-group input {
+        flex: 1 1 auto !important;
+        width: 1% !important;
+        height: 38px !important; /* Altura fija para todos los inputs */
+        margin: 0 !important;
+    }
+    
+    .input-group-append,
+    .input-group-prepend {
+        display: flex !important;
+        align-items: stretch !important;
+        margin: 0 !important;
+    }
+    
+    .input-group-append .btn,
+    .input-group-prepend .btn {
+        height: 38px !important; /* Misma altura que los inputs */
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 15px !important;
+        margin: 0 !important;
+        border-radius: 0 8px 8px 0 !important; /* Restaurar el radio del borde derecho */
+    }
+    
+    /* Eliminar margin-bottom que pudiese existir en los input-group */
+    #materialesModal .input-group,
+    #seleccionProductoModal .input-group {
+        margin-bottom: 10px !important;
+    }
+    
+    /* Arreglar el problema de los bordes */
+    .input-group input:focus,
+    .input-group .form-control:focus {
+        z-index: 3;
+    }
+}
+
+/* Estilos específicos para los grupos de entrada en modales */
+#materialesModal .input-group,
+#seleccionProductoModal .input-group {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#materialesModal .input-group input,
+#seleccionProductoModal .input-group input,
+#materialesModal .input-group .form-control,
+#seleccionProductoModal .input-group .form-control {
+    flex: 1 1 auto;
+    border-radius: 8px 0 0 8px;
+    height: 38px;
+    border-right: 0;
+}
+
+#materialesModal .input-group-append,
+#seleccionProductoModal .input-group-append {
+    display: flex;
+    align-items: stretch;
+}
+
+#materialesModal .input-group-append .btn,
+#seleccionProductoModal .input-group-append .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0 8px 8px 0;
+    height: 38px;
+    padding: 0 15px;
+}
+
+/* Estilo específico para input de búsqueda de cliente en el formulario */
+#formReparacion .input-group {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+}
+
+#formReparacion .input-group input,
+#formReparacion .input-group .form-control {
+    flex: 1 1 auto;
+    border-radius: 8px 0 0 8px;
+    height: 38px;
+    border-right: 0;
+}
+
+#formReparacion .input-group-append {
+    display: flex;
+    align-items: stretch;
+}
+
+#formReparacion .input-group-append .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0 8px 8px 0;
+    height: 38px;
+    padding: 0 15px;
+}
+
+/* Mejoras específicas para la alineación del botón de búsqueda */
+#btnBuscarCliente,
+#btnBuscarProducto,
+.input-group-append .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px; /* Misma altura que los inputs */
+    margin-left: -1px; /* Elimina el espacio entre input y botón */
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+#materialesModal .row, 
+#seleccionProductoModal .row {
+    margin-bottom: 15px;
+}
+
+#materialesModal .input-group input, 
+#seleccionProductoModal .input-group input {
+    height: 38px;
+}
+
+/* Asegurar que todos los input-group tengan la misma altura y alineación */
+.input-group {
+    min-height: 38px;
+}
+
+.input-group > .form-control:not(:last-child),
+.input-group > input:not(:last-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.input-group-append > .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+/* Media query para dispositivos móviles */
+@media (max-width: 768px) {
+    /* Estilos para gráficas en móvil */
+    .grafica-card {
+        width: 100%;
+        margin: 0 0 20px 0;
+    }
+
+    /* Estilos para formularios en móvil */
+    #formReparacion button {
+        margin-top: 10px;
+        width: 100%;
+    }
+    
+    #formReparacion .btn {
+        margin-top: 10px;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .button-group .btn {
+        max-width: none;
+    }
+    
+    /* Estilos para tablas responsive en móviles */
+    #tablaReparaciones thead,
+    #tablaClientes thead,
+    #tablaInventario thead,
+    .tabla-resultados thead,
+    #tablaProductosInventario thead,
+    #tablaProductosSeleccionados thead,
+    #materialesModal #tablaProductosSeleccionados thead {
+        display: none;
+    }
+    
+    /* Convertir filas en bloques para formato de tarjeta */
+    #tablaReparaciones tbody tr,
+    #tablaClientes tbody tr,
+    #tablaInventario tbody tr,
+    .tabla-resultados tbody tr,
+    #tablaProductosInventario tbody tr,
+    #tablaProductosSeleccionados tbody tr,
+    #materialesModal #tablaProductosSeleccionados tbody tr,
+    #seleccionProductoModal #tablaProductosInventario tbody tr {
+        display: block;
+        margin-bottom: 15px;
+        border: 1px solid var(--primary);
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        background-color: #fff;
+    }
+    
+    /* Convertir celdas en bloques con formato clave-valor */
+    #tablaReparaciones tbody td,
+    #tablaClientes tbody td,
+    #tablaInventario tbody td,
+    .tabla-resultados tbody td,
+    #tablaProductosInventario tbody td,
+    #tablaProductosSeleccionados tbody td,
+    #materialesModal #tablaProductosSeleccionados tbody td,
+    #seleccionProductoModal #tablaProductosInventario tbody td {
+        display: block;
+        text-align: right;
+        padding: 10px 15px;
+        border: none;
+        border-bottom: 1px solid #e3e6f0;
+        position: relative;
+        padding-left: 50%;
+        min-height: 30px;
+        font-size: 0.9rem;
+    }
+    
+    /* Añadir etiquetas para cada celda usando atributos data */
+    #tablaReparaciones tbody td:before,
+    #tablaClientes tbody td:before,
+    #tablaInventario tbody td:before,
+    .tabla-resultados tbody td:before {
+        content: attr(data-title);
+        position: absolute;
+        left: 15px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: bold;
+        text-align: left;
+        color: var(--secondary);
+    }
+    
+    /* Etiquetas específicas para tablas - mantenemos todos los selectores para no perder funcionalidad */
+    #tablaProductosInventario tbody tr td:nth-child(1):before,
+    #seleccionProductoModal #tablaProductosInventario tbody td:nth-child(1):before,
+    #materialesModal #tablaProductosSeleccionados tbody td:nth-child(1):before {
+        content: "Producto";
+        position: absolute;
+        left: 15px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: bold;
+        text-align: left;
+        color: var(--secondary);
+    }
+    
+    #tablaProductosInventario tbody tr td:nth-child(2):before,
+    #seleccionProductoModal #tablaProductosInventario tbody td:nth-child(2):before,
+    #materialesModal #tablaProductosSeleccionados tbody td:nth-child(2):before {
+        content: "SKU";
+        position: absolute;
+        left: 15px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: bold;
+        text-align: left;
+        color: var(--secondary);
+    }
+    
+    #tablaProductosInventario tbody tr td:nth-child(3):before,
+    #seleccionProductoModal #tablaProductosInventario tbody td:nth-child(3):before,
+    #materialesModal #tablaProductosSeleccionados tbody td:nth-child(3):before {
+        content: "IMEI/Serial";
+        position: absolute;
+        left: 15px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: bold;
+        text-align: left;
+        color: var(--secondary);
+    }
+    
+    /* Corrige el contenido específico para #tablaProductosSeleccionados */
+    #materialesModal #tablaProductosSeleccionados tbody td:nth-child(3):before {
+        content: "Cantidad";
+    }
+    
+    #tablaProductosInventario tbody tr td:nth-child(4):before,
+    #seleccionProductoModal #tablaProductosInventario tbody td:nth-child(4):before,
+    #materialesModal #tablaProductosSeleccionados tbody td:nth-child(4):before {
+        content: "Precio";
+        position: absolute;
+        left: 15px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: bold;
+        text-align: left;
+        color: var(--secondary);
+    }
+    
+    /* Corrige el contenido específico para #tablaProductosSeleccionados */
+    #materialesModal #tablaProductosSeleccionados tbody td:nth-child(4):before {
+        content: "Precio Unitario";
+    }
+    
+    #tablaProductosInventario tbody tr td:nth-child(5):before,
+    #seleccionProductoModal #tablaProductosInventario tbody td:nth-child(5):before,
+    #materialesModal #tablaProductosSeleccionados tbody td:nth-child(5):before {
+        content: "Existencias";
+        position: absolute;
+        left: 15px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: bold;
+        text-align: left;
+        color: var(--secondary);
+    }
+    
+    /* Corrige el contenido específico para #tablaProductosSeleccionados */
+    #materialesModal #tablaProductosSeleccionados tbody td:nth-child(5):before {
+        content: "Subtotal";
+    }
+    
+    #tablaProductosInventario tbody tr td:nth-child(6):before,
+    #seleccionProductoModal #tablaProductosInventario tbody td:nth-child(6):before,
+    #materialesModal #tablaProductosSeleccionados tbody td:nth-child(6):before {
+        content: "Seleccionar";
+        position: absolute;
+        left: 15px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: bold;
+        text-align: left;
+        color: var(--secondary);
+    }
+    
+    /* Corrige el contenido específico para #tablaProductosSeleccionados */
+    #materialesModal #tablaProductosSeleccionados tbody td:nth-child(6):before {
+        content: "Acciones";
+    }
+    
+    /* Ajustes para el pie de las tablas */
+    #tablaProductosSeleccionados tfoot tr,
+    #materialesModal #tablaProductosSeleccionados tfoot tr {
+        display: block;
+        margin-top: 10px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    #tablaProductosSeleccionados tfoot td,
+    #materialesModal #tablaProductosSeleccionados tfoot td {
+        display: block;
+        text-align: center !important;
+        padding: 10px;
+    }
+    
+    /* Destacar elementos importantes */
+    #tablaReparaciones td[data-title="Cliente"],
+    #tablaReparaciones td[data-title="Estado"],
+    #tablaReparaciones td[data-title="Problema"],
+    #tablaClientes td[data-title="Nombre"],
+    #tablaClientes td[data-title="Cédula"],
+    #tablaInventario td[data-title="Producto"],
+    #tablaInventario td[data-title="Existencias"],
+    .tabla-resultados td[data-title="Cliente"],
+    .tabla-resultados td[data-title="Estado"],
+    #tablaProductosInventario tbody tr td:nth-child(1),
+    #tablaProductosInventario tbody tr td:nth-child(5),
+    #tablaProductosSeleccionados tbody tr td:nth-child(1),
+    #tablaProductosSeleccionados tbody tr td:nth-child(5),
+    #materialesModal #tablaProductosSeleccionados tbody td:nth-child(1),
+    #materialesModal #tablaProductosSeleccionados tbody td:nth-child(5),
+    #seleccionProductoModal #tablaProductosInventario tbody td:nth-child(1),
+    #seleccionProductoModal #tablaProductosInventario tbody td:nth-child(5) {
+        background-color: #f8f9fa;
+    }
+    
+    /* Estilo para botones y columnas de acciones */
+    #tablaReparaciones tbody td[data-title="Acciones"],
+    #tablaClientes tbody td[data-title="Acciones"],
+    #tablaInventario tbody td[data-title="Acciones"],
+    #tablaProductosInventario tbody tr td:nth-child(6),
+    #tablaProductosSeleccionados tbody tr td:nth-child(6),
+    #materialesModal #tablaProductosSeleccionados tbody td:nth-child(6),
+    #seleccionProductoModal #tablaProductosInventario tbody td:nth-child(6) {
+        text-align: center;
+        padding-left: 15px;
+    }
+    
+    /* Ajustes a los modales */
+    .modal-dialog {
+        margin: 10px;
+    }
+    
+    .modal-body {
+        padding: 15px 10px;
+    }
+    
+    /* Ajustes para el modal de cantidad */
+    #cantidadProductoModal .card-body {
+        padding: 0.5rem;
+    }
+    
+    #cantidadProductoModal .row {
+        margin-left: -5px;
+        margin-right: -5px;
+    }
+    
+    #cantidadProductoModal .col-md-12,
+    #cantidadProductoModal .col-md-6 {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+    
+    #cantidadProductoModal .card-producto,
+    #cantidadProductoModal .card-existencias,
+    #cantidadProductoModal .card-subtotal {
+        margin-bottom: 10px;
+    }
+    
+    #cantidadProductoModal .titulo-card-producto,
+    #cantidadProductoModal .titulo-card-existencias,
+    #cantidadProductoModal .titulo-card-subtotal {
+        font-size: 0.85rem;
+    }
+    
+    #cantidadProductoModal .h5 {
+        font-size: 1rem;
+    }
+    
+    #cantidadProductoModal .input-group {
+        flex-wrap: nowrap;
+    }
+    
+    #cantidadProductoModal .input-group-prepend,
+    #cantidadProductoModal .input-group-append {
+        display: flex;
+    }
+    
+    #cantidadProductoModal .span-unidades {
+        padding: 5px;
+        font-size: 0.8rem;
+    }
+    
+    /* Eliminar margin-bottom que pudiese existir en los input-group */
+    #materialesModal .input-group,
+    #seleccionProductoModal .input-group {
+        margin-bottom: 10px !important;
+    }
+    
+    /* Arreglar el problema de los bordes */
+    .input-group input:focus,
+    .input-group .form-control:focus {
+        z-index: 3;
+    }
+    */
+    
+    /* Mantener estos estilos para asegurar compatibilidad en móvil */
+    #materialesModal .input-group,
+    #seleccionProductoModal .input-group {
+        margin-bottom: 15px !important;
+    }
+    
+    .input-group {
+        flex-wrap: nowrap !important;
+    }
+    
+    /* Estilos para componentes de búsqueda */
+    .busqueda-cliente,
+    .busqueda-inventario, 
+    .formBusquedaInventario {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+    }
+    
+    .busqueda-cliente input,
+    #clienteBusqueda,
+    #inventariobusqueda,
+    #startDate, 
+    #endDate {
+        max-width: 100%;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    /* Estilo para botones de acción */
+    .btn-addcliente,
+    .btn-addinventario, 
+    .btn-addpedido {
+        bottom: 10px;
+    }
+    
+    /* Botones alineados a la izquierda */
+    #exportarInventario,
+    .btnrecuentoinventario {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+    
+    /* Ajustes para la fila de botones */
+    .row-buttons-left {
+        flex-direction: column;
+        margin-bottom: 15px;
+    }
+    
+    /* Ajustes específicos para acciones rápidas */
+    .acciones-rapidas {
+        flex-direction: column;
+    }
+    
+    .boton-accion {
+        margin: 5px 0;
+    }
+    
+    /* Imágenes más pequeñas en modales para móvil */
+    #cantidadProductoModal .col-auto i,
+    #materialesModal .card-body i {
+        font-size: 1.5rem !important;
+    }
+    
+    /* Botones más grandes y más fáciles de tocar en móvil */
+    .modal-footer .btn {
+        padding: 10px 15px;
+        margin: 5px;
+        min-width: 120px;
+    }
+    
+    /* Aumentar el tamaño de los botones de acción en las tablas */
+    #tablaReparaciones .btn-sm,
+    #tablaClientes .btn-sm,
+    #tablaInventario .btn-sm,
+    #tablaProductosInventario .btn-sm,
+    #tablaProductosSeleccionados .btn-sm,
+    #materialesModal #tablaProductosSeleccionados .btn-sm,
+    #seleccionProductoModal #tablaProductosInventario .btn-sm {
+        padding: 8px 12px;
+        margin: 5px;
+        min-width: 35px;
+        min-height: 35px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    /* Optimizar espacio para la última celda sin bordes inferiores */
+    #tablaReparaciones tbody tr td:last-child,
+    #tablaClientes tbody tr td:last-child,
+    #tablaInventario tbody tr td:last-child,
+    #tablaProductosInventario tbody tr td:last-child,
+    #tablaProductosSeleccionados tbody tr td:last-child,
+    #materialesModal #tablaProductosSeleccionados tbody tr td:last-child,
+    #seleccionProductoModal #tablaProductosInventario tbody tr td:last-child {
+        border-bottom: none;
+        border-radius: 0 0 8px 8px;
+    }
+    
+    /* Primera celda con bordes superiores redondeados */
+    #tablaReparaciones tbody tr td:first-child,
+    #tablaClientes tbody tr td:first-child,
+    #tablaInventario tbody tr td:first-child,
+    #tablaProductosInventario tbody tr td:first-child,
+    #tablaProductosSeleccionados tbody tr td:first-child,
+    #materialesModal #tablaProductosSeleccionados tbody tr td:first-child,
+    #seleccionProductoModal #tablaProductosInventario tbody tr td:first-child {
+        border-top: none;
+        border-radius: 8px 8px 0 0;
+    }
+    
+    /* Ajustes específicos para el campo de búsqueda en modales */
+    #seleccionProductoModal #buscarProductoModal,
+    #buscarProducto {
+        width: 100% !important;
+        margin-bottom: 0;
+    }
+    
+    /* Mejorar espaciado interno de los modales */
+    .modal-body .row {
+        margin-left: -5px;
+        margin-right: -5px;
+    }
+    
+    /* Asegurar que los botones de búsqueda tengan el tamaño adecuado */
+    .input-group .btn {
+        padding: 8px 12px !important;
+        height: auto !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Asegurar que el ícono dentro del botón esté centrado */
+    .input-group .btn i {
+        margin: 0;
+    }
+    
+    /* Regla general para todos los input-group en la aplicación */
+    .input-group {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        width: 100% !important;
+    }
+    
+    /* Asegurar que los inputs ocupen la mayor parte del espacio */
+    .input-group > .form-control,
+    .input-group > input {
+        flex: 1 1 auto !important;
+        width: 1% !important; /* Truco para que se expanda correctamente */
+    }
+    
+    /* Asegurar que los botones de append/prepend mantengan su tamaño */
+    .input-group-append,
+    .input-group-prepend,
+    .input-group > .input-group-append > .btn,
+    .input-group > .input-group-prepend > .btn {
+        flex: 0 0 auto !important;
+        width: auto !important;
+    }
+    
+    /* Input groups para búsqueda de cliente e inventario */
+    .busqueda-cliente .input-group,
+    .busqueda-inventario .input-group,
+    .formBusquedaInventario .input-group {
+        max-width: 100% !important;
+        margin-bottom: 0 !important;
+    }
+}
+
+/* Ajustes adicionales para cuando el sidebar está abierto */
+.sidebar:not(.toggled) ~ #content-wrapper #tablaReparaciones tbody td[data-title="Acciones"],
+.sidebar:not(.toggled) ~ #content-wrapper #tablaClientes tbody td[data-title="Acciones"],
+.sidebar:not(.toggled) ~ #content-wrapper #tablaInventario tbody td[data-title="Acciones"] {
+    padding-top: 40px;
+}
+
+.sidebar:not(.toggled) ~ #content-wrapper #tablaReparaciones tbody td[data-title="Acciones"]:before,
+.sidebar:not(.toggled) ~ #content-wrapper #tablaClientes tbody td[data-title="Acciones"]:before,
+.sidebar:not(.toggled) ~ #content-wrapper #tablaInventario tbody td[data-title="Acciones"]:before {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+}
+
+/* Mejorar tamaño de botones en diferentes resoluciones */
+@media (max-width: 576px) {
+    #tablaReparaciones .btn-sm,
+    #tablaClientes .btn-sm,
+    #tablaInventario .btn-sm,
+    #tablaProductosInventario .btn-sm,
+    #tablaProductosSeleccionados .btn-sm {
+        padding: 10px 14px;
+    }
+    
+    #tablaReparaciones tbody td,
+    #tablaClientes tbody td,
+    #tablaInventario tbody td,
+    .tabla-resultados tbody td {
+        padding-left: 45%;
+    }
+    
+    #tablaReparaciones tbody td:before,
+    #tablaClientes tbody td:before,
+    #tablaInventario tbody td:before,
+    .tabla-resultados tbody td:before {
+        width: 40%;
+    }
+    
+    /* Ajustes específicos para las tablas en modales en pantallas pequeñas */
+    #tablaProductosInventario tbody td,
+    #tablaProductosSeleccionados tbody td {
+        padding-left: 45%;
+        font-size: 0.85rem;
+    }
+    
+    #tablaProductosInventario tbody td:before,
+    #tablaProductosSeleccionados tbody td:before {
+        width: 40%;
+        font-size: 0.85rem;
+    }
+    
+    /* Ajustes para la visualización del footer */
+    #tablaProductosSeleccionados tfoot td {
+        font-size: 0.9rem;
+        padding: 8px 5px;
+    }
+    
+    /* Ajustar el tamaño del texto en los modales */
+    .modal-title {
+        font-size: 1rem;
+    }
+    
+    .modal-body label {
+        font-size: 0.9rem;
+    }
+    
+    /* Ajustes para los campos de búsqueda en modales */
+    #materialesModal .input-group {
+        flex-wrap: nowrap;
     }
 }
 
@@ -297,9 +1136,112 @@ h3 {
 
 .btn-secondary {
     color: #fff;
+    background-color: #858796 !important;
     border: none !important;
     border-radius: 10px !important;
     padding: 10px 20px !important;
+}
+
+.btn-secondary:hover {
+    color: #fff;
+    background-color: #717384;
+    border-color: #6b6d7d;
+}
+
+.btn-info {
+    color: #fff;
+    background-color: #36b9cc;
+    border-color: #36b9cc;
+}
+
+.btn-info:hover {
+    color: #fff;
+    background-color: #2c9faf;
+    border-color: #2a96a5;
+}
+
+.btn-success {
+    color: #fff;
+    background-color: #1cc88a;
+    border-color: #1cc88a;
+}
+
+/* Ajustes para las barras de búsqueda */
+.busqueda-cliente,
+.busqueda-inventario,
+.busqueda-input {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 25px;
+    width: 100%;
+}
+
+.row-centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.row-buttons-left {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    padding-left: 10px;
+}
+
+.btnrecuentoinventario {
+    display: inline-flex;
+    margin: 0 5px;
+}
+
+/* Anular los estilos responsivos que afectan el centrado */
+@media (max-width: 768px) {
+    .busqueda-cliente,
+    .busqueda-inventario,
+    .busqueda-input {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .busqueda-cliente input,
+    .busqueda-inventario input,
+    .busqueda-input input,
+    .busqueda-cliente button,
+    .busqueda-inventario button,
+    .busqueda-input button {
+        margin: 5px;
+    }
+    
+    /* Botones de añadir cliente/inventario */
+    .btn-addcliente,
+    .btn-addinventario {
+        margin: 5px;
+    }
+    
+    /* Ajustes para botones de exportar y recuento */
+    #exportarInventario,
+    #exportarClientes,
+    .btnrecuentoinventario .btn {
+        margin: 5px;
+        min-width: 200px;
+    }
+    
+    /* Ajustes específicos para la fila de botones de inventario */
+    .row-buttons-left {
+        justify-content: center;
+        padding-left: 0;
+    }
 }
 
 /* Logo */
@@ -319,37 +1261,6 @@ h3 {
     max-width: 50%;
     height: auto;
     border-radius: 50%; /* Hace que el logo sea circular */
-}
-
-/* Tablas */
-.table thead th, .tabla-resultados th {
-    background-color: var(--primary);
-    color: #000000;
-}
-
-.table td, .table th {
-    padding: .75rem;
-    vertical-align: middle;
-    border-top: 1px solid #e3e6f0;
-}
-
-.table {
-    color: #000000;
-}
-
-.table-striped tbody tr:nth-of-type(odd) {
-    background-color: #ffffff0d;
-}
-
-.table-bordered td, .table-bordered th {
-    border: 1px solid #e3e6f0;
-}
-
-.table-responsive {
-    display: block !important;
-    margin-top: 7px;
-    width: 100% !important;
-    overflow-x: auto !important;
 }
 
 /* Estilos para la página de Verificar */
@@ -633,15 +1544,6 @@ h3 {
     border-radius: 8px;
 }
 
-/*Estilos página pedidos
-.filtro-pedido {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 25px;
-}*/
-
 #startDate, #endDate {
     width: 100%;
     max-width: 300px; /* Ancho máximo del input */
@@ -668,7 +1570,6 @@ h3 {
     width: 100%;
     max-width: 300px;
 }
-
 
 /* Chat de soporte */
 .chatbot-container, .btn-addcliente, .btn-addinventario, .btn-addpedido {
@@ -766,36 +1667,3 @@ h3 {
 .confi-tienda {
     align-items: center;
 }
-
-/*
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 999;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-  }
-  
-  .modal-content {
-    background-color: #fff;
-    margin: 10% auto;
-    padding: 20px;
-    border-radius: 8px;
-    width: 40%;
-    box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
-  }
-  
-  .cerrar {
-    float: right;
-    font-size: 24px;
-    cursor: pointer;
-    color: #95741d;
-  } */
-
-
-
-
-

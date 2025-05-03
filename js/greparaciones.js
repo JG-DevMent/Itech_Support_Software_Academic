@@ -290,31 +290,33 @@ document.addEventListener("DOMContentLoaded", () => {
             
             let row = `
                 <tr>
-                    <td>${index + 1}</td>
-                    <td>${rep.nombreCliente ? rep.nombreCliente : rep.cliente} (${rep.cliente})</td>
-                    <td>${rep.dispositivo}</td>
-                    <td>${rep.marcaModelo}</td>
-                    <td>${rep.imei}</td>
-                    <td>${rep.problema}</td>
-                    <td>${rep.descripcion}${infoMateriales}</td>
-                    <td>${rep.costo}</td>
-                    <td>${rep.fecha}</td>
-                    <td>${rep.estado}</td>
-                    <td>
-                        <button class="btn btn-sm btn-warning" onclick="editarReparacion(${index})">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger" onclick="eliminarReparacion(${index})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                        <button class="btn btn-sm btn-info" onclick="notificarCliente(${index})">
-                            <i class="fas fa-bell"></i>
-                        </button>
-                        ${tieneMateriales ? `
-                        <button class="btn btn-sm btn-success" onclick="verMateriales(${index})">
-                            <i class="fas fa-boxes"></i>
-                        </button>
-                        ` : ''}
+                    <td data-title="#">${index + 1}</td>
+                    <td data-title="Cliente">${rep.nombreCliente ? rep.nombreCliente : rep.cliente} (${rep.cliente})</td>
+                    <td data-title="Dispositivo">${rep.dispositivo}</td>
+                    <td data-title="Marca/Modelo">${rep.marcaModelo}</td>
+                    <td data-title="IMEI/Serial">${rep.imei}</td>
+                    <td data-title="Problema">${rep.problema}</td>
+                    <td data-title="Descripción">${rep.descripcion}${infoMateriales}</td>
+                    <td data-title="Costo">${rep.costo}</td>
+                    <td data-title="Fecha">${rep.fecha}</td>
+                    <td data-title="Estado">${rep.estado}</td>
+                    <td data-title="Acciones">
+                        <div class="btn-group-actions">
+                            <button class="btn btn-sm btn-warning" onclick="editarReparacion(${index})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="eliminarReparacion(${index})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button class="btn btn-sm btn-info" onclick="notificarCliente(${index})">
+                                <i class="fas fa-bell"></i>
+                            </button>
+                            ${tieneMateriales ? `
+                            <button class="btn btn-sm btn-success" onclick="verMateriales(${index})">
+                                <i class="fas fa-boxes"></i>
+                            </button>
+                            ` : ''}
+                        </div>
                     </td>
                 </tr>
             `;

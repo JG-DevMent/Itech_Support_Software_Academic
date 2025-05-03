@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <table class="tabla-resultados">
                     <thead>
                         <tr>
-                            <th>Cédula</th>
+                            <th>Cliente</th>
                             <th>Dispositivo</th>
                             <th>Marca/Modelo</th>
                             <th>IMEI/Serial</th>
@@ -34,12 +34,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     <tbody>
                         ${resultados.map(rep => `
                             <tr>
-                                <td>${rep.cliente}</td>
-                                <td>${rep.dispositivo}</td>
-                                <td>${rep.marcaModelo}</td>
-                                <td>${rep.imei}</td>
-                                <td>${rep.problema}</td>
-                                <td>${rep.estado}</td>
+                                <td data-title="Cliente">${rep.cliente}</td>
+                                <td data-title="Dispositivo">${rep.dispositivo}</td>
+                                <td data-title="Marca/Modelo">${rep.marcaModelo}</td>
+                                <td data-title="IMEI/Serial">${rep.imei}</td>
+                                <td data-title="Problema">${rep.problema}</td>
+                                <td data-title="Estado">${rep.estado}</td>
                             </tr>
                         `).join("")}
                     </tbody>

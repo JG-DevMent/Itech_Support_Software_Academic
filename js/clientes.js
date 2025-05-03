@@ -31,18 +31,20 @@ document.addEventListener('DOMContentLoaded', function () {
             const row = document.createElement('tr');
 
             row.innerHTML = `
-                <td>${cliente.nombre}</td>
-                <td>${cliente.cedula}</td>
-                <td>${cliente.telefono}</td>
-                <td>${cliente.correo}</td>
-                <td>${cliente.direccion}</td>
-                <td>
-                    <button class="btn btn-sm btn-warning editar-btn" data-index="${index}">
-                    <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-danger eliminar-btn" data-index="${index}">
-                    <i class="fas fa-trash"></i>
-                    </button>
+                <td data-title="Nombre">${cliente.nombre}</td>
+                <td data-title="Cédula">${cliente.cedula}</td>
+                <td data-title="Teléfono">${cliente.telefono}</td>
+                <td data-title="Correo">${cliente.correo}</td>
+                <td data-title="Dirección">${cliente.direccion}</td>
+                <td data-title="Acciones">
+                    <div class="btn-group-actions">
+                        <button class="btn btn-sm btn-warning editar-btn" data-index="${index}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger eliminar-btn" data-index="${index}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </td>
             `;
 

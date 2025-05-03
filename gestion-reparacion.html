@@ -177,13 +177,19 @@
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Registrar Reparación</button>
-                            <button type="button" id="btnNotificar" class="btn btn-info ml-2">
-                                <i class="fas fa-bell"></i> Notificar al Cliente
-                            </button>
-                            <button type="button" id="btnLimpiarForm" class="btn btn-secondary ml-2">
-                                <i class="fas fa-eraser"></i> Limpiar Formulario
-                            </button>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group button-group">
+                                        <button type="submit" class="btn btn-primary">Registrar Reparación</button>
+                                        <button type="button" id="btnNotificar" class="btn btn-info">
+                                            <i class="fas fa-bell"></i> Notificar al Cliente
+                                        </button>
+                                        <button type="button" id="btnLimpiarForm" class="btn btn-secondary">
+                                            <i class="fas fa-eraser"></i> Limpiar Formulario
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -205,10 +211,16 @@
                             </select>
                         </div>
                         <!-- Búsqueda y Exportar -->
-                        <input type="text" id="buscarInput" class="form-control mb-2" placeholder="Búsqueda general...">
-                        <button id="btnExportar" class="btn btn-success mb-2">
-                            <i class="fas fa-file-excel"></i> Exportar a XLSX
-                        </button>
+                        <div class="row mb-3">
+                            <div class="col-md-8 col-sm-12 mb-2">
+                                <input type="text" id="buscarInput" class="form-control" placeholder="Búsqueda general...">
+                            </div>
+                            <div class="col-md-4 col-sm-12 text-right">
+                                <button id="btnExportar" class="btn btn-success w-100">
+                                    <i class="fas fa-file-excel"></i> Exportar a XLSX
+                                </button>
+                            </div>
+                        </div>
                         <!-- Tabla de reparaciones -->
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped mt-2" id="tablaReparaciones">
@@ -228,7 +240,25 @@
                                     </tr>
                                 </thead>
                                 <tbody id="tablaBody">
-                                    <!-- Filas dinámicas aquí -->
+                                    <!-- Ejemplo de fila para mostrar formato responsive -->
+                                    <!-- Esta fila solo se muestra para facilitar la prueba, se recomienda eliminarla antes de producción -->
+                                    <tr class="fila-ejemplo" style="display: none;">
+                                        <td data-title="#">1</td>
+                                        <td data-title="Cliente">Juan Pérez</td>
+                                        <td data-title="Dispositivo">Celular</td>
+                                        <td data-title="Marca/Modelo">iPhone X</td>
+                                        <td data-title="IMEI/Serial">12345678901234</td>
+                                        <td data-title="Problema">Pantalla rota</td>
+                                        <td data-title="Descripción">Pantalla totalmente quebrada, necesita reemplazo</td>
+                                        <td data-title="Costo">$150.00</td>
+                                        <td data-title="Fecha">2023-06-01</td>
+                                        <td data-title="Estado">En Proceso</td>
+                                        <td data-title="Acciones">
+                                            <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                            <button class="btn btn-sm btn-info"><i class="fas fa-bell"></i></button>
+                                            <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>

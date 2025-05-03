@@ -93,7 +93,7 @@
                         <h1 class="text-h1">Inventario</h1>
                         <div class="busqueda-inventario">
                             <input type="text" id="inventariobusqueda" class="form-control" placeholder="Buscar producto">
-                            <button id="btnInventario">Buscar</button> 
+                            <button id="btnInventario" class="btn btn-primary">Buscar</button> 
                             <div>
                                 <button class="btn-addinventario" data-toggle="modal" data-target="#agregarArticuloModal">
                                     <i class="fas fa-plus"></i>
@@ -105,13 +105,15 @@
                 <div class="card-box-center">
                     <div class="card-body">
                         <p>Inventario Registrado</p>
-                        <button id="exportarInventario" class="btn btn-success mb-2">
-                            <i class="fas fa-file-excel"></i> Exportar a XLSX
-                        </button>
-                        <div class="btnrecuentoinventario">
-                            <button class="btn btn-warninginventario" id="btnRecontar">
-                                <i class="fas fa-list"></i> Recuento de inventario
+                        <div class="row-buttons-left">
+                            <button id="exportarInventario" class="btn btn-success mb-2">
+                                <i class="fas fa-file-excel"></i> Exportar a XLSX
                             </button>
+                            <div class="btnrecuentoinventario">
+                                <button class="btn btn-warninginventario" id="btnRecontar">
+                                    <i class="fas fa-list"></i> Recuento de inventario
+                                </button>
+                            </div>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-bordered" id="tablaInventario">
