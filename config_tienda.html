@@ -92,6 +92,13 @@
                 <div class="card-box">
                     <div class="card-body">
                         <h1 class="text-h1">Configuración de Tienda</h1>
+                        
+                        <div class="mb-4">
+                            <a href="configuracion.html" class="btnreverse">
+                                <i class="fas fa-arrow-left"></i> Volver a Configuración
+                            </a>
+                        </div>
+                        
                         <form id="storeForm" class="space-y-4">
                             <div>
                               <label for="storeName" class="block text-sm font-medium text-gray-700">Nombre de la Tienda</label>
@@ -106,8 +113,12 @@
                               <input type="text" id="admin" name="admin" class="mt-1 block w-full border rounded p-2" placeholder="Nombre del administrador" required>
                             </div>
                             <div class="confi-tienda">
-                              <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                              <button class="btnreverse"><a href="configuracion.html">Volver</a></button>
+                              <button type="submit" class="btn-primary">
+                                <i class="fas fa-save"></i> Guardar Cambios
+                              </button>
+                              <a href="configuracion.html" class="btnreverse">
+                                <i class="fas fa-times"></i> Cancelar
+                              </a>
                             </div>
                         </form>
                     </div>

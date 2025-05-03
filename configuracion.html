@@ -91,29 +91,46 @@
                 </nav>
                 <div class="card-box">
                     <div class="card-body">
-                        <h1 class="text-h2">Configuración</h1>
-                            <div class="card-body-left">
-                                <!-- Opciones del menú -->
-                                <div>
-                                <a href="config_tienda.html" class="text-blue-500 hover:underline text-lg">Configuración de la Tienda</a>
-                                </div>
-                                <hr class="border-gray-200">
-                                <div>
-                                <a href="config_recibos.html" class="text-blue-500 hover:underline text-lg">Configuración de Recibos</a>
-                                </div>
-                                <hr class="border-gray-200">
-                                <div>
-                                <a href="config_perfil.html" class="text-blue-500 hover:underline text-lg">Configuración de Perfil de Usuario</a>
-                                </div>
-                                
-                                <!-- Modal base (reutilizable) -->
-                                <div id="modal" class="modal">
-                                    <div class="modal-content">
-                                        <span class="cerrar" onclick="cerrarModal()">&times;</span>
-                                        <div id="contenido-modal"></div>
-                                    </div>
-                                </div>
+                        <h1 class="text-h1">Configuración</h1>
+                        <p>Gestiona las configuraciones del sistema según tus necesidades</p>
+                        
+                        <div class="config-option">
+                            <a href="config_tienda.html">
+                                <i class="fas fa-store"></i>
+                                <span>Configuración de la Tienda</span>
+                            </a>
+                            <div class="description">
+                                Personaliza la información de tu tienda, como nombre, dirección y datos de contacto.
                             </div>
+                        </div>
+                        
+                        <div class="config-option">
+                            <a href="config_recibos.html">
+                                <i class="fas fa-receipt"></i>
+                                <span>Configuración de Recibos</span>
+                            </a>
+                            <div class="description">
+                                Personaliza el formato de tus recibos, incluyendo mensajes, logotipos y datos fiscales.
+                            </div>
+                        </div>
+                        
+                        <div class="config-option">
+                            <a href="config_perfil.html">
+                                <i class="fas fa-user-cog"></i>
+                                <span>Configuración de Perfil de Usuario</span>
+                            </a>
+                            <div class="description">
+                                Gestiona los perfiles de usuarios, roles y permisos del sistema.
+                            </div>
+                        </div>
+                        
+                        <!-- Modal base (reutilizable) -->
+                        <div id="modal" class="modal">
+                            <div class="modal-content">
+                                <span class="cerrar" onclick="cerrarModal()">&times;</span>
+                                <div id="contenido-modal"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -93,16 +93,26 @@
                     <div class="card-body">
                         <h1 class="text-h1">Configuración Usuarios</h1>
                         
+                        <div class="mb-4">
+                            <a href="configuracion.html" class="btnreverse">
+                                <i class="fas fa-arrow-left"></i> Volver a Configuración
+                            </a>
+                        </div>
+                        
                         <div class="mb-4 button-group">
-                            <button id="showUserList" class="btn-primary">Ver Lista de Usuarios</button>
-                            <button id="showUserForm" class="btn-primary">Crear Nuevo Usuario</button>
+                            <button id="showUserList" class="btn-primary">
+                                <i class="fas fa-list"></i> Ver Lista de Usuarios
+                            </button>
+                            <button id="showUserForm" class="btn-primary">
+                                <i class="fas fa-user-plus"></i> Crear Nuevo Usuario
+                            </button>
                         </div>
                         
                         <div id="userListContainer" style="display: none;">
                             <h2 class="text-h2 mb-3">Lista de Usuarios</h2>
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="userTable">
-                                    <thead>
+                                    <thead class="table-color">
                                         <tr>
                                             <th>Usuario</th>
                                             <th>Correo</th>
@@ -145,10 +155,15 @@
                                 </select>
                             </div>
                             <div class="form-buttons">
-                                <button type="submit" class="btn-primary">Guardar Usuario</button>
-                                <button type="button" class="btnreverse" id="cancelButton">Cancelar</button>
+                                <button type="submit" class="btn-primary">
+                                    <i class="fas fa-save"></i> Guardar Usuario
+                                </button>
+                                <button type="button" class="btnreverse" id="cancelButton">
+                                    <i class="fas fa-times"></i> Cancelar
+                                </button>
                             </div>
                         </form>
+                        
                     </div>
                 </div>
             </div>
@@ -229,7 +244,7 @@
                 profileForm.reset();
                 editando = false;
                 indiceEditando = null;
-                document.querySelector('button[type="submit"]').textContent = 'Guardar Usuario';
+                document.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Guardar Usuario';
             }
             
             // Función para cargar usuarios
@@ -297,7 +312,7 @@
                 editando = true;
                 indiceEditando = index;
                 
-                document.querySelector('button[type="submit"]').textContent = 'Actualizar Usuario';
+                document.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Actualizar Usuario';
                 
                 userListContainer.style.display = 'none';
                 profileForm.style.display = 'block';
