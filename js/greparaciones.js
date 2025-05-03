@@ -3,6 +3,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const tablaCuerpo = document.getElementById("tablaBody");
     let listaReparaciones = JSON.parse(localStorage.getItem("reparaciones")) || [];
     
+    // Variable para controlar el modo del formulario (creación o edición)
+    let modoEdicion = false;
+    let indiceEdicion = -1;
+    
     // Variables para almacenar los datos del cliente actual
     let clienteActual = {
         nombre: "",
@@ -37,14 +41,20 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Función para limpiar el formulario
     btnLimpiarForm.addEventListener("click", function() {
-        // Limpiar el formulario
+        // Si estamos en modo edición, confirmar antes de limpiar
+        if (modoEdicion) {
+            if (confirm("¿Está seguro que desea cancelar la edición? Los cambios no guardados se perderán.")) {
+                resetearModoEdicion();
+            } else {
+                return; // No continuar con la limpieza si el usuario cancela
+            }
+        }
+        
+        // El resto del código de limpieza existente
         form.reset();
-        // Limpiar información del cliente
         infoCliente.innerHTML = "";
         clienteActual = { nombre: "", email: "", telefono: "" };
-        // Limpiar materiales seleccionados
         localStorage.removeItem("materialesReparacionTemp");
-        // Actualizar la tabla de materiales si existe
         if (typeof actualizarTablaMateriales === 'function') {
             actualizarTablaMateriales();
         }
@@ -105,6 +115,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Mostrar al iniciar
     renderTabla();
+    
+    // Verificar si hay una reparación en modo edición al cargar la página
+    function verificarModoEdicion() {
+        const estadoEdicion = JSON.parse(localStorage.getItem("reparacionEnEdicion"));
+        if (estadoEdicion && estadoEdicion.modoEdicion && estadoEdicion.indiceEdicion !== -1) {
+            // Restaurar el modo edición
+            modoEdicion = true;
+            indiceEdicion = estadoEdicion.indiceEdicion;
+            
+            // Verificar que el índice siga siendo válido
+            if (indiceEdicion < listaReparaciones.length) {
+                // Cargar los datos en el formulario
+                editarReparacion(indiceEdicion);
+                
+                // Mostrar notificación al usuario
+                alert("Se ha restaurado una reparación que estaba en edición.");
+            } else {
+                // El índice ya no es válido (pudo haber sido eliminado por otro usuario o sesión)
+                resetearModoEdicion();
+            }
+        }
+    }
+    
+    // Función para resetear el modo edición
+    function resetearModoEdicion() {
+        modoEdicion = false;
+        indiceEdicion = -1;
+        localStorage.removeItem("reparacionEnEdicion");
+        document.querySelector('button[type="submit"]').textContent = "Registrar Reparación";
+    }
 
     form.addEventListener("submit", function (e) {
         e.preventDefault();
@@ -113,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const materialesSeleccionados = JSON.parse(localStorage.getItem("materialesReparacionTemp")) || [];
         const costoMateriales = materialesSeleccionados.reduce((suma, producto) => suma + producto.subtotal, 0);
 
-        const nuevaReparacion = {
+        const datosReparacion = {
             cliente: document.getElementById("cliente").value,
             nombreCliente: clienteActual.nombre,
             emailCliente: clienteActual.email,
@@ -130,7 +170,21 @@ document.addEventListener("DOMContentLoaded", () => {
             costoMateriales: costoMateriales
         };
 
-        listaReparaciones.push(nuevaReparacion);
+        if (modoEdicion && indiceEdicion !== -1) {
+            // Modo edición: actualizar la reparación existente
+            listaReparaciones[indiceEdicion] = datosReparacion;
+            // Resetear el modo edición
+            modoEdicion = false;
+            indiceEdicion = -1;
+            localStorage.removeItem("reparacionEnEdicion");
+            alert("Reparación actualizada exitosamente.");
+        } else {
+            // Modo creación: añadir nueva reparación
+            listaReparaciones.push(datosReparacion);
+            alert("Reparación registrada exitosamente.");
+        }
+        
+        // Guardar en localStorage
         localStorage.setItem("reparaciones", JSON.stringify(listaReparaciones));
         
         // Actualizar el inventario si se han seleccionado materiales
@@ -145,8 +199,8 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.removeItem("materialesReparacionTemp");
         renderTabla();
         
-        // Notificar al usuario
-        alert("Reparación registrada exitosamente.");
+        // Cambiar el texto del botón de envío a su estado original
+        document.querySelector('button[type="submit"]').textContent = "Registrar Reparación";
     });
     
     // Función para actualizar el inventario después de registrar una reparación
@@ -270,6 +324,16 @@ document.addEventListener("DOMContentLoaded", () => {
     
     //Exponer funciones al global para poder usarlas en los botones de editar y eliminar
     window.editarReparacion = function (index) {
+        // Activar modo edición
+        modoEdicion = true;
+        indiceEdicion = index;
+        
+        // Guardar el estado actual en localStorage para recuperarlo en caso de actualización de la página
+        localStorage.setItem("reparacionEnEdicion", JSON.stringify({
+            modoEdicion: true,
+            indiceEdicion: index
+        }));
+        
         const rep = listaReparaciones[index];
         document.getElementById("cliente").value = rep.cliente;
         clienteActual = {
@@ -304,9 +368,13 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.removeItem("materialesReparacionTemp");
         }
 
-        listaReparaciones.splice(index, 1);
-        localStorage.setItem("reparaciones", JSON.stringify(listaReparaciones));
-        renderTabla();
+        // Cambiar texto del botón para indicar que está en modo edición
+        document.querySelector('button[type="submit"]').textContent = "Actualizar Reparación";
+        
+        // Hacer scroll hasta el formulario para que el usuario pueda ver que está editando
+        document.querySelector('#formReparacion').scrollIntoView({ behavior: 'smooth' });
+        
+        // No eliminar el registro original hasta que se confirme la edición
     };
 
     window.eliminarReparacion = function (index) {
@@ -597,4 +665,6 @@ document.addEventListener("DOMContentLoaded", () => {
     filtroEstado.addEventListener("change", aplicarFiltros);
     buscarInput.addEventListener("input", aplicarFiltros);
 
+    // Verificar al cargar la página
+    verificarModoEdicion();
 });

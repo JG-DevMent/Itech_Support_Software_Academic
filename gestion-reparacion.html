@@ -140,7 +140,7 @@
                             
                             <!-- Botón para abrir modal de Materiales y Refacciones -->
                             <div class="form-group">
-                                <button type="button" class="btn btn-outline-primary" id="btnMaterialesModal" data-toggle="modal" data-target="#materialesModal">
+                                <button type="button" class="btn btn-primary" id="btnMaterialesModal" data-toggle="modal" data-target="#materialesModal">
                                     <i class="fas fa-tools mr-2"></i>Gestionar Materiales y Refacciones
                                 </button>
                                 <small class="form-text text-muted">Haga clic para buscar y añadir materiales a la reparación.</small>
@@ -319,24 +319,119 @@
     <div class="modal fade" id="cantidadProductoModal" tabindex="-1" role="dialog" aria-labelledby="cantidadProductoModalLabel" aria-hidden="true" data-backdrop="static">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="cantidadProductoModalLabel">Establecer Cantidad</h5>
+                <div class="modal-header modal-header-cantidad">
+                    <h5 class="modal-title" id="cantidadProductoModalLabel">
+                        <i class="fas fa-cubes mr-2"></i>Establecer Cantidad
+                    </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>Producto: <span id="nombreProductoSeleccionado"></span></p>
-                    <p>Existencias disponibles: <span id="existenciasDisponibles"></span></p>
-                    <input type="hidden" id="productoSeleccionadoId">
-                    <div class="form-group">
-                        <label>Cantidad a utilizar:</label>
-                        <input type="number" id="cantidadProducto" class="form-control" min="1" value="1">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <div class="card shadow h-100 py-2 card-producto">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="titulo-card-producto">
+                                                Producto Seleccionado
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="nombreProductoSeleccionado">
+                                                <!-- Nombre del producto -->
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-boxes fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="card shadow h-100 py-2 card-existencias">
+                                <div class="card-body py-2">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="titulo-card-existencias">
+                                                Existencias Disponibles
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="existenciasDisponibles">
+                                                <!-- Existencias disponibles -->
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-warehouse fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card shadow h-100 py-2 card-subtotal">
+                                <div class="card-body py-2">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="titulo-card-subtotal">
+                                                Subtotal Estimado
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="subtotalEstimado">
+                                                $0.00
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="productoSeleccionadoId">
+                    <input type="hidden" id="precioUnitarioSeleccionado">
+                    
+                    <div class="form-group">
+                        <label for="cantidadProducto" class="label-cantidad">
+                            <i class="fas fa-hashtag mr-1"></i>Cantidad a utilizar:
+                        </label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <button class="btn btn-outline-secondary btn-cantidad" type="button" id="decrementarCantidad">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                            <input type="number" id="cantidadProducto" class="form-control input-cantidad" 
+                                min="1" value="1" aria-label="Cantidad" aria-describedby="cantidad-help">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary btn-cantidad" type="button" id="incrementarCantidad">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <span class="input-group-text span-unidades">unidades</span>
+                            </div>
+                        </div>
+                        <small id="cantidad-help" class="form-text text-muted">
+                            Ingrese la cantidad que desea utilizar para esta reparación.
+                        </small>
+                    </div>
+                    
+                    <div class="progress mt-3 mb-1">
+                        <div id="barraProgreso" class="progress-bar progress-bar-striped progress-bar-animated barra-progreso-cantidad" role="progressbar" 
+                            aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="width: 25%;">25%</div>
+                    </div>
+                    <small class="text-muted">Esta barra muestra el porcentaje de existencias que estás utilizando</small>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="btnConfirmarCantidad">Confirmar</button>
+                    <button type="button" class="btn btn-outline-secondary btn-cancelar-cantidad" data-dismiss="modal">
+                        <i class="fas fa-times mr-1"></i>Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btnConfirmarCantidad">
+                        <i class="fas fa-check mr-1"></i>Confirmar
+                    </button>
                 </div>
             </div>
         </div>

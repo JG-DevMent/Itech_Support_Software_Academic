@@ -166,8 +166,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById("nombreProductoSeleccionado").textContent = productoSeleccionado.nombre;
                 document.getElementById("existenciasDisponibles").textContent = productoSeleccionado.existencias;
                 document.getElementById("productoSeleccionadoId").value = index;
-                document.getElementById("cantidadProducto").max = productoSeleccionado.existencias;
-                document.getElementById("cantidadProducto").value = 1;
+                document.getElementById("precioUnitarioSeleccionado").value = productoSeleccionado.precio;
+                
+                // Establecer los valores iniciales
+                const cantidadInput = document.getElementById("cantidadProducto");
+                cantidadInput.max = productoSeleccionado.existencias;
+                cantidadInput.value = 1;
+                
+                // Actualizar el subtotal y barra de progreso
+                actualizarSubtotalYProgreso(1, productoSeleccionado.existencias, productoSeleccionado.precio);
                 
                 // Marcar que estamos abriendo el modal de cantidad para la lógica de transición
                 $('#seleccionProductoModal').data('openingCantidadModal', true);
@@ -185,11 +192,82 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
     
+    // Función para actualizar el subtotal y la barra de progreso
+    function actualizarSubtotalYProgreso(cantidad, existencias, precioUnitario) {
+        // Calcular el subtotal
+        const subtotal = cantidad * precioUnitario;
+        document.getElementById("subtotalEstimado").textContent = `$${subtotal.toFixed(2)}`;
+        
+        // Calcular y actualizar la barra de progreso
+        const porcentaje = Math.min(Math.round((cantidad / existencias) * 100), 100);
+        const barraProgreso = document.getElementById("barraProgreso");
+        barraProgreso.style.width = `${porcentaje}%`;
+        barraProgreso.textContent = `${porcentaje}%`;
+        
+        // Resetear clases y aplicar las correctas según el porcentaje
+        barraProgreso.className = "progress-bar progress-bar-striped progress-bar-animated";
+        
+        if (porcentaje < 40) {
+            // Baja cantidad - color primario
+            barraProgreso.classList.add("barra-progreso-cantidad");
+        } else if (porcentaje < 80) {
+            // Media cantidad - color highlight (dorado claro)
+            barraProgreso.style.backgroundColor = 'var(--highlight)';
+        } else {
+            // Alta cantidad - color alerta
+            barraProgreso.style.backgroundColor = '#c57e1d';
+        }
+    }
+    
+    // Evento para los botones de incrementar y decrementar cantidad
+    document.getElementById("incrementarCantidad").addEventListener("click", function() {
+        const cantidadInput = document.getElementById("cantidadProducto");
+        const existencias = parseInt(document.getElementById("existenciasDisponibles").textContent);
+        const precioUnitario = parseFloat(document.getElementById("precioUnitarioSeleccionado").value);
+        
+        // Verificar que no exceda las existencias disponibles
+        if (parseInt(cantidadInput.value) < existencias) {
+            cantidadInput.value = parseInt(cantidadInput.value) + 1;
+            actualizarSubtotalYProgreso(parseInt(cantidadInput.value), existencias, precioUnitario);
+        }
+    });
+    
+    document.getElementById("decrementarCantidad").addEventListener("click", function() {
+        const cantidadInput = document.getElementById("cantidadProducto");
+        const existencias = parseInt(document.getElementById("existenciasDisponibles").textContent);
+        const precioUnitario = parseFloat(document.getElementById("precioUnitarioSeleccionado").value);
+        
+        if (parseInt(cantidadInput.value) > 1) {
+            cantidadInput.value = parseInt(cantidadInput.value) - 1;
+            actualizarSubtotalYProgreso(parseInt(cantidadInput.value), existencias, precioUnitario);
+        }
+    });
+    
+    // Actualizar también cuando se cambia manualmente el valor
+    document.getElementById("cantidadProducto").addEventListener("input", function() {
+        const cantidadInput = document.getElementById("cantidadProducto");
+        const existencias = parseInt(document.getElementById("existenciasDisponibles").textContent);
+        const precioUnitario = parseFloat(document.getElementById("precioUnitarioSeleccionado").value);
+        
+        // Asegurar que el valor esté dentro de los límites
+        let cantidad = parseInt(cantidadInput.value) || 1;
+        if (cantidad < 1) cantidad = 1;
+        if (cantidad > existencias) cantidad = existencias;
+        
+        // Si el valor ha sido ajustado, actualizar el campo
+        if (cantidad !== parseInt(cantidadInput.value)) {
+            cantidadInput.value = cantidad;
+        }
+        
+        actualizarSubtotalYProgreso(cantidad, existencias, precioUnitario);
+    });
+    
     // Evento para confirmar la cantidad del producto seleccionado
     document.getElementById("btnConfirmarCantidad").addEventListener("click", function() {
         const cantidad = parseInt(document.getElementById("cantidadProducto").value);
+        const existencias = parseInt(document.getElementById("existenciasDisponibles").textContent);
         
-        if (isNaN(cantidad) || cantidad <= 0 || cantidad > parseInt(productoSeleccionado.existencias)) {
+        if (isNaN(cantidad) || cantidad <= 0 || cantidad > existencias) {
             alert("Por favor, ingrese una cantidad válida");
             return;
         }
@@ -197,8 +275,27 @@ document.addEventListener("DOMContentLoaded", () => {
         // Agregar el producto con la cantidad especificada
         agregarProductoSeleccionado(productoSeleccionado, cantidad);
         
-        // Cerrar el modal - el evento hidden.bs.modal se encargará de volver al modal de materiales
-        $('#cantidadProductoModal').modal('hide');
+        // Mostrar confirmación visual antes de cerrar
+        const btnConfirmar = document.getElementById("btnConfirmarCantidad");
+        const textoOriginal = btnConfirmar.innerHTML;
+        
+        // Usar la clase CSS para estilizar el botón de confirmación
+        btnConfirmar.innerHTML = '<i class="fas fa-check mr-1"></i>¡Agregado!';
+        btnConfirmar.classList.remove('btn-primary');
+        btnConfirmar.classList.add('btn-confirmado');
+        btnConfirmar.disabled = true;
+        
+        // Cerrar el modal después de un breve retraso para mostrar la confirmación
+        setTimeout(() => {
+            // Restaurar el botón para la próxima vez
+            btnConfirmar.innerHTML = textoOriginal;
+            btnConfirmar.classList.remove('btn-confirmado');
+            btnConfirmar.classList.add('btn-primary');
+            btnConfirmar.disabled = false;
+            
+            // Cerrar el modal - el evento hidden.bs.modal se encargará de volver al modal de materiales
+            $('#cantidadProductoModal').modal('hide');
+        }, 800);
     });
     
     // Función para agregar un producto a la lista de seleccionados

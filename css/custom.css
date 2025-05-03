@@ -378,6 +378,86 @@ h3 {
     width: 100%;
 }
 
+/* Estilos para el modal de cantidad */
+.modal-header-cantidad {
+    background-color: var(--primary);
+    color: #000000;
+}
+
+.card-producto {
+    border-left: 0.25rem solid var(--primary) !important;
+}
+
+.card-existencias {
+    border-left: 0.25rem solid var(--highlight) !important;
+}
+
+.card-subtotal {
+    border-left: 0.25rem solid var(--secondary) !important;
+}
+
+.titulo-card-producto {
+    color: var(--primary) !important;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.titulo-card-existencias {
+    color: var(--secondary) !important;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.titulo-card-subtotal {
+    color: var(--primary) !important;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.label-cantidad {
+    color: var(--secondary);
+    font-weight: bold;
+}
+
+.btn-cantidad {
+    border-color: var(--primary) !important;
+    color: var(--primary) !important;
+}
+
+.input-cantidad {
+    border-color: var(--primary) !important;
+    text-align: center;
+    font-weight: bold;
+}
+
+.span-unidades {
+    background-color: var(--highlight) !important;
+    color: #000000 !important;
+    border-color: var(--primary) !important;
+}
+
+.barra-progreso-cantidad {
+    background-color: var(--primary);
+}
+
+.btn-cancelar-cantidad {
+    color: var(--secondary) !important;
+    border-color: var(--secondary) !important;
+}
+
+/* Animación para el botón de confirmación */
+.btn-confirmado {
+    background-color: var(--highlight) !important;
+    border-color: var(--highlight) !important;
+    color: #000000 !important;
+}
+
 #resultadoReparacion {
     margin-top: 20px;
 }
@@ -714,6 +794,8 @@ h3 {
     cursor: pointer;
     color: #95741d;
   } */
+
+
 
 
 
