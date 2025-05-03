@@ -21,16 +21,14 @@
 
 /* Estilos para mostrar información del usuario */
 .user-info {
-    background-color: var(--highlight);
     padding: 10px;
     text-align: center;
     margin-bottom: 10px;
-    border-bottom: 1px solid rgba(0,0,0,0.1);
 }
 
 .user-info-name {
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 1.2rem;
     color: var(--secondary);
 }
 
