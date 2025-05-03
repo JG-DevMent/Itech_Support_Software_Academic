@@ -93,56 +93,58 @@
                     <div class="card-body">
                         <h1 class="text-h1">Configuración Usuarios</h1>
                         
-                        <div class="mb-4">
+                        <div class="mb-4 button-group">
                             <button id="showUserList" class="btn-primary">Ver Lista de Usuarios</button>
                             <button id="showUserForm" class="btn-primary">Crear Nuevo Usuario</button>
                         </div>
                         
                         <div id="userListContainer" style="display: none;">
                             <h2 class="text-h2 mb-3">Lista de Usuarios</h2>
-                            <table class="table table-bordered" id="userTable">
-                                <thead>
-                                    <tr>
-                                        <th>Usuario</th>
-                                        <th>Correo</th>
-                                        <th>Teléfono</th>
-                                        <th>Rol</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="userTableBody">
-                                    <!-- Los usuarios se cargarán aquí dinámicamente -->
-                                </tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="userTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Usuario</th>
+                                            <th>Correo</th>
+                                            <th>Teléfono</th>
+                                            <th>Rol</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="userTableBody">
+                                        <!-- Los usuarios se cargarán aquí dinámicamente -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                         
-                        <form id="profileForm" class="space-y-4">
-                            <div>
-                                <label for="username" class="block text-sm font-medium text-gray-700">Nombre de Usuario</label>
-                                <input type="text" id="username" name="username" class="mt-1 block w-full border rounded p-2" placeholder="Tu nombre de usuario" required>
+                        <form id="profileForm" class="formbox">
+                            <div class="form-group">
+                                <label for="username">Nombre de Usuario <span class="text-danger">*</span></label>
+                                <input type="text" id="username" name="username" class="form-control" placeholder="Tu nombre de usuario" required>
                             </div>
-                            <div>
-                                <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
-                                <input type="email" id="email" name="email" class="mt-1 block w-full border rounded p-2" placeholder="Tu correo electrónico" required>
+                            <div class="form-group">
+                                <label for="email">Correo Electrónico <span class="text-danger">*</span></label>
+                                <input type="email" id="email" name="email" class="form-control" placeholder="Tu correo electrónico" required>
                             </div>
-                            <div>
-                                <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
-                                <input type="password" id="password" name="password" class="mt-1 block w-full border rounded p-2" placeholder="Nueva contraseña" required>
+                            <div class="form-group">
+                                <label for="password">Contraseña <span class="text-danger">*</span></label>
+                                <input type="password" id="password" name="password" class="form-control" placeholder="Nueva contraseña" required>
                             </div>
-                            <div>
-                                <label for="phone" class="block text-sm font-medium text-gray-700">Teléfono</label>
-                                <input type="tel" id="phone" name="phone" class="mt-1 block w-full border rounded p-2" placeholder="Tu número de teléfono">
+                            <div class="form-group">
+                                <label for="phone">Teléfono <span class="text-danger">*</span></label>
+                                <input type="tel" id="phone" name="phone" class="form-control" placeholder="Tu número de teléfono" required>
                             </div>
-                            <div>
-                              <label for="role" class="block text-sm font-medium text-gray-700">Rol</label>
-                                <select id="role" name="role" class="mt-1 block w-full border rounded p-2" required>
+                            <div class="form-group">
+                                <label for="role">Rol <span class="text-danger">*</span></label>
+                                <select id="role" name="role" class="form-control" required>
                                     <option value="" disabled selected>Selecciona un rol</option>
                                     <option value="Administrador">Administrador</option>
                                     <option value="Técnico">Técnico</option>
                                     <option value="Vendedor">Vendedor</option>
                                 </select>
                             </div>
-                            <div>
+                            <div class="form-buttons">
                                 <button type="submit" class="btn-primary">Guardar Usuario</button>
                                 <button type="button" class="btnreverse" id="cancelButton">Cancelar</button>
                             </div>
@@ -155,11 +157,166 @@
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="js/sb-admin-2.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-    <script src="js/configuracion.js"></script>
-    <script src="js/perfiles.js"></script>
     <script src="js/custom.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar usuarios al inicio
+            cargarUsuarios();
+            
+            // Configuración de botones y formulario
+            const showUserListBtn = document.getElementById('showUserList');
+            const showUserFormBtn = document.getElementById('showUserForm');
+            const userListContainer = document.getElementById('userListContainer');
+            const profileForm = document.getElementById('profileForm');
+            const cancelButton = document.getElementById('cancelButton');
+            
+            showUserListBtn.addEventListener('click', function() {
+                userListContainer.style.display = 'block';
+                profileForm.style.display = 'none';
+                cargarUsuarios(); // Recargar usuarios al mostrar la lista
+            });
+            
+            showUserFormBtn.addEventListener('click', function() {
+                userListContainer.style.display = 'none';
+                profileForm.style.display = 'block';
+                resetForm();
+            });
+            
+            cancelButton.addEventListener('click', function() {
+                resetForm();
+                userListContainer.style.display = 'block';
+                profileForm.style.display = 'none';
+            });
+            
+            // Manejo del formulario
+            let editando = false;
+            let indiceEditando = null;
+            
+            profileForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const usuario = {
+                    id: Date.now(),
+                    username: document.getElementById('username').value,
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value,
+                    phone: document.getElementById('phone').value,
+                    role: document.getElementById('role').value
+                };
+                
+                const usuarios = JSON.parse(localStorage.getItem('users')) || [];
+                
+                if (editando) {
+                    usuarios[indiceEditando] = { ...usuarios[indiceEditando], ...usuario };
+                    editando = false;
+                    indiceEditando = null;
+                } else {
+                    usuarios.push(usuario);
+                }
+                
+                localStorage.setItem('users', JSON.stringify(usuarios));
+                resetForm();
+                cargarUsuarios();
+                
+                userListContainer.style.display = 'block';
+                profileForm.style.display = 'none';
+                
+                alert('Usuario guardado correctamente');
+            });
+            
+            // Función para resetear el formulario
+            function resetForm() {
+                profileForm.reset();
+                editando = false;
+                indiceEditando = null;
+                document.querySelector('button[type="submit"]').textContent = 'Guardar Usuario';
+            }
+            
+            // Función para cargar usuarios
+            function cargarUsuarios() {
+                const usuarios = JSON.parse(localStorage.getItem('users')) || [];
+                const tbody = document.getElementById('userTableBody');
+                tbody.innerHTML = '';
+                
+                if (usuarios.length === 0) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = '<td colspan="5" class="text-center">No hay usuarios registrados</td>';
+                    tbody.appendChild(tr);
+                    return;
+                }
+                
+                usuarios.forEach((usuario, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td data-title="Usuario">${usuario.username}</td>
+                        <td data-title="Correo">${usuario.email}</td>
+                        <td data-title="Teléfono">${usuario.phone}</td>
+                        <td data-title="Rol">${usuario.role}</td>
+                        <td data-title="Acciones">
+                            <div class="btn-group-actions">
+                                <button class="btn btn-sm btn-warning editar-btn" data-index="${index}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger eliminar-btn" data-index="${index}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                
+                // Configurar botones de editar
+                document.querySelectorAll('.editar-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        editarUsuario(index);
+                    });
+                });
+                
+                // Configurar botones de eliminar
+                document.querySelectorAll('.eliminar-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        eliminarUsuario(index);
+                    });
+                });
+            }
+            
+            // Función para editar usuario
+            function editarUsuario(index) {
+                const usuarios = JSON.parse(localStorage.getItem('users')) || [];
+                const usuario = usuarios[index];
+                
+                document.getElementById('username').value = usuario.username;
+                document.getElementById('email').value = usuario.email;
+                document.getElementById('password').value = usuario.password;
+                document.getElementById('phone').value = usuario.phone;
+                document.getElementById('role').value = usuario.role;
+                
+                editando = true;
+                indiceEditando = index;
+                
+                document.querySelector('button[type="submit"]').textContent = 'Actualizar Usuario';
+                
+                userListContainer.style.display = 'none';
+                profileForm.style.display = 'block';
+                
+                // Desplazar hacia el formulario
+                profileForm.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            // Función para eliminar usuario
+            function eliminarUsuario(index) {
+                if (confirm('¿Estás seguro de eliminar este usuario?')) {
+                    const usuarios = JSON.parse(localStorage.getItem('users')) || [];
+                    usuarios.splice(index, 1);
+                    localStorage.setItem('users', JSON.stringify(usuarios));
+                    cargarUsuarios();
+                    alert('Usuario eliminado correctamente');
+                }
+            }
+        });
+    </script>
 </body>
 </html>

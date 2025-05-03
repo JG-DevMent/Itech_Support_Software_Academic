@@ -1,62 +1,31 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Creamos usuarios por defecto si no hay usuarios
-    function createDefaultUsers() {
+    // Crear usuario admin por defecto si no hay usuarios
+    function createDefaultAdminUser() {
         const users = JSON.parse(localStorage.getItem('users')) || [];
         
         if (users.length === 0) {
-            console.log("No hay usuarios registrados, creando usuarios por defecto");
+            console.log("No hay usuarios registrados, creando usuario admin por defecto");
             
-            // Crear varios usuarios por defecto para diferentes roles
-            const defaultUsers = [
-                {
-                    id: Date.now(),
-                    username: 'admin',
-                    email: 'admin@itechsupport.com',
-                    password: 'admin123',
-                    phone: '123456789',
-                    role: 'Administrador'
-                },
-                {
-                    id: Date.now() + 1,
-                    username: 'tecnico',
-                    email: 'tecnico@itechsupport.com',
-                    password: 'tecnico123',
-                    phone: '987654321',
-                    role: 'Técnico'
-                },
-                {
-                    id: Date.now() + 2,
-                    username: 'vendedor',
-                    email: 'vendedor@itechsupport.com',
-                    password: 'vendedor123',
-                    phone: '456789123',
-                    role: 'Vendedor'
-                }
-            ];
+            // Crear solo el usuario admin
+            const adminUser = {
+                id: Date.now(),
+                username: 'admin',
+                email: 'admin@itechsupport.com',
+                password: 'admin',
+                phone: '123456789',
+                role: 'Administrador'
+            };
             
-            // Guardar usuarios en localStorage
-            localStorage.setItem('users', JSON.stringify(defaultUsers));
-            console.log('Usuarios por defecto creados');
-            alert('Se han creado usuarios por defecto:\n\n' + 
-                  '1. Administrador\n' +
-                  '   Usuario: admin\n' +
-                  '   Contraseña: admin123\n\n' +
-                  '2. Técnico\n' +
-                  '   Usuario: tecnico\n' +
-                  '   Contraseña: tecnico123\n\n' +
-                  '3. Vendedor\n' +
-                  '   Usuario: vendedor\n' +
-                  '   Contraseña: vendedor123');
+            // Guardar usuario en localStorage
+            localStorage.setItem('users', JSON.stringify([adminUser]));
+            console.log('Usuario admin por defecto creado');
         } else {
             console.log("Usuarios existentes:", users.length);
-            users.forEach(user => {
-                console.log(`Usuario: ${user.username} / Rol: ${user.role} / Contraseña: ${user.password}`);
-            });
         }
     }
     
-    // Ejecutar creación de usuarios por defecto
-    createDefaultUsers();
+    // Ejecutar creación de usuario admin por defecto
+    createDefaultAdminUser();
     
     // Formulario de login
     const loginForm = document.getElementById('loginForm');
