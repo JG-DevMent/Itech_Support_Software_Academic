@@ -3298,14 +3298,6 @@ body.sidebar-toggled #tablaClientes td[data-title="Dirección"],
 }
 
 /* Estilos para las tarjetas de estadísticas */
-.dashboard-summary {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-    transition: all 0.3s ease-in-out;
-}
-
 .dashboard-summary[data-visible-cards="2"] {
     grid-template-columns: repeat(2, 1fr);
 }
@@ -3699,14 +3691,6 @@ canvas {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-}
-
-/* Modificación para las tarjetas de estadísticas en nuevo layout */
-.dashboard-summary {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-    margin-bottom: 0;
 }
 
 /* Estilos para Próximas Actividades */
