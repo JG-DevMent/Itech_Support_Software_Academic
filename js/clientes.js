@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const inputBusqueda = document.getElementById('clienteBusqueda');
     const btnBuscar = document.getElementById('btnCliente');
     const exportarBtn = document.getElementById('exportarClientes');
+    const btnLimpiarBusqueda = document.getElementById('btnLimpiarBusqueda');
 
     let modoEdicion = false;
     let clienteEditandoIndex = null;
@@ -28,13 +29,20 @@ document.addEventListener('DOMContentLoaded', function () {
         tablaBody.innerHTML = '';
 
         lista.forEach((cliente, index) => {
+            // Formatear correo para mejor visualización en móviles
+            let correoFormateado = cliente.correo;
+            if (correoFormateado.length > 20) {
+                // Si el correo es muy largo, podemos formatearlo para mejor visualización
+                correoFormateado = `<span class="email-text">${correoFormateado}</span>`;
+            }
+            
             const row = document.createElement('tr');
 
             row.innerHTML = `
                 <td data-title="Nombre">${cliente.nombre}</td>
                 <td data-title="Cédula">${cliente.cedula}</td>
                 <td data-title="Teléfono">${cliente.telefono}</td>
-                <td data-title="Correo">${cliente.correo}</td>
+                <td data-title="Correo">${correoFormateado}</td>
                 <td data-title="Dirección">${cliente.direccion}</td>
                 <td data-title="Acciones">
                     <div class="btn-group-actions">
@@ -146,6 +154,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
             XLSX.writeFile(workbook, 'clientes.xlsx');
         });
+    }
+
+    // Función para limpiar campo de búsqueda
+    function limpiarBusqueda() {
+        clienteBusqueda.value = '';
+        // Mostrar todos los clientes después de limpiar la búsqueda
+        renderizarTabla();
+    }
+    
+    // Agregar evento al botón de limpiar
+    if (btnLimpiarBusqueda) {
+        btnLimpiarBusqueda.addEventListener('click', limpiarBusqueda);
     }
 
     renderizarTabla();

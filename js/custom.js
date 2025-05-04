@@ -353,32 +353,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             });
-
-            // Gráfica 3: Servicios por Mes
-            new Chart(document.getElementById("serviciosMes"), {
-                type: 'doughnut',
-                data: {
-                    labels: ["Reparaciones", "Instalaciones", "Diagnósticos"],
-                    datasets: [{
-                        label: "Servicios",
-                        data: [12, 9, 14],
-                        backgroundColor: [
-                            'rgba(149, 116, 29, 0.6)',
-                            'rgba(173, 139, 51, 0.6)',
-                            'rgba(227, 196, 116, 0.6)'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Servicios Realizados'
-                        }
-                    }
-                }
-            });
+            
         } catch (error) {
             console.log("Error al cargar gráficas:", error);
         }

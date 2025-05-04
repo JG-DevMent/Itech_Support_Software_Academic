@@ -1,6 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
     const enlaces = document.querySelectorAll(".informe-link");
-
+    const btnFiltrar = document.querySelector('.btn-filtrar');
+    const fechaDesde = document.getElementById('fechaDesde');
+    const fechaHasta = document.getElementById('fechaHasta');
+    
     enlaces.forEach(link => {
         link.addEventListener("click", (e) => {
         e.preventDefault(); // evitar que se recargue la página
@@ -21,4 +24,12 @@ document.addEventListener("DOMContentLoaded", () => {
         XLSX.writeFile(libro, `informe_${tipo}.xlsx`);
         });
     });
+
+    // Evento para el botón de filtrar
+    if (btnFiltrar) {
+        btnFiltrar.addEventListener('click', function() {
+            // La funcionalidad existente para filtrar
+            alert(`Filtrando desde ${fechaDesde.value} hasta ${fechaHasta.value}`);
+        });
+    }
 });

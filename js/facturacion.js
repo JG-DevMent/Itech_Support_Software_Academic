@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const clientSearchBtn = document.getElementById('clientSearchBtn');
     const repairSearchBtn = document.getElementById('repairSearchBtn');
     const searchHistory = document.getElementById('searchHistory');
+    const btnLimpiarHistorial = document.getElementById('btnLimpiarHistorial');
+    const btnLimpiarCliente = document.getElementById('btnLimpiarCliente');
+    const btnLimpiarReparacion = document.getElementById('btnLimpiarReparacion');
     
     // Elementos de la pantalla 2
     const screen2 = document.getElementById('screen2');
@@ -253,11 +256,13 @@ document.addEventListener('DOMContentLoaded', function() {
         return clients.find(client => client.cedula === clientId);
     }
     
-    // Cargar historial al inicio
+    // Cargar historial de búsquedas desde localStorage al inicio
     loadSearchHistory();
     
-    // Llamar a esta función al inicio para popular el historial
-    popularHistorialDesdeReparaciones();
+    // Cargar el historial con reparaciones disponibles si no hay historial
+    if (searchHistory.children.length === 0) {
+        popularHistorialDesdeReparaciones();
+    }
     
     // Validar campos de entrada
     function validateInputs() {
@@ -888,5 +893,54 @@ document.addEventListener('DOMContentLoaded', function() {
             </html>
         `);
         ventana.document.close();
+    }
+
+    // Función para limpiar el historial de búsquedas
+    function limpiarHistorial() {
+        // Limpiar el historial visual
+        searchHistory.innerHTML = '';
+        
+        // Limpiar el historial en localStorage
+        localStorage.removeItem('searchHistory');
+        
+        // Mostrar mensaje temporal
+        const mensajeDiv = document.createElement('div');
+        mensajeDiv.className = 'alert alert-success mt-2';
+        mensajeDiv.innerHTML = 'Historial de búsquedas limpiado';
+        mensajeDiv.style.textAlign = 'center';
+        searchHistory.appendChild(mensajeDiv);
+        
+        // Eliminar el mensaje después de 2 segundos
+        setTimeout(() => {
+            if (mensajeDiv.parentNode === searchHistory) {
+                searchHistory.removeChild(mensajeDiv);
+            }
+        }, 2000);
+    }
+    
+    // Evento para el botón de limpiar historial
+    if (btnLimpiarHistorial) {
+        btnLimpiarHistorial.addEventListener('click', limpiarHistorial);
+    }
+
+    // Función para limpiar el campo de cliente
+    function limpiarCampoCliente() {
+        clientIdInput.value = '';
+        removeError(clientIdInput);
+    }
+    
+    // Función para limpiar el campo de reparación
+    function limpiarCampoReparacion() {
+        repairIdInput.value = '';
+        removeError(repairIdInput);
+    }
+    
+    // Eventos para los botones de limpiar campos
+    if (btnLimpiarCliente) {
+        btnLimpiarCliente.addEventListener('click', limpiarCampoCliente);
+    }
+    
+    if (btnLimpiarReparacion) {
+        btnLimpiarReparacion.addEventListener('click', limpiarCampoReparacion);
     }
 });

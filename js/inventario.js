@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnExportar = document.getElementById('exportarInventario');
   const btnRecontar = document.getElementById('btnRecontar');
   const btnGuardar = document.querySelector('#formInventario button.btn-primary');
+  const btnLimpiarInventario = document.getElementById('btnLimpiarInventario');
 
   let indexEditar = null;
 
@@ -126,6 +127,15 @@ document.addEventListener('DOMContentLoaded', () => {
       XLSX.utils.book_append_sheet(wb, ws, 'Inventario');
       XLSX.writeFile(wb, 'Inventario_ITECHSUPPORT.xlsx');
   });
+
+  function limpiarBusqueda() {
+      buscarInput.value = '';
+      cargarInventario();
+  }
+
+  if (btnLimpiarInventario) {
+      btnLimpiarInventario.addEventListener('click', limpiarBusqueda);
+  }
 
   cargarInventario();
 });

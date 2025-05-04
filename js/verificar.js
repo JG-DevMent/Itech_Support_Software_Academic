@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const inputBusqueda = document.getElementById("inputBusqueda");
     const btnBuscar = document.getElementById("btnBuscar");
     const resultadoDiv = document.getElementById("resultadoReparacion");
+    const btnLimpiar = document.getElementById("btnLimpiar");
 
     function realizarBusqueda() {
         const valor = inputBusqueda.value.trim().toLowerCase();
@@ -58,5 +59,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 realizarBusqueda();
             }
         });
+    }
+    
+    // Función para limpiar el campo de búsqueda y el resultado
+    function limpiarBusqueda() {
+        inputBusqueda.value = "";
+        resultadoDiv.innerHTML = "";
+    }
+    
+    // Evento para botón limpiar
+    if (btnLimpiar) {
+        btnLimpiar.addEventListener("click", limpiarBusqueda);
     }
 });
