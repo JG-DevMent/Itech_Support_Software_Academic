@@ -81,4 +81,106 @@ document.addEventListener('DOMContentLoaded', function() {
       modal.style.display = 'none';
     }
   };
+
+  console.log('Configuración: Módulo cargado correctamente');
+  
+  // Gestionar opciones de configuración según el rol
+  gestionarOpcionesPorRol();
+  
+  // Inicializar modales si existen
+  inicializarModales();
 });
+
+// Función para gestionar las opciones de configuración según el rol del usuario
+function gestionarOpcionesPorRol() {
+    // Obtener el usuario actual de la sesión
+    const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+    if (!currentUser || !currentUser.role) {
+        console.warn('No se encontró un usuario con rol válido en la sesión');
+        return;
+    }
+    
+    const userRole = currentUser.role;
+    console.log('Rol del usuario actual:', userRole);
+    
+    // Obtener todas las opciones de configuración
+    const configOptions = document.querySelectorAll('.config-option');
+    
+    configOptions.forEach(option => {
+        const rolesPermitidos = option.getAttribute('data-role');
+        
+        // Si no tiene el atributo data-role, mostrar la opción siempre
+        if (!rolesPermitidos) {
+            option.style.display = 'block';
+            return;
+        }
+        
+        // Verificar si el rol del usuario actual está en la lista de roles permitidos
+        const rolesArray = rolesPermitidos.split(' ');
+        if (rolesArray.includes(userRole)) {
+            option.style.display = 'block';
+        } else {
+            option.style.display = 'none';
+        }
+    });
+    
+    // Añadir clases CSS para mejorar el diseño según cuántas opciones quedan visibles
+    ajustarDisenoPorOpciones();
+}
+
+// Función para ajustar el diseño según la cantidad de opciones visibles
+function ajustarDisenoPorOpciones() {
+    const container = document.querySelector('.config-options-container');
+    if (!container) return;
+    
+    const opcionesVisibles = Array.from(container.querySelectorAll('.config-option')).filter(
+        option => option.style.display !== 'none'
+    );
+    
+    // Aplicar clases según el número de opciones visibles
+    const numOpciones = opcionesVisibles.length;
+    
+    if (numOpciones <= 2) {
+        container.classList.add('options-few');
+    } else {
+        container.classList.remove('options-few');
+    }
+    
+    if (numOpciones === 1) {
+        container.classList.add('option-single');
+    } else {
+        container.classList.remove('option-single');
+    }
+}
+
+// Función para inicializar modales
+function inicializarModales() {
+    const modal = document.getElementById('modal');
+    if (!modal) return;
+    
+    // Cerrar modal al hacer clic fuera
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            cerrarModal();
+        }
+    };
+}
+
+// Función para cerrar el modal
+function cerrarModal() {
+    const modal = document.getElementById('modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Función para abrir un modal con contenido
+function abrirModal(contenido) {
+    const modal = document.getElementById('modal');
+    const contenidoModal = document.getElementById('contenido-modal');
+    
+    if (!modal || !contenidoModal) return;
+    
+    contenidoModal.innerHTML = contenido;
+    modal.style.display = 'block';
+}

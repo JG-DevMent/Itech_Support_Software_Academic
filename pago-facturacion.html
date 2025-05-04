@@ -368,69 +368,71 @@
                                         <span>¡Pago procesado correctamente!</span>
                                     </div>
                                     
-                                    <div class="invoice-header">
-                                        <div id="invoiceLogo"></div>
-                                        <div id="invoiceTitle" class="invoice-title">Factura de Servicio</div>
-                                        <div id="invoiceCompany" class="invoice-company">ITECH SUPPORT</div>
-                                        <div id="invoiceTagline" class="invoice-tagline">Soluciones tecnológicas a tu alcance</div>
-                                        <div id="invoiceHeaderNotes"></div>
-                                    </div>
-                                    
-                                    <div class="invoice-details">
-                                        <div class="invoice-details-left">
-                                            <h3>Datos del Cliente</h3>
-                                            <p><strong>Cliente:</strong> <span id="invoiceClientName"></span></p>
-                                            <p><strong>Cédula/NIT:</strong> <span id="invoiceClientId"></span></p>
-                                            <p><strong>Teléfono:</strong> <span id="invoiceClientPhone"></span></p>
-                                            <p><strong>Correo:</strong> <span id="invoiceClientEmail"></span></p>
-                                            <p><strong>Dirección:</strong> <span id="invoiceClientAddress"></span></p>
+                                    <div class="invoice-content">
+                                        <div class="invoice-header">
+                                            <div id="invoiceLogo" class="text-center mb-3"></div>
+                                            <div id="invoiceTitle" class="invoice-title">Factura de Servicio</div>
+                                            <div id="invoiceCompany" class="invoice-company">Itech Support</div>
+                                            <div id="invoiceTagline" class="invoice-tagline">Se más seguro con nosotros.</div>
+                                            <div id="invoiceHeaderNotes" class="small text-muted mt-2"></div>
                                         </div>
-                                        <div class="invoice-details-right">
-                                            <h3>Detalles de la Factura</h3>
-                                            <p><strong>Factura #:</strong> <span id="invoiceNumber"></span></p>
-                                            <p><strong>Fecha:</strong> <span id="invoiceDate"></span></p>
-                                            <p><strong>Método de Pago:</strong> <span id="invoicePaymentMethod"></span></p>
-                                            <p><strong>Estado:</strong> <span style="color: green; font-weight: bold;">PAGADO</span></p>
+                                        
+                                        <div class="invoice-details">
+                                            <div class="invoice-details-left">
+                                                <h3>Datos del Cliente</h3>
+                                                <p><strong>Cliente:</strong> <span id="invoiceClientName"></span></p>
+                                                <p><strong>Cédula/NIT:</strong> <span id="invoiceClientId"></span></p>
+                                                <p><strong>Teléfono:</strong> <span id="invoiceClientPhone"></span></p>
+                                                <p><strong>Correo:</strong> <span id="invoiceClientEmail"></span></p>
+                                                <p><strong>Dirección:</strong> <span id="invoiceClientAddress"></span></p>
+                                            </div>
+                                            <div class="invoice-details-right">
+                                                <h3>Detalles de la Factura</h3>
+                                                <p><strong>Factura #:</strong> <span id="invoiceNumber"></span></p>
+                                                <p><strong>Fecha:</strong> <span id="invoiceDate"></span></p>
+                                                <p><strong>Método de Pago:</strong> <span id="invoicePaymentMethod"></span></p>
+                                                <p><strong>Estado:</strong> <span style="color: green; font-weight: bold;">PAGADO</span></p>
+                                            </div>
                                         </div>
-                                    </div>
-                                    
-                                    <table class="invoice-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Descripción</th>
-                                                <th>Dispositivo</th>
-                                                <th>IMEI/Serial</th>
-                                                <th>Precio</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="invoiceTableBody">
-                                            <!-- Se llenará dinámicamente -->
-                                        </tbody>
-                                        <tfoot>
-                                            <tr>
-                                                <th colspan="3" style="text-align: right;">Subtotal</th>
-                                                <td><span class="currency-symbol">$</span> <span id="invoiceSubtotal"></span></td>
-                                            </tr>
-                                            <tr>
-                                                <th colspan="3" style="text-align: right;">
-                                                    IVA (<span id="invoiceTaxRate">19</span>%)
-                                                </th>
-                                                <td><span class="currency-symbol">$</span> <span id="invoiceTax"></span></td>
-                                            </tr>
-                                            <tr>
-                                                <th colspan="3" style="text-align: right;">Total</th>
-                                                <td><span class="currency-symbol">$</span> <span id="invoiceTotal"></span></td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                    
-                                    <div id="invoiceQrcode" class="text-center mt-4"></div>
-                                    
-                                    <div class="invoice-footer">
-                                        <p id="invoiceFooterText">Gracias por su preferencia</p>
-                                        <p id="invoiceTerms"></p>
-                                        <p id="invoiceContact"></p>
-                                        <div id="invoiceSocial" class="invoice-social"></div>
+                                        
+                                        <table class="invoice-table">
+                                            <thead>
+                                                <tr>
+                                                    <th width="40%">Descripción</th>
+                                                    <th width="30%">Dispositivo</th>
+                                                    <th width="15%">IMEI/Serial</th>
+                                                    <th width="15%">Precio</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="invoiceTableBody">
+                                                <!-- Se llenará dinámicamente -->
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <th colspan="3" style="text-align: right;">Subtotal</th>
+                                                    <td><span class="currency-symbol">$</span> <span id="invoiceSubtotal"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <th colspan="3" style="text-align: right;">
+                                                        IVA (<span id="invoiceTaxRate">19</span>%)
+                                                    </th>
+                                                    <td><span class="currency-symbol">$</span> <span id="invoiceTax"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <th colspan="3" style="text-align: right;">Total</th>
+                                                    <td><span class="currency-symbol">$</span> <span id="invoiceTotal"></span></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                        
+                                        <div id="invoiceQrcode" class="text-center mt-3"></div>
+                                        
+                                        <div class="invoice-footer">
+                                            <p id="invoiceFooterText">Gracias por su preferencia</p>
+                                            <p id="invoiceTerms" class="small text-muted"></p>
+                                            <p id="invoiceContact" class="small"></p>
+                                            <div id="invoiceSocial" class="invoice-social"></div>
+                                        </div>
                                     </div>
                                     
                                     <div class="invoice-actions no-print">

@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Cargar configuración de recibos desde localStorage
     const receiptConfig = JSON.parse(localStorage.getItem('receiptConfig')) || {};
+    console.log('Configuración de recibos cargada:', receiptConfig);
     
     // Elementos de la pantalla 1
     const screen1 = document.getElementById('screen1');
@@ -55,6 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
         currencyElements.forEach(el => {
             el.textContent = currencySymbol;
         });
+        console.log('Símbolo de moneda aplicado:', currencySymbol);
     }
     
     // Función para mostrar una animación de carga
@@ -593,16 +595,27 @@ document.addEventListener('DOMContentLoaded', function() {
             const cost = parseFloat(document.getElementById('displayCost').textContent.replace(/,/g, '').replace(/\$/g, '').trim());
             
             const paymentMethod = selectedMethod;
-            const date = new Date().toLocaleDateString();
+            const date = new Date().toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+            
+            // Cargar la configuración de recibos más reciente
+            const receiptConfig = JSON.parse(localStorage.getItem('receiptConfig')) || {};
             
             // Aplicar la configuración del recibo a la factura
             if (receiptConfig.logoURL) {
                 document.getElementById('invoiceLogo').innerHTML = `<img src="${receiptConfig.logoURL}" alt="Logo" class="invoice-logo">`;
+            } else {
+                // Logo por defecto
+                document.getElementById('invoiceLogo').innerHTML = `<img src="img/logo-itech-support.png" alt="Logo" class="invoice-logo">`;
             }
             
+            // Aplicar título, nombre y eslogan configurados o usar valores predeterminados
             document.getElementById('invoiceTitle').textContent = receiptConfig.receiptTitle || 'Factura de Servicio';
-            document.getElementById('invoiceCompany').textContent = receiptConfig.companyName || 'ITECH SUPPORT';
-            document.getElementById('invoiceTagline').textContent = receiptConfig.companyTagline || 'Soluciones tecnológicas a tu alcance';
+            document.getElementById('invoiceCompany').textContent = receiptConfig.companyName || 'Itech Support';
+            document.getElementById('invoiceTagline').textContent = receiptConfig.companyTagline || 'Se más seguro con nosotros.';
             document.getElementById('invoiceHeaderNotes').textContent = receiptConfig.headerNotes || '';
             
             // Impuesto configurado o valor predeterminado (19% para Colombia)
@@ -622,7 +635,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('invoiceClientAddress').textContent = clientAddress;
             
             // Generar número de factura con prefijo si existe
-            const prefix = receiptConfig.receiptPrefix || 'ITECH-';
+            const prefix = receiptConfig.receiptPrefix || 'ITECH';
             const invoiceNumber = prefix + new Date().getTime().toString().slice(-6);
             document.getElementById('invoiceNumber').textContent = invoiceNumber;
             
@@ -635,9 +648,16 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const currencySymbol = receiptConfig.currency || '$';
             
+            // Crear fila para el servicio de reparación
             const row = document.createElement('tr');
+            
+            // Extraer solo el texto plano sin HTML para descripción
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = description;
+            const cleanDescription = tempDiv.textContent || tempDiv.innerText || '';
+            
             row.innerHTML = `
-                <td>${issue}: ${description}</td>
+                <td>${issue}</td>
                 <td>${device} ${brandModel}</td>
                 <td>${imei}</td>
                 <td>${currencySymbol} ${subtotal.toLocaleString('es-CO')}</td>
@@ -681,7 +701,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const qrContainer = document.getElementById('invoiceQrcode');
             qrContainer.innerHTML = '';
             
-            if (receiptConfig.showQRCode === 'true' || true) { // Siempre generar QR
+            if (receiptConfig.showQRCode === 'true' || receiptConfig.showQRCode === undefined) {
                 const qrData = `Factura: ${invoiceNumber}\nCliente: ${clientName}\nCédula: ${clientId}\nTotal: ${currencySymbol} ${total.toLocaleString('es-CO')}\nFecha: ${date}`;
                 createQRCode(qrContainer, qrData);
             }
@@ -741,7 +761,42 @@ document.addEventListener('DOMContentLoaded', function() {
         
         setTimeout(() => {
             hideLoading();
+            
+            // Guardar el estado actual del scroll
+            const scrollPos = window.scrollY;
+            
+            // Asegurarse de que la factura esté visible
+            invoiceSection.style.display = 'block';
+            invoiceSection.classList.remove('hidden');
+            
+            // Asegurarse de que la opción de QR esté funcionando
+            const qrContainer = document.getElementById('invoiceQrcode');
+            if (qrContainer && qrContainer.innerHTML === '') {
+                const invoiceNumber = document.getElementById('invoiceNumber').textContent;
+                const clientName = document.getElementById('invoiceClientName').textContent;
+                const clientId = document.getElementById('invoiceClientId').textContent;
+                const total = document.getElementById('invoiceTotal').textContent;
+                const currencySymbol = document.querySelector('.currency-symbol').textContent;
+                const date = document.getElementById('invoiceDate').textContent;
+                
+                // Intentar regenerar el QR si no existe
+                const qrData = `Factura: ${invoiceNumber}\nCliente: ${clientName}\nCédula: ${clientId}\nTotal: ${currencySymbol} ${total}\nFecha: ${date}`;
+                createQRCode(qrContainer, qrData);
+            }
+            
+            // Verificar si hay redes sociales
+            const socialDiv = document.getElementById('invoiceSocial');
+            if (socialDiv && socialDiv.innerHTML.trim() === '') {
+                socialDiv.style.display = 'none';
+            } else {
+                socialDiv.style.display = 'block';
+            }
+            
+            // Imprimir
             window.print();
+            
+            // Revertir cambios que se hayan hecho solo para impresión
+            window.scrollTo(0, scrollPos);
         }, 500);
     });
     
