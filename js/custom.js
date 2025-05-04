@@ -258,15 +258,51 @@ document.addEventListener('DOMContentLoaded', function() {
     // Verificar si está en una página protegida
     checkProtectedPage();
     
-    // Toggle para el menú lateral si existe
-    const sidebarToggle = document.getElementById('sidebarToggleCustom');
-    
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function() {
-            document.body.classList.toggle('sidebar-toggled');
-            document.querySelector('.sidebar').classList.toggle('toggled');
-        });
+    // Código para controlar el toggle del sidebar de manera universal
+    function setupSidebarToggle() {
+        const sidebarToggle = document.getElementById('sidebarToggleCustom');
+        
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', function() {
+                console.log('Sidebar toggle clicked');
+                
+                // Alternar clase en el cuerpo para el estado del sidebar
+                document.body.classList.toggle('sidebar-toggled');
+                
+                // Alternar clase en el sidebar
+                const sidebar = document.querySelector('.sidebar');
+                if (sidebar) {
+                    sidebar.classList.toggle('toggled');
+                    
+                    // Si está colapsado, cerrar cualquier menú desplegable
+                    if (sidebar.classList.contains('toggled')) {
+                        const collapseElements = sidebar.querySelectorAll('.collapse');
+                        collapseElements.forEach(function(el) {
+                            if ($(el).hasClass('show')) {
+                                $(el).collapse('hide');
+                            }
+                        });
+                    }
+                }
+                
+                // Guardar el estado del sidebar en localStorage para mantenerlo entre páginas
+                localStorage.setItem('sidebarToggled', document.body.classList.contains('sidebar-toggled'));
+            });
+        }
+        
+        // Restaurar el estado del sidebar al cargar la página
+        const sidebarToggled = localStorage.getItem('sidebarToggled') === 'true';
+        if (sidebarToggled) {
+            document.body.classList.add('sidebar-toggled');
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar) {
+                sidebar.classList.add('toggled');
+            }
+        }
     }
+
+    // Ejecutar la configuración del sidebar
+    setupSidebarToggle();
     
     //Graficas Dashboard SIMULACION (si estamos en home.html)
     if (window.location.pathname.includes('home.html')) {
@@ -365,80 +401,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-//Graficas Dashboard SIMULACION
-// Gráfica 1: Refacciones más utilizadas
-new Chart(document.getElementById("refaccionesutilizadas"), 
-{ type: 'bar',
-  data: {
-      labels: ["Pantallas", "Baterias", "Cámaras", "Memoria", "U Almacenamiento", "Teclados"],
-      datasets: [{
-          label: "Refacciones",
-          data: [10, 20, 15, 25, 30, 22],
-          backgroundColor: 'rgba(149, 116, 29, 0.6)'
-      }]
-  },
-  options: {
-      responsive: true,
-      plugins: {
-          title: {
-              display: true,
-              text: 'Refacciones más utilizadas'
-          }
-      }
-  }
-});
-
-// Gráfica 2: Progreso de Clientes
-new Chart(document.getElementById("progresoClientes"), {
-  type: 'line',
-  data: {
-      labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun"],
-      datasets: [{
-          label: "Clientes Nuevos",
-          data: [5, 10, 8, 12, 15, 14],
-          borderColor: 'rgba(173, 139, 51, 0.9)',
-          backgroundColor: 'rgba(173, 139, 51, 0.3)',
-          fill: true,
-          tension: 0.4
-      }]
-  },
-  options: {
-      responsive: true,
-      plugins: {
-          title: {
-              display: true,
-              text: 'Progreso de Clientes'
-          }
-      }
-  }
-});
-
-// Gráfica 3: Servicios por Mes
-new Chart(document.getElementById("serviciosMes"), {
-  type: 'doughnut',
-  data: {
-      labels: ["Reparaciones", "Instalaciones", "Diagnósticos"],
-      datasets: [{
-          label: "Servicios",
-          data: [12, 9, 14],
-          backgroundColor: [
-              'rgba(149, 116, 29, 0.6)',
-              'rgba(173, 139, 51, 0.6)',
-              'rgba(227, 196, 116, 0.6)'
-          ]
-      }]
-  },
-  options: {
-      responsive: true,
-      plugins: {
-          title: {
-              display: true,
-              text: 'Servicios Realizados'
-          }
-      }
-  }
-});
-
 // Código para el botón de chat(Ayuda y soporte)
 function toggleChat() {
   const chatBox = document.getElementById('chatBox');
@@ -446,7 +408,7 @@ function toggleChat() {
 }
 
 // Código para el botón de filtrar fechas
-document.querySelector(".btn-filtrar").addEventListener("click", () => {
+document.querySelector(".btn-filtrar")?.addEventListener("click", () => {
   alert("Aquí se aplicaría el filtro de fechas.");
 });
 

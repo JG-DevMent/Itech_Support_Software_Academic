@@ -99,8 +99,199 @@
                             </a>
                         </div>
                         
-                        <p class="text-recibos">Aquí se configurarán los recibos de la tienda. (Funcionalidad por implementar)</p>
+                        <div class="tab-buttons mt-4">
+                            <button class="tab-button active" data-tab="general">General</button>
+                            <button class="tab-button" data-tab="header">Encabezado</button>
+                            <button class="tab-button" data-tab="footer">Pie de Página</button>
+                            <button class="tab-button" data-tab="preview">Vista Previa</button>
+                        </div>
                         
+                        <form id="receiptForm">
+                            <div id="general-tab" class="tab-content active">
+                                <div class="form-section">
+                                    <h3 class="mb-3">Configuración General</h3>
+                                    
+                                    <div class="form-group">
+                                        <label for="receiptTitle">Título del Recibo</label>
+                                        <input type="text" id="receiptTitle" class="form-control" placeholder="Ej: Factura de Servicio" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="receiptPrefix">Prefijo para Número de Factura</label>
+                                        <input type="text" id="receiptPrefix" class="form-control" placeholder="Ej: ITECH-" maxlength="10">
+                                        <small class="form-text text-muted">Opcional. Se añadirá antes del número de factura.</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="taxRate">Porcentaje de Impuesto (%)</label>
+                                        <input type="number" id="taxRate" class="form-control" min="0" max="100" step="0.01" placeholder="Ej: 19" value="19">
+                                        <small class="form-text text-muted">IVA estándar en Colombia: 19%</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="currency">Moneda</label>
+                                        <select id="currency" class="form-control">
+                                            <option value="$">$ (Peso Colombiano)</option>
+                                            <option value="USD $">USD $ (Dólar)</option>
+                                            <option value="€">€ (Euro)</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="showQRCode">Incluir Código QR</label>
+                                        <select id="showQRCode" class="form-control">
+                                            <option value="true">Sí</option>
+                                            <option value="false">No</option>
+                                        </select>
+                                        <small class="form-text text-muted">El código QR contendrá la información básica de la factura.</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="header-tab" class="tab-content">
+                                <div class="form-section">
+                                    <h3 class="mb-3">Encabezado del Recibo</h3>
+                                    
+                                    <div class="form-group">
+                                        <label for="logoURL">URL del Logo</label>
+                                        <input type="text" id="logoURL" class="form-control" placeholder="URL de la imagen del logo">
+                                        <small class="form-text text-muted">Opcional. Se mostrará en la parte superior del recibo.</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="companyName">Nombre de la Empresa</label>
+                                        <input type="text" id="companyName" class="form-control" placeholder="Nombre de tu empresa" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="companyTagline">Eslogan de la Empresa</label>
+                                        <input type="text" id="companyTagline" class="form-control" placeholder="Eslogan o descripción corta">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="headerNotes">Notas Adicionales (Encabezado)</label>
+                                        <textarea id="headerNotes" class="form-control" rows="3" placeholder="Información adicional a mostrar en el encabezado"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="footer-tab" class="tab-content">
+                                <div class="form-section">
+                                    <h3 class="mb-3">Pie de Página del Recibo</h3>
+                                    
+                                    <div class="form-group">
+                                        <label for="footerText">Texto del Pie de Página</label>
+                                        <textarea id="footerText" class="form-control" rows="3" placeholder="Texto a mostrar en el pie de página"></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="termsAndConditions">Términos y Condiciones</label>
+                                        <textarea id="termsAndConditions" class="form-control" rows="5" placeholder="Términos y condiciones que aparecerán en el recibo"></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="contactInfo">Información de Contacto</label>
+                                        <textarea id="contactInfo" class="form-control" rows="3" placeholder="Teléfono, correo, dirección, etc."></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="showSocialMedia">Mostrar Redes Sociales</label>
+                                        <select id="showSocialMedia" class="form-control">
+                                            <option value="true">Sí</option>
+                                            <option value="false">No</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div id="socialMediaInputs">
+                                        <div class="form-group">
+                                            <label for="facebook">Facebook</label>
+                                            <input type="text" id="facebook" class="form-control" placeholder="URL de Facebook">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="instagram">Instagram</label>
+                                            <input type="text" id="instagram" class="form-control" placeholder="Usuario de Instagram">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="twitter">Twitter/X</label>
+                                            <input type="text" id="twitter" class="form-control" placeholder="Usuario de Twitter/X">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="preview-tab" class="tab-content">
+                                <div class="form-section">
+                                    <h3 class="mb-3">Vista Previa del Recibo</h3>
+                                    
+                                    <div class="preview-receipt">
+                                        <div class="preview-header">
+                                            <div id="preview-logo"></div>
+                                            <h3 id="preview-title">Factura de Servicio</h3>
+                                            <p id="preview-company">ITECH SUPPORT</p>
+                                            <p id="preview-tagline">Soluciones tecnológicas a tu alcance</p>
+                                            <p id="preview-header-notes"></p>
+                                        </div>
+                                        
+                                        <div class="preview-content">
+                                            <h4>Datos del Cliente:</h4>
+                                            <p>Nombre: Cliente de Ejemplo</p>
+                                            <p>CC/NIT: 1234567890</p>
+                                            <p>Teléfono: 300-123-4567</p>
+                                            
+                                            <h4>Detalles de la Factura:</h4>
+                                            <p>Factura #: <span id="preview-invoice-number">ITECH-001</span></p>
+                                            <p>Fecha: <span id="preview-date">01/01/2023</span></p>
+                                            
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Descripción</th>
+                                                        <th>Precio</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Reparación de Pantalla Samsung Galaxy S21</td>
+                                                        <td><span class="preview-currency">$</span> <span id="preview-amount">350.000</span></td>
+                                                    </tr>
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <th>Subtotal</th>
+                                                        <td><span class="preview-currency">$</span> <span id="preview-subtotal">350.000</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>IVA (<span id="preview-tax-rate">19</span>%)</th>
+                                                        <td><span class="preview-currency">$</span> <span id="preview-tax">66.500</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Total</th>
+                                                        <td><span class="preview-currency">$</span> <span id="preview-total">416.500</span></td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                            
+                                            <div id="preview-qrcode" style="text-align: center; margin-top: 20px;">
+                                                <p>[Aquí aparecería el código QR]</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="preview-footer">
+                                            <p id="preview-footer-text">Gracias por su preferencia</p>
+                                            <p id="preview-terms"></p>
+                                            <p id="preview-contact"></p>
+                                            <div id="preview-social"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <button type="submit" class="btn-primary">
+                                    <i class="fas fa-save"></i> Guardar Configuración
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -114,5 +305,6 @@
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script src="js/configuracion.js"></script>
     <script src="js/custom.js"></script>
+    <script src="js/recibos-config.js"></script>
 </body>
 </html>

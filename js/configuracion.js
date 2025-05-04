@@ -64,16 +64,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
   
-  // Toggle para el menú lateral
-  const sidebarToggle = document.getElementById('sidebarToggleCustom');
-  
-  if (sidebarToggle) {
-    sidebarToggle.addEventListener('click', function() {
-      document.body.classList.toggle('sidebar-toggled');
-      document.querySelector('.sidebar').classList.toggle('toggled');
-    });
-  }
-  
   // Función para abrir modales si existieran
   window.abrirModal = function(contenido) {
     const modal = document.getElementById('modal');

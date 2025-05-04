@@ -233,7 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         if (dispositivo && marcaModelo && estado) {
             document.getElementById("mensajeNotificacion").value = 
-                `Estimado ${clienteActual.nombre || "cliente"}, le informamos que su ${dispositivo} ${marcaModelo} se encuentra en estado: ${estado}. Por favor, visite nuestra web o contáctenos para más información.`;
+                `Estimado ${clienteActual.nombre || "cliente"}, le informamos que su ${dispositivo} ${marcaModelo} se encuentra en estado: ${estado}. Por favor contáctenos para más información.`;
         }
         
         // Abrir el modal
@@ -403,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Pre-rellenar los campos del modal
         document.getElementById("asuntoNotificacion").value = `Actualización de su reparación en ITECH SUPPORT - ${rep.dispositivo} ${rep.marcaModelo}`;
         document.getElementById("mensajeNotificacion").value = 
-            `Estimado ${rep.nombreCliente || "cliente"}, le informamos que su ${rep.dispositivo} ${rep.marcaModelo} se encuentra en estado: ${rep.estado}. Por favor, visite nuestra web o contáctenos para más información.`;
+            `Estimado ${rep.nombreCliente || "cliente"}, le informamos que su ${rep.dispositivo} ${rep.marcaModelo} se encuentra en estado: ${rep.estado}. Por favor contáctenos para más información.`;
         
         // Configurar manejadores de eventos para el modal
         const handleEnviarNotificacion = function() {
