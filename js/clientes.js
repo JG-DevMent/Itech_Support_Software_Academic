@@ -8,36 +8,29 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnLimpiarBusqueda = document.getElementById('btnLimpiarBusqueda');
 
     let modoEdicion = false;
-    let clienteEditandoIndex = null;
+    let clienteEditandoId = null;
 
-    function obtenerClientes() {
-        return JSON.parse(localStorage.getItem('clientes')) || [];
-    }
-
-    function guardarClientes(clientes) {
-        localStorage.setItem('clientes', JSON.stringify(clientes));
+    async function obtenerClientes() {
+        const response = await fetch('http://localhost:4000/api/clientes');
+        return await response.json();
     }
 
     function limpiarFormulario() {
         inputs.forEach(input => input.value = '');
         modoEdicion = false;
-        clienteEditandoIndex = null;
+        clienteEditandoId = null;
     }
 
-    function renderizarTabla(clientes = null) {
-        const lista = clientes || obtenerClientes();
+    async function renderizarTabla(clientes = null) {
+        const lista = clientes || await obtenerClientes();
         tablaBody.innerHTML = '';
 
-        lista.forEach((cliente, index) => {
-            // Formatear correo para mejor visualización en móviles
+        lista.forEach((cliente) => {
             let correoFormateado = cliente.correo;
             if (correoFormateado.length > 20) {
-                // Si el correo es muy largo, podemos formatearlo para mejor visualización
                 correoFormateado = `<span class="email-text">${correoFormateado}</span>`;
             }
-            
             const row = document.createElement('tr');
-
             row.innerHTML = `
                 <td data-title="Nombre">${cliente.nombre}</td>
                 <td data-title="Cédula">${cliente.cedula}</td>
@@ -46,23 +39,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td data-title="Dirección">${cliente.direccion}</td>
                 <td data-title="Acciones">
                     <div class="btn-group-actions">
-                        <button class="btn btn-sm btn-warning editar-btn" data-index="${index}">
+                        <button class="btn btn-sm btn-warning editar-btn" data-id="${cliente.id}">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn btn-sm btn-danger eliminar-btn" data-index="${index}">
+                        <button class="btn btn-sm btn-danger eliminar-btn" data-id="${cliente.id}">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
                 </td>
             `;
-
             tablaBody.appendChild(row);
         });
     }
 
-    formCliente.addEventListener('submit', (e) => {
+    formCliente.addEventListener('submit', async (e) => {
         e.preventDefault();
-
         const cliente = {
             nombre: inputs[0].value,
             cedula: inputs[1].value,
@@ -70,63 +61,81 @@ document.addEventListener('DOMContentLoaded', function () {
             correo: inputs[3].value,
             direccion: inputs[4].value
         };
-
-        const clientes = obtenerClientes();
-
-        if (modoEdicion && clienteEditandoIndex !== null) {
-            clientes[clienteEditandoIndex] = cliente;
-        } else {
-            clientes.push(cliente);
+        try {
+            if (modoEdicion && clienteEditandoId) {
+                const response = await fetch(`http://localhost:4000/api/clientes/${clienteEditandoId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(cliente)
+                });
+                if (!response.ok) throw new Error('Error actualizando cliente');
+                alert('Cliente actualizado correctamente');
+            } else {
+                const response = await fetch('http://localhost:4000/api/clientes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(cliente)
+                });
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert(error.error || 'Error creando cliente');
+                    return;
+                }
+                alert('Cliente guardado correctamente');
+            }
+            await renderizarTabla();
+            $('#agregarClienteModal').modal('hide');
+            limpiarFormulario();
+        } catch (error) {
+            alert('Error de conexión con el servidor.');
         }
-
-        guardarClientes(clientes);
-        renderizarTabla();
-        $('#agregarClienteModal').modal('hide');
-        limpiarFormulario();
     });
 
-    tablaBody.addEventListener('click', (e) => {
-        const index = e.target.dataset.index;
-        const clientes = obtenerClientes();
-
+    tablaBody.addEventListener('click', async (e) => {
+        const id = e.target.dataset.id;
         if (e.target.classList.contains('eliminar-btn')) {
             if (confirm('¿Seguro que deseas eliminar este cliente?')) {
-                clientes.splice(index, 1);
-                guardarClientes(clientes);
-                renderizarTabla();
+                try {
+                    const response = await fetch(`http://localhost:4000/api/clientes/${id}`, {
+                        method: 'DELETE'
+                    });
+                    if (!response.ok) throw new Error('Error eliminando cliente');
+                    await renderizarTabla();
+                } catch (error) {
+                    alert('Error de conexión con el servidor.');
+                }
             }
         }
-
         if (e.target.classList.contains('editar-btn')) {
-            const cliente = clientes[index];
-
-            inputs[0].value = cliente.nombre;
-            inputs[1].value = cliente.cedula;
-            inputs[2].value = cliente.telefono;
-            inputs[3].value = cliente.correo;
-            inputs[4].value = cliente.direccion;
-
-            modoEdicion = true;
-            clienteEditandoIndex = index;
-
-            $('#agregarClienteModal').modal('show');
+            try {
+                const response = await fetch(`http://localhost:4000/api/clientes/${id}`);
+                if (!response.ok) throw new Error('Cliente no encontrado');
+                const cliente = await response.json();
+                inputs[0].value = cliente.nombre;
+                inputs[1].value = cliente.cedula;
+                inputs[2].value = cliente.telefono;
+                inputs[3].value = cliente.correo;
+                inputs[4].value = cliente.direccion;
+                modoEdicion = true;
+                clienteEditandoId = id;
+                $('#agregarClienteModal').modal('show');
+            } catch (error) {
+                alert('Error al cargar cliente para editar.');
+            }
         }
     });
 
     // Búsqueda por cédula
-    function buscarCliente() {
+    async function buscarCliente() {
         const termino = inputBusqueda.value.trim().toLowerCase();
-        const clientes = obtenerClientes();
-
+        const clientes = await obtenerClientes();
         if (termino === '') {
             renderizarTabla();
             return;
         }
-
         const filtrados = clientes.filter(cliente =>
             cliente.cedula.toLowerCase().includes(termino)
         );
-
         renderizarTabla(filtrados);
     }
 
@@ -140,18 +149,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Exportar a XLSX
     if (exportarBtn) {
-        exportarBtn.addEventListener('click', () => {
-            const clientes = obtenerClientes();
-
+        exportarBtn.addEventListener('click', async () => {
+            const clientes = await obtenerClientes();
             if (clientes.length === 0) {
                 alert('No hay clientes para exportar.');
                 return;
             }
-
             const worksheet = XLSX.utils.json_to_sheet(clientes);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, 'Clientes');
-
             XLSX.writeFile(workbook, 'clientes.xlsx');
         });
     }
@@ -159,11 +165,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Función para limpiar campo de búsqueda
     function limpiarBusqueda() {
         clienteBusqueda.value = '';
-        // Mostrar todos los clientes después de limpiar la búsqueda
         renderizarTabla();
     }
-    
-    // Agregar evento al botón de limpiar
     if (btnLimpiarBusqueda) {
         btnLimpiarBusqueda.addEventListener('click', limpiarBusqueda);
     }
