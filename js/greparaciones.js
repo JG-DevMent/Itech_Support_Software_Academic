@@ -1,31 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("formReparacion");
     const tablaCuerpo = document.getElementById("tablaBody");
-    let listaReparaciones = JSON.parse(localStorage.getItem("reparaciones")) || [];
-    
-    // Variable para controlar el modo del formulario (creación o edición)
-    let modoEdicion = false;
-    let indiceEdicion = -1;
-    
-    // Variables para almacenar los datos del cliente actual
-    let clienteActual = {
-        nombre: "",
-        email: "",
-        telefono: ""
-    };
-
-    //Funciones de filtro    
     const tabla = document.getElementById("tablaReparaciones").getElementsByTagName("tbody")[0];
     const filtroCliente = document.getElementById("filtroCliente");
     const filtroDispositivo = document.getElementById("filtroDispositivo");
     const filtroEstado = document.getElementById("filtroEstado");
-    //Buscar
     const buscarInput = document.getElementById("buscarInput");
-
     const toggleBtn = document.getElementById("toggleFiltrosBtn");
     const contenedorFiltros = document.getElementById("contenedorFiltros");
-
-    // Elementos para notificación
     const btnNotificar = document.getElementById("btnNotificar");
     const btnLimpiarForm = document.getElementById("btnLimpiarForm");
     const btnEnviarNotificacion = document.getElementById("btnEnviarNotificacion");
@@ -33,24 +15,52 @@ document.addEventListener("DOMContentLoaded", () => {
     const inputCliente = document.getElementById("cliente");
     const infoCliente = document.getElementById("infoCliente");
 
+    // Variables globales
+    let listaReparaciones = [];
+    let modoEdicion = false;
+    let idEdicion = null;
+    let clienteActual = { nombre: '', email: '', telefono: '' };
+    const API_BASE = 'http://localhost:4000/api';
+
+    // ===================== FUNCIONES FETCH =====================
+    async function cargarReparaciones() {
+        const res = await fetch(`${API_BASE}/reparaciones`);
+        return await res.json();
+    }
+    async function buscarClientePorCedula(cedula) {
+        const res = await fetch(`${API_BASE}/clientes?cedula=${encodeURIComponent(cedula)}`);
+        const data = await res.json();
+        return data.length > 0 ? data[0] : null;
+    }
+    async function guardarReparacion(datos, id = null) {
+        const res = await fetch(id ? `${API_BASE}/reparaciones/${id}` : `${API_BASE}/reparaciones`, {
+            method: id ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datos)
+        });
+        return await res.json();
+    }
+    async function eliminarReparacionBackend(id) {
+        await fetch(`${API_BASE}/reparaciones/${id}`, { method: 'DELETE' });
+    }
+
+    // ===================== UI Y LÓGICA =====================
     toggleBtn.addEventListener("click", () => {
         const visible = contenedorFiltros.style.display === "flex";
         contenedorFiltros.style.display = visible ? "none" : "flex";
-        toggleBtn.textContent = visible ? "👓 Mostrar Filtros" : "❌ Ocultar Filtros";
+        toggleBtn.textContent = visible ? " Mostrar Filtros" : " ❌ Ocultar Filtros";
     });
     
-    // Función para limpiar el formulario
     btnLimpiarForm.addEventListener("click", function() {
-        // Si estamos en modo edición, confirmar antes de limpiar
         if (modoEdicion) {
             if (confirm("¿Está seguro que desea cancelar la edición? Los cambios no guardados se perderán.")) {
-                resetearModoEdicion();
+                modoEdicion = false;
+                idEdicion = null;
+                document.querySelector('button[type="submit"]').textContent = 'Registrar Reparación';
             } else {
-                return; // No continuar con la limpieza si el usuario cancela
+                return;
             }
         }
-        
-        // El resto del código de limpieza existente
         form.reset();
         infoCliente.innerHTML = "";
         clienteActual = { nombre: "", email: "", telefono: "" };
@@ -60,262 +70,204 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     
-    // Función para buscar cliente por cédula
-    function buscarClientePorCedula(cedula) {
-        const clientes = JSON.parse(localStorage.getItem("clientes")) || [];
-        return clientes.find(cliente => cliente.cedula === cedula);
-    }
-    
-    // Manejar clic en botón de búsqueda
-    btnBuscarCliente.addEventListener("click", function() {
+    btnBuscarCliente.addEventListener('click', async function() {
         const cedula = inputCliente.value.trim();
         if (!cedula) {
-            alert("Por favor, ingrese la cédula del cliente");
+            alert('Por favor, ingrese la cédula del cliente');
             return;
         }
-        
-        const cliente = buscarClientePorCedula(cedula);
+        const cliente = await buscarClientePorCedula(cedula);
         if (cliente) {
             clienteActual = {
                 nombre: cliente.nombre,
                 email: cliente.correo,
                 telefono: cliente.telefono
             };
-            
             infoCliente.innerHTML = `<strong>Cliente encontrado:</strong> ${cliente.nombre} | Email: ${cliente.correo} | Tel: ${cliente.telefono}`;
-            infoCliente.style.color = "#28a745"; // Verde para éxito
+            infoCliente.style.color = '#28a745';
         } else {
-            clienteActual = { nombre: "", email: "", telefono: "" };
-            infoCliente.innerHTML = "Cliente no encontrado. Por favor, verifique la cédula o registre al cliente en el módulo de Clientes.";
-            infoCliente.style.color = "#dc3545"; // Rojo para error
+            clienteActual = { nombre: '', email: '', telefono: '' };
+            infoCliente.innerHTML = 'Cliente no encontrado. Por favor, verifique la cédula o registre al cliente en el módulo de Clientes.';
+            infoCliente.style.color = '#dc3545';
         }
     });
-    
-    // También buscar al perder el foco
-    inputCliente.addEventListener("blur", function() {
+
+    inputCliente.addEventListener('blur', async function() {
         const cedula = inputCliente.value.trim();
         if (cedula) {
-            const cliente = buscarClientePorCedula(cedula);
+            const cliente = await buscarClientePorCedula(cedula);
             if (cliente) {
                 clienteActual = {
                     nombre: cliente.nombre,
                     email: cliente.correo,
                     telefono: cliente.telefono
                 };
-                
                 infoCliente.innerHTML = `<strong>Cliente encontrado:</strong> ${cliente.nombre} | Email: ${cliente.correo} | Tel: ${cliente.telefono}`;
-                infoCliente.style.color = "#28a745"; // Verde para éxito
+                infoCliente.style.color = '#28a745';
             } else {
-                clienteActual = { nombre: "", email: "", telefono: "" };
-                infoCliente.innerHTML = "Cliente no encontrado";
-                infoCliente.style.color = "#dc3545"; // Rojo para error
+                clienteActual = { nombre: '', email: '', telefono: '' };
+                infoCliente.innerHTML = 'Cliente no encontrado';
+                infoCliente.style.color = '#dc3545';
             }
         }
     });
 
-    // Mostrar al iniciar
-    renderTabla();
-    
-    // Verificar si hay una reparación en modo edición al cargar la página
-    function verificarModoEdicion() {
-        const estadoEdicion = JSON.parse(localStorage.getItem("reparacionEnEdicion"));
-        if (estadoEdicion && estadoEdicion.modoEdicion && estadoEdicion.indiceEdicion !== -1) {
-            // Restaurar el modo edición
-            modoEdicion = true;
-            indiceEdicion = estadoEdicion.indiceEdicion;
-            
-            // Verificar que el índice siga siendo válido
-            if (indiceEdicion < listaReparaciones.length) {
-                // Cargar los datos en el formulario
-                editarReparacion(indiceEdicion);
-                
-                // Mostrar notificación al usuario
-                alert("Se ha restaurado una reparación que estaba en edición.");
-            } else {
-                // El índice ya no es válido (pudo haber sido eliminado por otro usuario o sesión)
-                resetearModoEdicion();
-            }
-        }
-    }
-    
-    // Función para resetear el modo edición
-    function resetearModoEdicion() {
-        modoEdicion = false;
-        indiceEdicion = -1;
-        localStorage.removeItem("reparacionEnEdicion");
-        document.querySelector('button[type="submit"]').textContent = "Registrar Reparación";
-    }
-
-    form.addEventListener("submit", function (e) {
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
-
-        // Obtener los materiales seleccionados del localStorage
-        const materialesSeleccionados = JSON.parse(localStorage.getItem("materialesReparacionTemp")) || [];
+        let materialesSeleccionados = JSON.parse(localStorage.getItem('materialesReparacionTemp')) || [];
+        // Asegurar que cada material tenga sku y cantidad
+        materialesSeleccionados = materialesSeleccionados.map(mat => ({
+            sku: mat.sku,
+            cantidad: mat.cantidad,
+            nombre: mat.nombre,
+            precio: mat.precioUnitario || mat.precio, // compatibilidad
+            subtotal: mat.subtotal
+        }));
         const costoMateriales = materialesSeleccionados.reduce((suma, producto) => suma + producto.subtotal, 0);
-
+        const estadoSeleccionado = document.getElementById('estado').value;
+        if (!estadoSeleccionado || estadoSeleccionado === 'Seleccione un estado') {
+            alert('Por favor, seleccione un estado válido para la reparación.');
+            return;
+        }
         const datosReparacion = {
-            cliente: document.getElementById("cliente").value,
+            cliente: document.getElementById('cliente').value,
             nombreCliente: clienteActual.nombre,
             emailCliente: clienteActual.email,
             telefonoCliente: clienteActual.telefono,
-            dispositivo: document.getElementById("dispositivo").value,
-            marcaModelo: document.getElementById("marcaModelo").value,
-            imei: document.getElementById("imei").value,
-            problema: document.getElementById("problema").value,
-            descripcion: document.getElementById("descripcion").value,
-            costo: document.getElementById("costo").value,
-            fecha: document.getElementById("fecha").value,
-            estado: document.getElementById("estado").value,
-            materiales: materialesSeleccionados,
-            costoMateriales: costoMateriales
+            dispositivo: document.getElementById('dispositivo').value,
+            marcaModelo: document.getElementById('marcaModelo').value,
+            imei: document.getElementById('imei').value,
+            problema: document.getElementById('problema').value,
+            descripcion: document.getElementById('descripcion').value,
+            costo: document.getElementById('costo').value,
+            estado: estadoSeleccionado,
+            costoMateriales: costoMateriales,
+            materiales: materialesSeleccionados
         };
-
-        if (modoEdicion && indiceEdicion !== -1) {
-            // Modo edición: actualizar la reparación existente
-            listaReparaciones[indiceEdicion] = datosReparacion;
-            // Resetear el modo edición
-            modoEdicion = false;
-            indiceEdicion = -1;
-            localStorage.removeItem("reparacionEnEdicion");
-            alert("Reparación actualizada exitosamente.");
-        } else {
-            // Modo creación: añadir nueva reparación
-            listaReparaciones.push(datosReparacion);
-            alert("Reparación registrada exitosamente.");
-        }
-        
-        // Guardar en localStorage
-        localStorage.setItem("reparaciones", JSON.stringify(listaReparaciones));
-        
-        // Actualizar el inventario si se han seleccionado materiales
-        if (materialesSeleccionados.length > 0) {
-            actualizarInventarioDespuesDeReparacion(materialesSeleccionados);
-        }
-        
-        // Limpiar el formulario y los materiales seleccionados
-        form.reset();
-        infoCliente.innerHTML = "";
-        clienteActual = { nombre: "", email: "", telefono: "" };
-        localStorage.removeItem("materialesReparacionTemp");
-        renderTabla();
-        
-        // Cambiar el texto del botón de envío a su estado original
-        document.querySelector('button[type="submit"]').textContent = "Registrar Reparación";
-    });
-    
-    // Función para actualizar el inventario después de registrar una reparación
-    function actualizarInventarioDespuesDeReparacion(materiales) {
-        const inventario = JSON.parse(localStorage.getItem("inventarioITECH")) || [];
-        
-        // Restar la cantidad utilizada del inventario
-        materiales.forEach(material => {
-            const productoIndex = inventario.findIndex(item => item.sku === material.sku);
-            if (productoIndex !== -1) {
-                inventario[productoIndex].existencias = parseInt(inventario[productoIndex].existencias) - material.cantidad;
+        try {
+            if (modoEdicion && idEdicion) {
+                await guardarReparacion(datosReparacion, idEdicion);
+                modoEdicion = false;
+                idEdicion = null;
+                alert('Reparación actualizada exitosamente.');
+            } else {
+                const resp = await guardarReparacion(datosReparacion);
+                if (resp.error) {
+                    alert('Error al registrar reparación: ' + resp.error);
+                    return;
+                }
+                alert('Reparación registrada exitosamente.');
             }
-        });
-        
-        // Guardar el inventario actualizado
-        localStorage.setItem("inventarioITECH", JSON.stringify(inventario));
+            form.reset();
+            infoCliente.innerHTML = '';
+            clienteActual = { nombre: '', email: '', telefono: '' };
+            localStorage.removeItem('materialesReparacionTemp');
+            await renderTabla();
+            document.querySelector('button[type="submit"]').textContent = 'Registrar Reparación';
+        } catch (err) {
+            alert('Error al registrar reparación: ' + (err.message || err));
+        }
+    });
+
+    window.editarReparacion = async function(index) {
+        const rep = listaReparaciones[index];
+        modoEdicion = true;
+        idEdicion = rep.id;
+        document.getElementById('cliente').value = rep.cliente;
+        clienteActual = {
+            nombre: rep.nombreCliente || '',
+            email: rep.emailCliente || '',
+            telefono: rep.telefonoCliente || ''
+        };
+        if (clienteActual.nombre) {
+            infoCliente.innerHTML = `<strong>Cliente:</strong> ${clienteActual.nombre} | Email: ${clienteActual.email} | Tel: ${clienteActual.telefono}`;
+            infoCliente.style.color = '#28a745';
+        }
+        document.getElementById('dispositivo').value = rep.dispositivo;
+        document.getElementById('marcaModelo').value = rep.marcaModelo;
+        document.getElementById('imei').value = rep.imei;
+        document.getElementById('problema').value = rep.problema;
+        document.getElementById('descripcion').value = rep.descripcion;
+        document.getElementById('costo').value = rep.costo;
+        document.getElementById('estado').value = rep.estado;
+        document.querySelector('button[type="submit"]').textContent = 'Actualizar Reparación';
+        document.querySelector('#formReparacion').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.eliminarReparacion = async function(index) {
+        const rep = listaReparaciones[index];
+        if (confirm('¿Seguro que deseas eliminar esta reparación?')) {
+            await eliminarReparacionBackend(rep.id);
+            renderTabla();
+            alert('Reparación eliminada correctamente.');
+        }
+    };
+
+    // Filtros de la tabla
+    function aplicarFiltros() {
+        let filtradas = listaReparaciones;
+        const cliente = filtroCliente.value.trim().toLowerCase();
+        const dispositivo = filtroDispositivo.value.trim().toLowerCase();
+        const estado = filtroEstado.value;
+        const busqueda = buscarInput.value.trim().toLowerCase();
+        if (cliente) {
+            filtradas = filtradas.filter(rep => (rep.nombreCliente || '').toLowerCase().includes(cliente) || (rep.cliente || '').toLowerCase().includes(cliente));
+        }
+        if (dispositivo) {
+            filtradas = filtradas.filter(rep => (rep.dispositivo || '').toLowerCase().includes(dispositivo));
+        }
+        if (estado) {
+            filtradas = filtradas.filter(rep => (rep.estado || '').toLowerCase() === estado.toLowerCase());
+        }
+        if (busqueda) {
+            filtradas = filtradas.filter(rep =>
+                (rep.nombreCliente || '').toLowerCase().includes(busqueda) ||
+                (rep.cliente || '').toLowerCase().includes(busqueda) ||
+                (rep.dispositivo || '').toLowerCase().includes(busqueda) ||
+                (rep.marcaModelo || '').toLowerCase().includes(busqueda) ||
+                (rep.imei || '').toLowerCase().includes(busqueda) ||
+                (rep.problema || '').toLowerCase().includes(busqueda) ||
+                (rep.descripcion || '').toLowerCase().includes(busqueda) ||
+                (rep.estado || '').toLowerCase().includes(busqueda)
+            );
+        }
+        renderTablaFiltrada(filtradas);
     }
 
-    // Función para notificar al cliente
-    btnNotificar.addEventListener("click", function() {
-        if (!clienteActual.email && !clienteActual.telefono) {
-            alert("No hay información de contacto para este cliente. Por favor, busque el cliente primero.");
-            return;
-        }
-        
-        // Pre-rellenar el mensaje con información del dispositivo
-        const dispositivo = document.getElementById("dispositivo").value;
-        const marcaModelo = document.getElementById("marcaModelo").value;
-        const estado = document.getElementById("estado").value;
-        
-        if (dispositivo && marcaModelo && estado) {
-            document.getElementById("mensajeNotificacion").value = 
-                `Estimado ${clienteActual.nombre || "cliente"}, le informamos que su ${dispositivo} ${marcaModelo} se encuentra en estado: ${estado}. Por favor contáctenos para más información.`;
-        }
-        
-        // Abrir el modal
-        $('#modalNotificacion').modal('show');
-    });
-    
-    // Enviar la notificación
-    btnEnviarNotificacion.addEventListener("click", function() {
-        const metodo = document.getElementById("metodoNotificacion").value;
-        const asunto = document.getElementById("asuntoNotificacion").value;
-        const mensaje = document.getElementById("mensajeNotificacion").value;
-        
-        // Simulación de envío - En un entorno real, aquí se conectaría con un servicio de envío
-        let mensajeExito = "";
-        
-        if (metodo === "email" || metodo === "ambos") {
-            if (clienteActual.email) {
-                // Simular envío de email
-                console.log(`Enviando email a ${clienteActual.email} con asunto: ${asunto}`);
-                console.log(`Mensaje: ${mensaje}`);
-                mensajeExito += "Email enviado correctamente. ";
-            } else {
-                alert("No hay email registrado para este cliente.");
-                return;
-            }
-        }
-        
-        if (metodo === "sms" || metodo === "ambos") {
-            if (clienteActual.telefono) {
-                // Simular envío de SMS
-                console.log(`Enviando SMS a ${clienteActual.telefono}`);
-                console.log(`Mensaje: ${mensaje}`);
-                mensajeExito += "SMS enviado correctamente.";
-            } else {
-                alert("No hay teléfono registrado para este cliente.");
-                return;
-            }
-        }
-        
-        // Cerrar el modal y mostrar mensaje de éxito
-        $('#modalNotificacion').modal('hide');
-        alert(mensajeExito || "Notificación enviada correctamente.");
-    });
-
-    function renderTabla() {
-        tablaCuerpo.innerHTML = "";
-        listaReparaciones.forEach((rep, index) => {
-            // Verificar si la reparación tiene materiales
-            const tieneMateriales = rep.materiales && rep.materiales.length > 0;
-            const costoMateriales = tieneMateriales ? rep.costoMateriales : 0;
-            const infoMateriales = tieneMateriales ? 
-                `<br><small class="text-info">Materiales: ${rep.materiales.length} items ($${costoMateriales.toFixed(2)})</small>` : 
-                '';
-            
+    function renderTablaFiltrada(reparaciones) {
+        tablaCuerpo.innerHTML = '';
+        reparaciones.forEach((rep, index) => {
+            let costoMaterialesNum = Number(rep.costoMateriales);
+            if (isNaN(costoMaterialesNum)) costoMaterialesNum = 0;
+            const tieneMateriales = costoMaterialesNum > 0;
+            const infoMateriales = tieneMateriales ? `<br><small class="text-info">Materiales: $${costoMaterialesNum.toFixed(2)}</small>` : '';
+            const fechaMostrar = rep.fecha_registro || rep.fecha || '';
             let row = `
                 <tr>
-                    <td data-title="#">${index + 1}</td>
-                    <td data-title="Cliente">${rep.nombreCliente ? rep.nombreCliente : rep.cliente} (${rep.cliente})</td>
-                    <td data-title="Dispositivo">${rep.dispositivo}</td>
-                    <td data-title="Marca/Modelo">${rep.marcaModelo}</td>
-                    <td data-title="IMEI/Serial">${rep.imei}</td>
-                    <td data-title="Problema">${rep.problema}</td>
-                    <td data-title="Descripción">${rep.descripcion}${infoMateriales}</td>
-                    <td data-title="Costo">${rep.costo}</td>
-                    <td data-title="Fecha">${rep.fecha}</td>
-                    <td data-title="Estado">${rep.estado}</td>
-                    <td data-title="Acciones">
-                        <div class="btn-group-actions">
-                            <button class="btn btn-sm btn-warning" onclick="editarReparacion(${index})">
-                                <i class="fas fa-edit"></i>
+                    <td data-title=\"#\">${rep.id}</td>
+                    <td data-title=\"Cliente\">${rep.nombreCliente ? rep.nombreCliente : rep.cliente} (${rep.cliente})</td>
+                    <td data-title=\"Dispositivo\">${rep.dispositivo}</td>
+                    <td data-title=\"Marca/Modelo\">${rep.marcaModelo}</td>
+                    <td data-title=\"IMEI/Serial\">${rep.imei}</td>
+                    <td data-title=\"Problema\">${rep.problema}</td>
+                    <td data-title=\"Descripción\">${rep.descripcion}${infoMateriales}</td>
+                    <td data-title=\"Costo\">${rep.costo}</td>
+                    <td data-title=\"Fecha\">${fechaMostrar}</td>
+                    <td data-title=\"Estado\">${rep.estado}</td>
+                    <td data-title=\"Acciones\">
+                        <div class=\"btn-group-actions\">
+                            <button class=\"btn btn-sm btn-warning\" onclick=\"editarReparacion(${index})\">
+                                <i class=\"fas fa-edit\"></i>
                             </button>
-                            <button class="btn btn-sm btn-danger" onclick="eliminarReparacion(${index})">
-                                <i class="fas fa-trash"></i>
+                            <button class=\"btn btn-sm btn-danger\" onclick=\"eliminarReparacion(${index})\">
+                                <i class=\"fas fa-trash\"></i>
                             </button>
-                            <button class="btn btn-sm btn-info" onclick="notificarCliente(${index})">
-                                <i class="fas fa-bell"></i>
+                            <button class=\"btn btn-sm btn-info\" onclick=\"notificarCliente(${index})\">
+                                <i class=\"fas fa-bell\"></i>
                             </button>
-                            ${tieneMateriales ? `
-                            <button class="btn btn-sm btn-success" onclick="verMateriales(${index})">
-                                <i class="fas fa-boxes"></i>
+                            <button class=\"btn btn-sm btn-secondary\" onclick=\"imprimirMateriales(${index})\" title=\"Imprimir Materiales\">
+                                <i class=\"fas fa-print\"></i>
                             </button>
-                            ` : ''}
                         </div>
                     </td>
                 </tr>
@@ -324,349 +276,139 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
     
-    //Exponer funciones al global para poder usarlas en los botones de editar y eliminar
-    window.editarReparacion = function (index) {
-        // Activar modo edición
-        modoEdicion = true;
-        indiceEdicion = index;
-        
-        // Guardar el estado actual en localStorage para recuperarlo en caso de actualización de la página
-        localStorage.setItem("reparacionEnEdicion", JSON.stringify({
-            modoEdicion: true,
-            indiceEdicion: index
-        }));
-        
+    window.imprimirMateriales = function(index) {
         const rep = listaReparaciones[index];
-        document.getElementById("cliente").value = rep.cliente;
-        clienteActual = {
-            nombre: rep.nombreCliente || "",
-            email: rep.emailCliente || "",
-            telefono: rep.telefonoCliente || ""
-        };
-        
-        if (clienteActual.nombre) {
-            infoCliente.innerHTML = `<strong>Cliente:</strong> ${clienteActual.nombre} | Email: ${clienteActual.email} | Tel: ${clienteActual.telefono}`;
-            infoCliente.style.color = "#28a745"; // Verde para éxito
-        }
-        
-        document.getElementById("dispositivo").value = rep.dispositivo;
-        document.getElementById("marcaModelo").value = rep.marcaModelo;
-        document.getElementById("imei").value = rep.imei;
-        document.getElementById("problema").value = rep.problema;
-        document.getElementById("descripcion").value = rep.descripcion;
-        document.getElementById("costo").value = rep.costo;
-        document.getElementById("fecha").value = rep.fecha;
-        document.getElementById("estado").value = rep.estado;
-        
-        // Cargar los materiales en el formulario si existen
-        if (rep.materiales && rep.materiales.length > 0) {
-            localStorage.setItem("materialesReparacionTemp", JSON.stringify(rep.materiales));
-            
-            // Disparar un evento personalizado para avisar al módulo de materiales
-            const event = new CustomEvent('materialesReparacionCargados');
-            document.dispatchEvent(event);
-        } else {
-            // Limpiar cualquier material anterior
-            localStorage.removeItem("materialesReparacionTemp");
-        }
-
-        // Cambiar texto del botón para indicar que está en modo edición
-        document.querySelector('button[type="submit"]').textContent = "Actualizar Reparación";
-        
-        // Hacer scroll hasta el formulario para que el usuario pueda ver que está editando
-        document.querySelector('#formReparacion').scrollIntoView({ behavior: 'smooth' });
-        
-        // No eliminar el registro original hasta que se confirme la edición
-    };
-
-    window.eliminarReparacion = function (index) {
-        console.log("Intentando eliminar la reparación con índice:", index);
-        const confirmar = confirm("¿Seguro que deseas eliminar esta reparación?");
-        
-        if (confirmar) {
-            listaReparaciones.splice(index, 1);
-            localStorage.setItem("reparaciones", JSON.stringify(listaReparaciones));
-            renderTabla();
-            alert("Reparación eliminada correctamente.");
-        }
-    };
-    
-    window.notificarCliente = function (index) {
-        const rep = listaReparaciones[index];
-        
-        // Verificar si hay información de contacto
-        if (!rep.emailCliente && !rep.telefonoCliente) {
-            alert("No hay información de contacto registrada para este cliente. Por favor, edite la reparación y añada un email o teléfono.");
-            return;
-        }
-        
-        // Pre-rellenar los campos del modal
-        document.getElementById("asuntoNotificacion").value = `Actualización de su reparación en ITECH SUPPORT - ${rep.dispositivo} ${rep.marcaModelo}`;
-        document.getElementById("mensajeNotificacion").value = 
-            `Estimado ${rep.nombreCliente || "cliente"}, le informamos que su ${rep.dispositivo} ${rep.marcaModelo} se encuentra en estado: ${rep.estado}. Por favor contáctenos para más información.`;
-        
-        // Configurar manejadores de eventos para el modal
-        const handleEnviarNotificacion = function() {
-            const metodo = document.getElementById("metodoNotificacion").value;
-            const asunto = document.getElementById("asuntoNotificacion").value;
-            const mensaje = document.getElementById("mensajeNotificacion").value;
-            
-            // Simulación de envío - En un entorno real, aquí se conectaría con un servicio de envío
-            let mensajeExito = "";
-            
-            if (metodo === "email" || metodo === "ambos") {
-                if (rep.emailCliente) {
-                    console.log(`Enviando email a ${rep.emailCliente} con asunto: ${asunto}`);
-                    console.log(`Mensaje: ${mensaje}`);
-                    mensajeExito += "Email enviado correctamente. ";
-                } else {
-                    alert("No hay email registrado para este cliente.");
-                    return;
-                }
-            }
-            
-            if (metodo === "sms" || metodo === "ambos") {
-                if (rep.telefonoCliente) {
-                    console.log(`Enviando SMS a ${rep.telefonoCliente}`);
-                    console.log(`Mensaje: ${mensaje}`);
-                    mensajeExito += "SMS enviado correctamente.";
-                } else {
-                    alert("No hay teléfono registrado para este cliente.");
-                    return;
-                }
-            }
-            
-            // Cerrar el modal y mostrar mensaje de éxito
-            $('#modalNotificacion').modal('hide');
-            alert(mensajeExito || "Notificación enviada correctamente.");
-            
-            // Remover el manejador de eventos para evitar duplicados
-            document.getElementById("btnEnviarNotificacion").removeEventListener("click", handleEnviarNotificacion);
-        };
-        
-        // Agregar el manejador de eventos
-        document.getElementById("btnEnviarNotificacion").addEventListener("click", handleEnviarNotificacion);
-        
-        // Abrir el modal
-        $('#modalNotificacion').modal('show');
-        
-        // Limpiar el manejador cuando se cierre el modal
-        $('#modalNotificacion').on('hidden.bs.modal', function () {
-            document.getElementById("btnEnviarNotificacion").removeEventListener("click", handleEnviarNotificacion);
-        });
-    };
-    
-    // Función para ver los materiales de una reparación
-    window.verMateriales = function(index) {
-        const rep = listaReparaciones[index];
-        if (!rep.materiales || rep.materiales.length === 0) {
-            alert("Esta reparación no tiene materiales registrados.");
-            return;
-        }
-        
-        // Crear una tabla HTML con los materiales
-        let tablaMateriales = '<table class="table table-sm table-bordered">';
-        tablaMateriales += '<thead class="thead-light"><tr><th>Producto</th><th>SKU</th><th>Cantidad</th><th>Precio Unit.</th><th>Subtotal</th></tr></thead><tbody>';
-        
-        rep.materiales.forEach(material => {
-            tablaMateriales += `<tr>
-                <td>${material.nombre}</td>
-                <td>${material.sku}</td>
-                <td>${material.cantidad}</td>
-                <td>$${material.precioUnitario.toFixed(2)}</td>
-                <td>$${material.subtotal.toFixed(2)}</td>
-            </tr>`;
-        });
-        
-        tablaMateriales += `<tr class="table-info">
-            <td colspan="4" class="text-right"><strong>Total Materiales:</strong></td>
-            <td><strong>$${rep.costoMateriales.toFixed(2)}</strong></td>
-        </tr>`;
-        tablaMateriales += '</tbody></table>';
-        
-        // Generar un ID único para la ventana para evitar conflictos
-        const ventanaId = `materiales_${Date.now()}`;
-        
-        // Mostrar en una ventana emergente con estilos mejorados
-        const ventana = window.open('', ventanaId, 'width=700,height=500');
-        ventana.document.write(`
-            <!DOCTYPE html>
-            <html lang="es">
-            <head>
-                <meta charset="UTF-8">
-                <title>Materiales de Reparación #${index + 1}</title>
-                <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-                <style>
-                    body { 
-                        padding: 20px; 
-                        font-family: Arial, sans-serif;
-                    }
-                    .header {
-                        border-bottom: 2px solid #f0f0f0;
-                        margin-bottom: 20px;
-                        padding-bottom: 10px;
-                    }
-                    .footer {
-                        margin-top: 20px;
-                        text-align: center;
-                    }
-                    @media print {
-                        .no-print {
-                            display: none;
-                        }
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <div class="header">
-                        <h3>Materiales utilizados en reparación #${index + 1}</h3>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p><strong>Cliente:</strong> ${rep.nombreCliente || rep.cliente}</p>
-                                <p><strong>Fecha:</strong> ${rep.fecha}</p>
-                            </div>
-                            <div class="col-md-6">
-                                <p><strong>Dispositivo:</strong> ${rep.dispositivo} ${rep.marcaModelo}</p>
-                                <p><strong>Estado:</strong> ${rep.estado}</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="content">
-                        ${tablaMateriales}
-                    </div>
-                    
-                    <div class="footer">
-                        <button onclick="window.print()" class="btn btn-primary no-print">
-                            <i class="fas fa-print"></i> Imprimir
-                        </button>
-                        <button onclick="window.close()" class="btn btn-secondary ml-2 no-print">
-                            <i class="fas fa-times"></i> Cerrar
-                        </button>
-                    </div>
+        let fechaMostrar = rep.fecha_registro || rep.fecha || '';
+        let html = `
+        <div style='width:700px; margin:auto; font-family:Segoe UI,Arial,sans-serif; background:#fff; border-radius:12px; box-shadow:0 4px 24px #0002; border:1.5px solid #e9ecef; padding:32px 32px 18px 32px;'>
+            <div style='display:flex; align-items:center; border-bottom:2.5px solid #218838; margin-bottom:22px; padding-bottom:10px;'>
+                <img src='img/logo-itech-support.png' alt='ITECH SUPPORT' style='height:60px; margin-right:24px;'>
+                <div>
+                    <h1 style='margin:0; color:#218838; font-size:2.3em; letter-spacing:1px;'>ITECH SUPPORT</h1>
+                    <div style='font-size:1.15em; color:#444; font-weight:500;'>Materiales usados en la reparación</div>
                 </div>
-                
-                <script>
-                    // Cerrar automáticamente la ventana después de imprimir
-                    window.addEventListener('afterprint', function() {
-                        setTimeout(function() {
-                            window.close();
-                        }, 1000);
-                    });
-                </script>
-            </body>
-            </html>
-        `);
+            </div>
+            <div style='margin-bottom:14px; font-size:1.13em; color:#222;'>
+                <strong>ID Reparación:</strong> <span style='color:#007bff;'>${rep.id}</span><br>
+                <strong>Cliente:</strong> ${rep.nombreCliente ? rep.nombreCliente : rep.cliente} (${rep.cliente})<br>
+                <strong>Dispositivo:</strong> ${rep.dispositivo}<br>
+                <strong>IMEI/Serial:</strong> <span style='color:#555;'>${rep.imei}</span><br>
+                <strong>Fecha:</strong> ${fechaMostrar}<br>
+                <strong>Estado:</strong> ${rep.estado}
+            </div>
+            <hr style='border:0; border-top:1.5px solid #e9ecef; margin:18px 0;'>
+        `;
+        if (rep.materiales && rep.materiales.length > 0) {
+            html += `<table style='width:100%; border-collapse:collapse; margin-bottom:20px; font-size:1.08em;'>
+                <thead style='background:#e9ecef;'>
+                    <tr>
+                        <th style='padding:10px; border:1px solid #ccc; color:#218838;'>Nombre</th>
+                        <th style='padding:10px; border:1px solid #ccc; color:#218838;'>Cantidad</th>
+                        <th style='padding:10px; border:1px solid #ccc; color:#218838;'>Precio</th>
+                        <th style='padding:10px; border:1px solid #ccc; color:#218838;'>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            rep.materiales.forEach(mat => {
+                html += `<tr>
+                    <td style='padding:9px; border:1px solid #ccc;'>${mat.nombre}</td>
+                    <td style='padding:9px; border:1px solid #ccc; text-align:center;'>${mat.cantidad}</td>
+                    <td style='padding:9px; border:1px solid #ccc; text-align:right;'>${mat.precio}</td>
+                    <td style='padding:9px; border:1px solid #ccc; text-align:right;'>${mat.subtotal}</td>
+                </tr>`;
+            });
+            html += `</tbody></table>`;
+        } else {
+            html += `<p style='color:#c00;'>No hay materiales registrados para esta reparación.</p>`;
+        }
+        html += `
+            <div style='margin-top:32px; text-align:center; color:#888; font-size:1.08em;'>
+                <hr style='border:0; border-top:1px solid #e9ecef; margin:18px 0;'>
+                <div>Gracias por confiar en <b style='color:#218838;'>ITECH SUPPORT</b></div>
+                <div style='font-size:0.98em;'>www.itech-support.com</div>
+            </div>
+        </div>`;
+        const ventana = window.open('', '', 'width=800,height=600');
+        ventana.document.write(`<html><head><title>Impresión de Materiales</title></head><body>${html}</body></html>`);
         ventana.document.close();
-    };
+        ventana.print();
+    }
 
-    // Exportar a Excel
-    document.getElementById("btnExportar")?.addEventListener("click", function () {
-        exportarAExcel(listaReparaciones);
+    filtroCliente.addEventListener('input', aplicarFiltros);
+    filtroDispositivo.addEventListener('input', aplicarFiltros);
+    filtroEstado.addEventListener('change', aplicarFiltros);
+    buscarInput.addEventListener('input', aplicarFiltros);
+
+    // Modifico renderTabla para que siempre aplique los filtros tras cargar
+    async function renderTabla() {
+        listaReparaciones = await cargarReparaciones();
+        aplicarFiltros();
+    }
+
+    // Función para exportar a Excel
+    document.getElementById('btnExportar').addEventListener('click', function() {
+        const wb = XLSX.utils.book_new();
+        // Extraer datos de la tabla
+        const ws_data = [
+            [
+                '#', 'Cliente', 'Dispositivo', 'Marca/Modelo', 'IMEI/Serial', 'Problema', 'Descripción', 'Costo', 'Fecha', 'Estado'
+            ]
+        ];
+        listaReparaciones.forEach((rep, index) => {
+            ws_data.push([
+                index + 1,
+                (rep.nombreCliente ? rep.nombreCliente : rep.cliente) + ' (' + rep.cliente + ')',
+                rep.dispositivo,
+                rep.marcaModelo,
+                rep.imei,
+                rep.problema,
+                rep.descripcion,
+                rep.costo,
+                rep.fecha,
+                rep.estado
+            ]);
+        });
+        const ws = XLSX.utils.aoa_to_sheet(ws_data);
+        XLSX.utils.book_append_sheet(wb, ws, 'Reparaciones');
+        XLSX.writeFile(wb, 'reparaciones.xlsx');
     });
 
-    function exportarAExcel(data) {
-        const headers = ["Cliente", "Cédula", "Email", "Teléfono", "Dispositivo", "Marca/Modelo", "IMEI/Serial", "Problema", "Descripción", "Costo Reparación", "Costo Materiales", "Costo Total", "Fecha", "Estado", "Cant. Materiales"];
-        const rows = data.map(obj => {
-            const tieneMateriales = obj.materiales && obj.materiales.length > 0;
-            const costoMateriales = tieneMateriales ? obj.costoMateriales : 0;
-            const costoTotal = parseFloat(obj.costo) + costoMateriales;
-            const cantMateriales = tieneMateriales ? obj.materiales.length : 0;
-            
-            return [
-                obj.nombreCliente || "No especificado", 
-                obj.cliente, 
-                obj.emailCliente || "No especificado", 
-                obj.telefonoCliente || "No especificado", 
-                obj.dispositivo, 
-                obj.marcaModelo, 
-                obj.imei, 
-                obj.problema, 
-                obj.descripcion, 
-                obj.costo,
-                costoMateriales.toFixed(2),
-                costoTotal.toFixed(2),
-                obj.fecha, 
-                obj.estado,
-                cantMateriales
-            ];
-        });
-        
-        // Creamos la hoja principal con el resumen de reparaciones
-        const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Reparaciones");
-        
-        // Si hay reparaciones con materiales, creamos una segunda hoja con el detalle
-        const reparacionesConMateriales = data.filter(rep => rep.materiales && rep.materiales.length > 0);
-        if (reparacionesConMateriales.length > 0) {
-            const headersDetalle = ["ID Reparación", "Cliente", "Dispositivo", "Nombre Material", "SKU", "Cantidad", "Precio Unitario", "Subtotal"];
-            const rowsDetalle = [];
-            
-            reparacionesConMateriales.forEach((rep, index) => {
-                rep.materiales.forEach(mat => {
-                    rowsDetalle.push([
-                        index + 1,
-                        rep.nombreCliente || rep.cliente,
-                        `${rep.dispositivo} ${rep.marcaModelo}`,
-                        mat.nombre,
-                        mat.sku,
-                        mat.cantidad,
-                        mat.precioUnitario,
-                        mat.subtotal
-                    ]);
-                });
-            });
-            
-            const worksheetDetalle = XLSX.utils.aoa_to_sheet([headersDetalle, ...rowsDetalle]);
-            XLSX.utils.book_append_sheet(workbook, worksheetDetalle, "Detalle Materiales");
-        }
-        
-        XLSX.writeFile(workbook, "reparaciones.xlsx");
-    }
+    // ===================== NOTIFICACIÓN =====================
+    window.notificarCliente = function(index) {
+        const rep = listaReparaciones[index];
+        // Rellenar el modal de notificación con los datos del cliente y reparación
+        document.getElementById('metodoNotificacion').value = 'email';
+        document.getElementById('asuntoNotificacion').value = `Actualización de su reparación en ITECH SUPPORT`;
+        document.getElementById('mensajeNotificacion').value = `Estimado ${rep.nombreCliente || ''},\n\nLe informamos que el estado de su reparación (${rep.dispositivo} - ${rep.marcaModelo}) es: ${rep.estado}.\n\nDescripción: ${rep.descripcion}\n\nGracias por confiar en nosotros.`;
+        // Mostrar el modal
+        $('#modalNotificacion').modal('show');
+        // Guardar el índice de la reparación seleccionada para usarlo al enviar
+        window._reparacionNotificarIndex = index;
+    };
 
-    function aplicarFiltros() {
-        const cliente = filtroCliente.value.toLowerCase();
-        const dispositivo = filtroDispositivo.value.toLowerCase();
-        const estado = filtroEstado.value;
-        const busqueda = buscarInput.value.toLowerCase();
-
-        for (let fila of tabla.rows) {
-            const celdaCliente = fila.cells[1].textContent.toLowerCase();
-            const celdaDispositivo = fila.cells[2].textContent.toLowerCase();
-            const celdaDescripcion = fila.cells[4].textContent.toLowerCase();
-            const celdaEstado = fila.cells[9].textContent.toLowerCase();
-
-            const coincideCliente = celdaCliente.includes(cliente);
-            const coincideDispositivo = celdaDispositivo.includes(dispositivo);
-            const coincideEstado = estado === "" || celdaEstado === estado.toLowerCase();
-            const celdamarcaModelo = fila.cells[3].textContent.toLowerCase();
-            const celdaimei = fila.cells[4].textContent.toLowerCase();
-            const celdaProblema = fila.cells[5].textContent.toLowerCase();
-
-            const coincideBusquedaGeneral =
-                celdaCliente.includes(busqueda) ||
-                celdaDispositivo.includes(busqueda) ||
-                celdamarcaModelo.includes(busqueda) ||
-                celdaimei.includes(busqueda) ||
-                celdaProblema.includes(busqueda) ||
-                celdaDescripcion.includes(busqueda) ||
-                celdaEstado.includes(busqueda);
-
-            if (coincideCliente && coincideDispositivo && coincideEstado && coincideBusquedaGeneral) {
-                fila.style.display = "";
+    btnNotificar.addEventListener('click', function() {
+        // Si hay una reparación seleccionada en edición, notificar esa
+        if (modoEdicion && idEdicion !== null) {
+            const index = listaReparaciones.findIndex(r => r.id === idEdicion);
+            if (index !== -1) {
+                window.notificarCliente(index);
             } else {
-                fila.style.display = "none";
+                alert('No hay reparación seleccionada para notificar.');
             }
+        } else {
+            alert('Seleccione una reparación para notificar.');
         }
-    }
+    });
 
-    filtroCliente.addEventListener("input", aplicarFiltros);
-    filtroDispositivo.addEventListener("input", aplicarFiltros);
-    filtroEstado.addEventListener("change", aplicarFiltros);
-    buscarInput.addEventListener("input", aplicarFiltros);
+    btnEnviarNotificacion.addEventListener('click', function() {
+        // Aquí puedes implementar el envío real (correo, SMS, etc.)
+        // Por ahora, solo simula el envío y cierra el modal
+        $('#modalNotificacion').modal('hide');
+        setTimeout(() => {
+            alert('Notificación enviada correctamente al cliente.');
+        }, 500);
+    });
 
-    // Verificar al cargar la página
-    verificarModoEdicion();
+    // Inicializar tabla al cargar
+    renderTabla();
 });

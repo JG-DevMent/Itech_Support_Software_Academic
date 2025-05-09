@@ -245,6 +245,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // === NUEVAS FUNCIONES PARA CONSULTA AL BACKEND ===
+    async function fetchRepairById(repairId) {
+        try {
+            const res = await fetch(`http://localhost:4000/api/reparaciones/${repairId}`);
+            if (!res.ok) return null;
+            return await res.json();
+        } catch (e) { return null; }
+    }
+    async function fetchClientByCedula(cedula) {
+        try {
+            const res = await fetch(`http://localhost:4000/api/clientes?cedula=${encodeURIComponent(cedula)}`);
+            if (!res.ok) return null;
+            const data = await res.json();
+            return data.length > 0 ? data[0] : null;
+        } catch (e) { return null; }
+    }
+    
     // Buscar reparación por ID
     function findRepairById(repairId) {
         const repairs = getRepairsFromStorage();
@@ -329,88 +346,60 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Eventos para cambiar entre pantallas
-    searchButton.addEventListener('click', function() {
-        // Validar entradas
-        if (!validateInputs()) {
+    // Reemplazar búsqueda local por backend en el evento de búsqueda principal
+    searchButton.addEventListener('click', async function() {
+        if (!validateInputs()) return;
+        showLoading('Buscando reparación...');
+        const repairId = repairIdInput.value.trim();
+        const clientId = clientIdInput.value.trim();
+        // Buscar en el backend
+        const repair = await fetchRepairById(repairId);
+        const client = await fetchClientByCedula(clientId);
+        hideLoading();
+        if (!repair) {
+            alert('No se encontró ninguna reparación con el ID: ' + repairId);
             return;
         }
-        
-        // Mostrar cargando
-        showLoading('Buscando reparación...');
-        
-        // Buscar datos reales en localStorage
-        setTimeout(function() {
-            // Obtener los datos de reparación y cliente
-            const repairId = repairIdInput.value;
-            const clientId = clientIdInput.value;
-            
-            // Buscar la reparación por ID (índice)
-            const repairs = getRepairsFromStorage();
-            const repair = repairs[parseInt(repairId) - 1]; // Ajustar el índice
-            
-            // Buscar el cliente por cédula
-            const client = findClientById(clientId);
-            
-            if (!repair) {
-                hideLoading();
-                alert('No se encontró ninguna reparación con el ID: ' + repairId);
-                return;
+        if (!client) {
+            alert('No se encontró ningún cliente con la cédula: ' + clientId);
+            return;
+        }
+        // Mostrar datos del cliente
+        document.getElementById('displayClientId').textContent = client.cedula || '';
+        document.getElementById('displayClientName').textContent = client.nombre || '';
+        document.getElementById('displayClientPhone').textContent = client.telefono || '';
+        document.getElementById('displayClientEmail').textContent = client.correo || '';
+        document.getElementById('displayClientAddress').textContent = client.direccion || '';
+        // Verificar si la reparación tiene materiales
+        const tieneMateriales = repair.materiales && repair.materiales.length > 0;
+        const costoMateriales = tieneMateriales ? repair.costoMateriales : 0;
+        const infoMateriales = tieneMateriales ? 
+            `<br><small class="text-info">Materiales: ${repair.materiales.length} items ($${costoMateriales.toFixed(2)})</small>` : 
+            '';
+        // Mostrar datos de la reparación
+        document.getElementById('displayRepairId').textContent = repair.id || repairId;
+        document.getElementById('displayDevice').textContent = repair.dispositivo || '';
+        document.getElementById('displayBrandModel').textContent = repair.marcaModelo || '';
+        document.getElementById('displayImei').textContent = repair.imei || '';
+        document.getElementById('displayIssue').textContent = repair.problema || '';
+        document.getElementById('displayDescription').innerHTML = (repair.descripcion || '') + infoMateriales;
+        document.getElementById('displayCost').textContent = repair.costo || '0';
+        document.getElementById('displayDate').textContent = repair.fecha || new Date().toLocaleDateString();
+        document.getElementById('displayStatus').textContent = repair.estado || 'Completado';
+        // Mostrar botón de materiales si existen
+        const materialsButton = document.getElementById('viewMaterialsButton');
+        if (materialsButton) {
+            if (tieneMateriales) {
+                materialsButton.style.display = 'inline-block';
+                materialsButton.onclick = function() {
+                    mostrarMateriales(repair);
+                };
+            } else {
+                materialsButton.style.display = 'none';
             }
-            
-            if (!client) {
-                hideLoading();
-                alert('No se encontró ningún cliente con la cédula: ' + clientId);
-                return;
-            }
-            
-            // Mostrar datos del cliente
-            document.getElementById('displayClientId').textContent = client.cedula || '';
-            document.getElementById('displayClientName').textContent = client.nombre || '';
-            document.getElementById('displayClientPhone').textContent = client.telefono || '';
-            document.getElementById('displayClientEmail').textContent = client.correo || '';
-            document.getElementById('displayClientAddress').textContent = client.direccion || '';
-            
-            // Verificar si la reparación tiene materiales
-            const tieneMateriales = repair.materiales && repair.materiales.length > 0;
-            const costoMateriales = tieneMateriales ? repair.costoMateriales : 0;
-            const infoMateriales = tieneMateriales ? 
-                `<br><small class="text-info">Materiales: ${repair.materiales.length} items ($${costoMateriales.toFixed(2)})</small>` : 
-                '';
-            
-            // Mostrar datos de la reparación
-            document.getElementById('displayRepairId').textContent = repairId;
-            document.getElementById('displayDevice').textContent = repair.dispositivo || '';
-            document.getElementById('displayBrandModel').textContent = repair.marcaModelo || '';
-            document.getElementById('displayImei').textContent = repair.imei || '';
-            document.getElementById('displayIssue').textContent = repair.problema || '';
-            document.getElementById('displayDescription').innerHTML = (repair.descripcion || '') + infoMateriales;
-            document.getElementById('displayCost').textContent = repair.costo || '0';
-            document.getElementById('displayDate').textContent = repair.fecha || new Date().toLocaleDateString();
-            document.getElementById('displayStatus').textContent = repair.estado || 'Completado';
-            
-            // Mostrar botón de materiales si existen
-            const materialsButton = document.getElementById('viewMaterialsButton');
-            if (materialsButton) {
-                if (tieneMateriales) {
-                    materialsButton.style.display = 'inline-block';
-                    materialsButton.onclick = function() {
-                        mostrarMateriales(repair);
-                    };
-                } else {
-                    materialsButton.style.display = 'none';
-                }
-            }
-            
-            // Agregar al historial
-            addToSearchHistory(repairId, client.nombre || 'Cliente');
-            
-            // Ocultar cargando
-            hideLoading();
-            
-            // Cambiar a pantalla 2 con transición
-            transitionToScreen(screen1, screen2);
-        }, 1000);
+        }
+        // Cambiar a la pantalla de detalles
+        transitionToScreen(screen1, screen2);
     });
     
     // También añadir eventos a los botones de búsqueda individuales

@@ -1,4 +1,5 @@
 const reparacionesModel = require('../models/reparacionesModel');
+const pool = require('../db');
 
 exports.listarReparaciones = async (req, res) => {
   try {
@@ -20,11 +21,24 @@ exports.obtenerReparacionPorId = async (req, res) => {
 };
 
 exports.crearReparacion = async (req, res) => {
+  const connection = await pool.getConnection();
   try {
-    const nuevaReparacion = await reparacionesModel.crear(req.body);
-    res.status(201).json(nuevaReparacion);
+    await connection.beginTransaction();
+    // Crear la reparación (la fecha se asigna automáticamente)
+    const nuevaReparacion = await reparacionesModel.crear(req.body, connection);
+    // Si se envían materiales, agregarlos y descontar inventario
+    if (Array.isArray(req.body.materiales) && req.body.materiales.length > 0) {
+      await reparacionesModel.agregarMateriales(nuevaReparacion.id, req.body.materiales, connection);
+    }
+    await connection.commit();
+    // Obtener la reparación recién creada para devolver la fecha_registro
+    const reparacionCompleta = await reparacionesModel.obtenerPorId(nuevaReparacion.id);
+    res.status(201).json(reparacionCompleta);
   } catch (error) {
+    await connection.rollback();
     res.status(400).json({ error: error.message });
+  } finally {
+    connection.release();
   }
 };
 
@@ -74,5 +88,16 @@ exports.eliminarMaterial = async (req, res) => {
     res.json({ mensaje: 'Material eliminado correctamente' });
   } catch (error) {
     res.status(500).json({ error: 'Error al eliminar material' });
+  }
+};
+
+exports.buscarPorCedulaOImei = async (req, res) => {
+  try {
+    const valor = req.query.valor;
+    if (!valor) return res.status(400).json([]);
+    const resultados = await reparacionesModel.buscarPorCedulaOImei(valor);
+    res.json(resultados);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al buscar reparación' });
   }
 }; 

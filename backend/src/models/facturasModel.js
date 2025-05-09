@@ -11,16 +11,16 @@ module.exports = {
     return rows[0];
   },
 
-  async crear(factura) {
+  async crear(factura, connection = pool) {
     if (!factura.numero_factura || !factura.cliente || !factura.nombre_cliente || !factura.fecha_emision || !factura.subtotal || !factura.impuesto || !factura.total || !factura.metodo_pago) {
       throw new Error('Faltan campos obligatorios');
     }
     // Verificar si el número de factura ya existe
-    const [existe] = await pool.query('SELECT id FROM facturas WHERE numero_factura = ?', [factura.numero_factura]);
+    const [existe] = await connection.query('SELECT id FROM facturas WHERE numero_factura = ?', [factura.numero_factura]);
     if (existe.length > 0) {
       throw new Error('El número de factura ya existe');
     }
-    const [result] = await pool.query(
+    const [result] = await connection.query(
       'INSERT INTO facturas (numero_factura, cliente, nombre_cliente, email_cliente, telefono_cliente, reparacion_id, fecha_emision, subtotal, impuesto, total, metodo_pago, estado, notas, usuario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
         factura.numero_factura,

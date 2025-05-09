@@ -2,6 +2,10 @@ const clientesModel = require('../models/clientesModel');
 
 exports.listarClientes = async (req, res) => {
   try {
+    if (req.query.cedula) {
+      const clientes = await clientesModel.buscarPorCedula(req.query.cedula);
+      return res.json(clientes);
+    }
     const clientes = await clientesModel.obtenerTodos();
     res.json(clientes);
   } catch (error) {

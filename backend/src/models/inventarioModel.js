@@ -38,5 +38,24 @@ module.exports = {
   async eliminar(id) {
     const [result] = await pool.query('DELETE FROM inventario WHERE id = ?', [id]);
     return result.affectedRows > 0;
+  },
+
+  async descontarExistenciasPorSKU(sku, cantidad, connection = pool) {
+    const [rows] = await connection.query('SELECT existencias FROM inventario WHERE sku = ?', [sku]);
+    if (rows.length === 0) throw new Error('SKU no encontrado');
+    const existenciasActuales = parseInt(rows[0].existencias, 10);
+    if (existenciasActuales < cantidad) throw new Error('Stock insuficiente para SKU ' + sku);
+    const nuevasExistencias = existenciasActuales - cantidad;
+    await connection.query('UPDATE inventario SET existencias = ? WHERE sku = ?', [nuevasExistencias, sku]);
+    return true;
+  },
+
+  async sumarExistenciasPorSKU(sku, cantidad, connection = pool) {
+    const [rows] = await connection.query('SELECT existencias FROM inventario WHERE sku = ?', [sku]);
+    if (rows.length === 0) throw new Error('SKU no encontrado');
+    const existenciasActuales = parseInt(rows[0].existencias, 10);
+    const nuevasExistencias = existenciasActuales + cantidad;
+    await connection.query('UPDATE inventario SET existencias = ? WHERE sku = ?', [nuevasExistencias, sku]);
+    return true;
   }
 }; 

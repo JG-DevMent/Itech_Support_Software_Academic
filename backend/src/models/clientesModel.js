@@ -38,5 +38,10 @@ module.exports = {
   async eliminar(id) {
     const [result] = await pool.query('DELETE FROM clientes WHERE id = ?', [id]);
     return result.affectedRows > 0;
+  },
+
+  async buscarPorCedula(cedula) {
+    const [rows] = await pool.query('SELECT * FROM clientes WHERE cedula = ?', [cedula]);
+    return rows;
   }
 }; 

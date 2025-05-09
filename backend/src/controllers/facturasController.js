@@ -1,4 +1,6 @@
 const facturasModel = require('../models/facturasModel');
+const reparacionesModel = require('../models/reparacionesModel');
+const pool = require('../db');
 
 exports.listarFacturas = async (req, res) => {
   try {
@@ -20,11 +22,26 @@ exports.obtenerFacturaPorId = async (req, res) => {
 };
 
 exports.crearFactura = async (req, res) => {
+  const connection = await pool.getConnection();
   try {
-    const nuevaFactura = await facturasModel.crear(req.body);
+    await connection.beginTransaction();
+    // 1. Validar reparación
+    const reparacion = await reparacionesModel.obtenerPorId(req.body.reparacion_id, connection);
+    if (!reparacion) throw new Error('Reparación no encontrada');
+    if (reparacion.estado && reparacion.estado.toLowerCase().includes('pagad')) {
+      throw new Error('La reparación ya está pagada/facturada');
+    }
+    // 2. Crear factura
+    const nuevaFactura = await facturasModel.crear(req.body, connection);
+    // 3. Actualizar estado de la reparación
+    await reparacionesModel.actualizarEstado(req.body.reparacion_id, 'Pagada', connection);
+    await connection.commit();
     res.status(201).json(nuevaFactura);
   } catch (error) {
+    await connection.rollback();
     res.status(400).json({ error: error.message });
+  } finally {
+    connection.release();
   }
 };
 

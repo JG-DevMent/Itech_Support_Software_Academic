@@ -107,16 +107,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     
     // Función para cargar productos del inventario que coincidan con el término de búsqueda
-    function cargarProductosInventario(termino = "") {
+    async function cargarProductosInventario(termino = "") {
         tablaProductosInventario.innerHTML = "";
-        const inventario = JSON.parse(localStorage.getItem("inventarioITECH")) || [];
-        
+        let inventario = [];
+        try {
+            const response = await fetch('http://localhost:4000/api/inventario');
+            inventario = await response.json();
+        } catch (error) {
+            const row = tablaProductosInventario.insertRow();
+            const cell = row.insertCell(0);
+            cell.colSpan = 6;
+            cell.textContent = "Error al cargar inventario desde el servidor";
+            cell.className = "text-center text-danger";
+            return;
+        }
         const productosFiltrados = inventario.filter(producto => 
             producto.nombre.toLowerCase().includes(termino) || 
             producto.sku.toLowerCase().includes(termino) || 
             producto.imei.toLowerCase().includes(termino)
         );
-        
         if (productosFiltrados.length === 0) {
             const row = tablaProductosInventario.insertRow();
             const cell = row.insertCell(0);
@@ -125,13 +134,9 @@ document.addEventListener("DOMContentLoaded", () => {
             cell.className = "text-center";
             return;
         }
-        
         productosFiltrados.forEach((producto, index) => {
             const row = tablaProductosInventario.insertRow();
-            
-            // Verificar si el producto ya está en la lista de seleccionados para evitar duplicados
             const yaSeleccionado = productosSeleccionados.some(item => item.sku === producto.sku);
-            
             row.innerHTML = `
                 <td>${producto.nombre}</td>
                 <td>${producto.sku}</td>
@@ -145,47 +150,31 @@ document.addEventListener("DOMContentLoaded", () => {
                     </button>
                 </td>
             `;
-            
             if (yaSeleccionado) {
                 row.classList.add("table-secondary");
             }
-            
             if (parseInt(producto.existencias) === 0) {
                 row.classList.add("table-danger");
             }
         });
-        
         // Evento para seleccionar un producto
         const botonesSeleccionar = tablaProductosInventario.querySelectorAll(".btn-seleccionar");
         botonesSeleccionar.forEach(btn => {
             btn.addEventListener("click", function() {
                 const index = this.getAttribute("data-index");
                 productoSeleccionado = productosFiltrados[index];
-                
-                // Mostrar el modal para establecer la cantidad
                 document.getElementById("nombreProductoSeleccionado").textContent = productoSeleccionado.nombre;
                 document.getElementById("existenciasDisponibles").textContent = productoSeleccionado.existencias;
                 document.getElementById("productoSeleccionadoId").value = index;
                 document.getElementById("precioUnitarioSeleccionado").value = productoSeleccionado.precio;
-                
-                // Establecer los valores iniciales
                 const cantidadInput = document.getElementById("cantidadProducto");
                 cantidadInput.max = productoSeleccionado.existencias;
                 cantidadInput.value = 1;
-                
-                // Actualizar el subtotal y barra de progreso
                 actualizarSubtotalYProgreso(1, productoSeleccionado.existencias, productoSeleccionado.precio);
-                
-                // Marcar que estamos abriendo el modal de cantidad para la lógica de transición
                 $('#seleccionProductoModal').data('openingCantidadModal', true);
-                
-                // Cerrar el modal de selección y abrir el de cantidad
                 $('#seleccionProductoModal').modal('hide');
-                
-                // Esperar a que se cierre el modal anterior
                 setTimeout(() => {
                     $('#cantidadProductoModal').modal('show');
-                    // Limpiar el flag una vez mostrado el modal
                     $('#seleccionProductoModal').data('openingCantidadModal', false);
                 }, 500);
             });
