@@ -14,7 +14,11 @@ module.exports = {
 
   async obtenerPorId(id) {
     const [rows] = await pool.query('SELECT *, fecha_registro FROM reparaciones WHERE id = ?', [id]);
-    return rows[0];
+    if (!rows[0]) return null;
+    const rep = rows[0];
+    const [materiales] = await pool.query('SELECT * FROM materiales_reparacion WHERE reparacion_id = ?', [rep.id]);
+    rep.materiales = materiales;
+    return rep;
   },
 
   async crear(reparacion, connection = pool) {
@@ -43,6 +47,45 @@ module.exports = {
   },
 
   async actualizar(id, reparacion) {
+    // Obtener reparación y materiales actuales
+    const reparacionActual = await this.obtenerPorId(id);
+    if (reparacionActual.estado === 'Completada' || reparacionActual.estado === 'Pagada') {
+      throw new Error('No se puede editar una reparación completada o pagada.');
+    }
+    const materialesNuevos = reparacion.materiales || [];
+    const materialesActuales = await this.obtenerMateriales(id);
+    // Mapear por SKU para comparar
+    const mapActuales = new Map(materialesActuales.map(m => [m.sku, m]));
+    const mapNuevos = new Map(materialesNuevos.map(m => [m.sku, m]));
+    // 1. Reponer inventario de materiales eliminados o reducidos
+    for (const mat of materialesActuales) {
+      const nuevo = mapNuevos.get(mat.sku);
+      if (!nuevo) {
+        // Material eliminado
+        await inventarioModel.sumarExistenciasPorSKU(mat.sku, mat.cantidad);
+        await pool.query('DELETE FROM materiales_reparacion WHERE id = ?', [mat.id]);
+      } else if (nuevo.cantidad < mat.cantidad) {
+        // Cantidad reducida
+        await inventarioModel.sumarExistenciasPorSKU(mat.sku, mat.cantidad - nuevo.cantidad);
+        await pool.query('UPDATE materiales_reparacion SET cantidad = ?, subtotal = ? WHERE id = ?', [nuevo.cantidad, nuevo.subtotal, mat.id]);
+      } else if (nuevo.cantidad > mat.cantidad) {
+        // Cantidad aumentada
+        await inventarioModel.descontarExistenciasPorSKU(mat.sku, nuevo.cantidad - mat.cantidad);
+        await pool.query('UPDATE materiales_reparacion SET cantidad = ?, subtotal = ? WHERE id = ?', [nuevo.cantidad, nuevo.subtotal, mat.id]);
+      } else {
+        // Solo actualizar subtotal si cambió
+        await pool.query('UPDATE materiales_reparacion SET subtotal = ? WHERE id = ?', [nuevo.subtotal, mat.id]);
+      }
+    }
+    // 2. Insertar materiales nuevos
+    for (const mat of materialesNuevos) {
+      if (!mapActuales.has(mat.sku)) {
+        await inventarioModel.descontarExistenciasPorSKU(mat.sku, mat.cantidad);
+        await pool.query('INSERT INTO materiales_reparacion (reparacion_id, nombre, sku, precio, cantidad, subtotal) VALUES (?, ?, ?, ?, ?, ?)',
+          [id, mat.nombre, mat.sku, mat.precio, mat.cantidad, mat.subtotal]);
+      }
+    }
+    // 3. Actualizar reparación (sin campo materiales)
     const costoMaterialesNum = Number(reparacion.costoMateriales) || 0;
     const [result] = await pool.query(
       'UPDATE reparaciones SET cliente = ?, nombreCliente = ?, emailCliente = ?, telefonoCliente = ?, dispositivo = ?, marcaModelo = ?, imei = ?, problema = ?, descripcion = ?, costo = ?, estado = ?, costoMateriales = ? WHERE id = ?',
@@ -66,6 +109,11 @@ module.exports = {
   },
 
   async eliminar(id) {
+    // Obtener reparación actual
+    const reparacionActual = await this.obtenerPorId(id);
+    if (reparacionActual.estado === 'Completada' || reparacionActual.estado === 'Pagada') {
+      throw new Error('No se puede eliminar una reparación completada o pagada.');
+    }
     // Obtener materiales asociados a la reparación antes de eliminar
     const [materiales] = await pool.query('SELECT * FROM materiales_reparacion WHERE reparacion_id = ?', [id]);
     // Sumar existencias de nuevo al inventario por cada material

@@ -98,41 +98,23 @@
                                     <h2><i class="fas fa-search"></i> Buscar Reparación</h2>
                                 </div>
                                 <div class="pos-search-panel">
-                                    <div class="form-group">
-                                        <label>Cédula/NIT del Cliente <span class="required-mark">*</span></label>
-                                        <div class="input-group">
-                                            <input type="text" id="clientId" class="form-control" placeholder="Cédula/NIT" required>
-                                            <div class="input-group-append">
-                                                <button class="btn btn-primary" id="clientSearchBtn">
-                                                    <i class="fas fa-search"></i>
-                                                </button>
-                                                <button class="btn btn-secondary" id="btnLimpiarCliente">
-                                                    <i class="fas fa-eraser"></i>
-                                                </button>
+                                    <form id="formBusquedaFacturacion" autocomplete="off">
+                                        <div class="form-group mb-3">
+                                            <label for="repairId" class="font-weight-bold">ID de Reparación <span class="required-mark">*</span></label>
+                                            <div class="input-group input-group-lg">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-white"><i class="fas fa-tools"></i></span>
+                                                </div>
+                                                <input type="number" id="repairId" class="form-control" placeholder="ID de reparación" required>
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-primary" id="repairSearchBtn" type="button"><i class="fas fa-search"></i></button>
+                                                    <button class="btn btn-secondary" id="btnLimpiarReparacion" type="button"><i class="fas fa-eraser"></i></button>
+                                                </div>
                                             </div>
+                                            <div class="invalid-feedback" id="repairIdError"></div>
                                         </div>
-                                        <!-- Espacio para mensajes de validación -->
-                                        <div class="invalid-feedback" id="clientIdError"></div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>ID de Reparación <span class="required-mark">*</span></label>
-                                        <div class="input-group">
-                                            <input type="number" id="repairId" class="form-control" placeholder="ID de reparación" required>
-                                            <div class="input-group-append">
-                                                <button class="btn btn-primary" id="repairSearchBtn">
-                                                    <i class="fas fa-search"></i>
-                                                </button>
-                                                <button class="btn btn-secondary" id="btnLimpiarReparacion">
-                                                    <i class="fas fa-eraser"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <!-- Espacio para mensajes de validación -->
-                                        <div class="invalid-feedback" id="repairIdError"></div>
-                                    </div>
-                                    <button id="searchButton" class="btnfactus btn-block">
-                                        <i class="fas fa-search"></i> Buscar Reparación
-                                    </button>
+                                        <button id="searchButton" class="btnfactus btn-block btn-lg mt-3" type="button" style="font-weight:bold;"><i class="fas fa-search"></i> Buscar Reparación</button>
+                                    </form>
                                     
                                     <div class="pos-history">
                                         <h4><i class="fas fa-history"></i> Búsquedas Recientes</h4>

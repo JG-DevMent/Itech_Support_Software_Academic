@@ -21,7 +21,7 @@ module.exports = {
       throw new Error('El número de factura ya existe');
     }
     const [result] = await connection.query(
-      'INSERT INTO facturas (numero_factura, cliente, nombre_cliente, email_cliente, telefono_cliente, reparacion_id, fecha_emision, subtotal, impuesto, total, metodo_pago, estado, notas, usuario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO facturas (numero_factura, cliente, nombre_cliente, email_cliente, telefono_cliente, reparacion_id, fecha_emision, subtotal, impuesto, total, metodo_pago, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
         factura.numero_factura,
         factura.cliente,
@@ -34,9 +34,7 @@ module.exports = {
         factura.impuesto,
         factura.total,
         factura.metodo_pago,
-        factura.estado || 'Pendiente',
-        factura.notas || '',
-        factura.usuario || ''
+        factura.estado || 'Pendiente'
       ]
     );
     return { id: result.insertId, ...factura };
@@ -44,7 +42,7 @@ module.exports = {
 
   async actualizar(id, factura) {
     const [result] = await pool.query(
-      'UPDATE facturas SET numero_factura = ?, cliente = ?, nombre_cliente = ?, email_cliente = ?, telefono_cliente = ?, reparacion_id = ?, fecha_emision = ?, subtotal = ?, impuesto = ?, total = ?, metodo_pago = ?, estado = ?, notas = ?, usuario = ? WHERE id = ?',
+      'UPDATE facturas SET numero_factura = ?, cliente = ?, nombre_cliente = ?, email_cliente = ?, telefono_cliente = ?, reparacion_id = ?, fecha_emision = ?, subtotal = ?, impuesto = ?, total = ?, metodo_pago = ?, estado = ? WHERE id = ?',
       [
         factura.numero_factura,
         factura.cliente,
@@ -58,8 +56,6 @@ module.exports = {
         factura.total,
         factura.metodo_pago,
         factura.estado || 'Pendiente',
-        factura.notas || '',
-        factura.usuario || '',
         id
       ]
     );

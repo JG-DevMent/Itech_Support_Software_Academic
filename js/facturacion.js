@@ -4,12 +4,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Facturación: Módulo cargado correctamente');
     
-    // Verificar datos en localStorage
-    const reparaciones = JSON.parse(localStorage.getItem('reparaciones') || '[]');
-    const clientes = JSON.parse(localStorage.getItem('clientes') || '[]');
-    console.log('Reparaciones disponibles:', reparaciones.length);
-    console.log('Clientes disponibles:', clientes.length);
-    
     // Cargar configuración de recibos desde localStorage
     const receiptConfig = JSON.parse(localStorage.getItem('receiptConfig')) || {};
     console.log('Configuración de recibos cargada:', receiptConfig);
@@ -132,16 +126,14 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         
         // Agregar evento de clic
-        historyItem.querySelector('.pos-history-select').addEventListener('click', function() {
+        historyItem.querySelector('.pos-history-select').addEventListener('click', async function() {
             repairIdInput.value = id;
-            
-            // Obtener la cédula del cliente desde el historial de reparaciones
-            const repairs = getRepairsFromStorage();
-            const repair = repairs[parseInt(id) - 1]; // Ajustar el índice
-            if (repair) {
-                clientIdInput.value = repair.cliente || '';
+            // Buscar reparación y cliente en backend
+            const repair = await findRepairById(id);
+            if (repair && repair.cliente) {
+                const client = await findClientById(repair.cliente);
+                clientIdInput.value = client ? (client.cedula || '') : '';
             }
-            
             searchButton.click();
         });
         
@@ -201,51 +193,42 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Mostrar lista de reparaciones disponibles
-    function popularHistorialDesdeReparaciones() {
+    async function popularHistorialDesdeReparaciones() {
         try {
-            const repairs = getRepairsFromStorage();
+            const repairs = await getRepairsFromBackend();
             if (repairs.length === 0) {
-                console.log('No hay reparaciones disponibles en el localStorage');
+                console.log('No hay reparaciones disponibles en el backend');
                 return;
             }
-            
-            // Limpiar historial actual
             searchHistory.innerHTML = '';
-            
-            // Mostrar las últimas 5 reparaciones en el historial para facilitar acceso
-            repairs.slice(-5).reverse().forEach((repair, index) => {
-                const id = repairs.length - index; // El ID mostrado corresponde al índice + 1 (empezando desde el final)
-                const clientName = repair.nombreCliente || 'Cliente';
+            repairs.slice(-5).reverse().forEach((repair) => {
+                const id = repair.id || repair._id || repair.reparacion_id || repair.ID || repair.numero || repair.numero_reparacion;
+                const clientName = repair.nombreCliente || repair.cliente || 'Cliente';
                 addToSearchHistory(id.toString(), clientName);
             });
-            
-            console.log('Historial de búsquedas cargado con las últimas reparaciones');
+            console.log('Historial de búsquedas cargado con las últimas reparaciones (backend)');
         } catch (error) {
-            console.error('Error cargando reparaciones para el historial:', error);
+            console.error('Error cargando reparaciones para el historial (backend):', error);
         }
     }
     
-    // Obtener reparaciones desde localStorage
-    function getRepairsFromStorage() {
+    // Reemplazar funciones de obtención local por fetch
+    async function getRepairsFromBackend() {
         try {
-            return JSON.parse(localStorage.getItem('reparaciones') || '[]');
-        } catch (error) {
-            console.error('Error obteniendo reparaciones:', error);
-            return [];
-        }
+            const res = await fetch('http://localhost:4000/api/reparaciones');
+            if (!res.ok) return [];
+            return await res.json();
+        } catch (e) { return []; }
     }
-    
-    // Obtener clientes desde localStorage
-    function getClientsFromStorage() {
+    async function getClientsFromBackend() {
         try {
-            return JSON.parse(localStorage.getItem('clientes') || '[]');
-        } catch (error) {
-            console.error('Error obteniendo clientes:', error);
-            return [];
-        }
+            const res = await fetch('http://localhost:4000/api/clientes');
+            if (!res.ok) return [];
+            return await res.json();
+        } catch (e) { return []; }
     }
     
-    // === NUEVAS FUNCIONES PARA CONSULTA AL BACKEND ===
+    // Reemplazar findRepairById y findClientById para usar fetch
     async function fetchRepairById(repairId) {
         try {
             const res = await fetch(`http://localhost:4000/api/reparaciones/${repairId}`);
@@ -263,16 +246,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Buscar reparación por ID
-    function findRepairById(repairId) {
-        const repairs = getRepairsFromStorage();
-        // En la lista de reparaciones, buscamos por índice ya que no hay un ID explícito
-        return repairs[parseInt(repairId) - 1]; // Ajustamos el índice ya que los usuarios ven índices desde 1
+    async function findRepairById(repairId) {
+        return await fetchRepairById(repairId);
     }
     
     // Buscar cliente por cédula
-    function findClientById(clientId) {
-        const clients = getClientsFromStorage();
-        return clients.find(client => client.cedula === clientId);
+    async function findClientById(clientId) {
+        return await fetchClientByCedula(clientId);
     }
     
     // Cargar historial de búsquedas desde localStorage al inicio
@@ -285,14 +265,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Validar campos de entrada
     function validateInputs() {
-        // Validar cédula/NIT
-        if (!clientIdInput.value.trim()) {
-            showError(clientIdInput, 'Ingrese la cédula o NIT del cliente');
-            return false;
-        } else {
-            removeError(clientIdInput);
-        }
-        
         // Validar ID de reparación
         if (!repairIdInput.value.trim()) {
             showError(repairIdInput, 'Ingrese el ID de reparación');
@@ -300,7 +272,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             removeError(repairIdInput);
         }
-        
         return true;
     }
     
@@ -351,25 +322,24 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!validateInputs()) return;
         showLoading('Buscando reparación...');
         const repairId = repairIdInput.value.trim();
-        const clientId = clientIdInput.value.trim();
         // Buscar en el backend
         const repair = await fetchRepairById(repairId);
-        const client = await fetchClientByCedula(clientId);
         hideLoading();
         if (!repair) {
             alert('No se encontró ninguna reparación con el ID: ' + repairId);
             return;
         }
-        if (!client) {
-            alert('No se encontró ningún cliente con la cédula: ' + clientId);
-            return;
+        // Obtener cliente desde la reparación
+        let client = null;
+        if (repair.cliente) {
+            client = await fetchClientByCedula(repair.cliente);
         }
-        // Mostrar datos del cliente
-        document.getElementById('displayClientId').textContent = client.cedula || '';
-        document.getElementById('displayClientName').textContent = client.nombre || '';
-        document.getElementById('displayClientPhone').textContent = client.telefono || '';
-        document.getElementById('displayClientEmail').textContent = client.correo || '';
-        document.getElementById('displayClientAddress').textContent = client.direccion || '';
+        // Mostrar datos del cliente (si existe)
+        document.getElementById('displayClientId').textContent = client ? (client.cedula || '') : '';
+        document.getElementById('displayClientName').textContent = client ? (client.nombre || '') : '';
+        document.getElementById('displayClientPhone').textContent = client ? (client.telefono || '') : '';
+        document.getElementById('displayClientEmail').textContent = client ? (client.correo || '') : '';
+        document.getElementById('displayClientAddress').textContent = client ? (client.direccion || '') : '';
         // Verificar si la reparación tiene materiales
         const tieneMateriales = repair.materiales && repair.materiales.length > 0;
         const costoMateriales = tieneMateriales ? repair.costoMateriales : 0;
@@ -402,32 +372,7 @@ document.addEventListener('DOMContentLoaded', function() {
         transitionToScreen(screen1, screen2);
     });
     
-    // También añadir eventos a los botones de búsqueda individuales
-    clientSearchBtn.addEventListener('click', function() {
-        if (!clientIdInput.value) {
-            showError(clientIdInput, 'Por favor, ingrese la cédula del cliente');
-            return;
-        } else {
-            removeError(clientIdInput);
-        }
-        
-        showLoading('Buscando cliente...');
-        
-        setTimeout(function() {
-            const clientId = clientIdInput.value;
-            const client = findClientById(clientId);
-            
-            hideLoading();
-            
-            if (client) {
-                alert('Cliente encontrado: ' + client.nombre);
-                repairIdInput.focus();
-            } else {
-                alert('No se encontró ningún cliente con la cédula: ' + clientId);
-            }
-        }, 800);
-    });
-    
+    // Mantener solo repairSearchBtn, btnLimpiarReparacion
     repairSearchBtn.addEventListener('click', function() {
         if (!repairIdInput.value) {
             showError(repairIdInput, 'Por favor, ingrese el ID de reparación');
@@ -435,19 +380,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             removeError(repairIdInput);
         }
-        
-        // Si hay ID de reparación pero no hay cédula, buscar la reparación
-        // y auto-completar la cédula del cliente
-        if (!clientIdInput.value) {
-            const repairId = repairIdInput.value;
-            const repairs = getRepairsFromStorage();
-            const repair = repairs[parseInt(repairId) - 1]; // Ajustar el índice
-            
-            if (repair && repair.cliente) {
-                clientIdInput.value = repair.cliente;
-            }
-        }
-        
         searchButton.click();
     });
     
@@ -557,24 +489,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 selectedMethod = radio.value;
             }
         });
-        
         if (!selectedMethod) {
             alert('Por favor, seleccione un método de pago');
             return;
         }
-        
-        // Mostrar indicación de procesamiento
         showLoading('Generando factura...');
-        
-        // Simular procesamiento
-        setTimeout(function() {
+        setTimeout(async function() {
             // Obtener datos para la factura
             const clientName = document.getElementById('displayClientName').textContent;
             const clientId = document.getElementById('displayClientId').textContent;
             const clientPhone = document.getElementById('displayClientPhone').textContent;
             const clientEmail = document.getElementById('displayClientEmail').textContent;
             const clientAddress = document.getElementById('displayClientAddress').textContent;
-            
             const repairId = document.getElementById('displayRepairId').textContent;
             const device = document.getElementById('displayDevice').textContent;
             const brandModel = document.getElementById('displayBrandModel').textContent;
@@ -582,69 +508,102 @@ document.addEventListener('DOMContentLoaded', function() {
             const issue = document.getElementById('displayIssue').textContent;
             const description = document.getElementById('displayDescription').textContent;
             const cost = parseFloat(document.getElementById('displayCost').textContent.replace(/,/g, '').replace(/\$/g, '').trim());
-            
             const paymentMethod = selectedMethod;
             const date = new Date().toLocaleDateString('es-ES', {
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit'
             });
-            
-            // Cargar la configuración de recibos más reciente
             const receiptConfig = JSON.parse(localStorage.getItem('receiptConfig')) || {};
-            
-            // Aplicar la configuración del recibo a la factura
+            const taxRate = parseFloat(receiptConfig.taxRate || 19);
+            const subtotal = cost;
+            const tax = subtotal * (taxRate / 100);
+            const total = subtotal + tax;
+            const prefix = receiptConfig.receiptPrefix || 'ITECH';
+            const invoiceNumber = prefix + new Date().getTime().toString().slice(-6);
+            // Guardar factura en backend
+            try {
+                // 1. Guardar factura principal
+                const facturaPayload = {
+                    numero_factura: invoiceNumber,
+                    cliente: clientId,
+                    nombre_cliente: clientName,
+                    email_cliente: clientEmail,
+                    telefono_cliente: clientPhone,
+                    reparacion_id: repairId,
+                    fecha_emision: new Date().toISOString().slice(0, 19).replace('T', ' '),
+                    subtotal: subtotal,
+                    impuesto: tax,
+                    total: total,
+                    metodo_pago: paymentMethod,
+                    estado: 'Pagada'
+                };
+                const facturaResp = await fetch('http://localhost:4000/api/facturas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(facturaPayload)
+                });
+                const facturaData = await facturaResp.json();
+                if (!facturaResp.ok) throw new Error(facturaData.error || 'Error al guardar la factura');
+                // 2. Guardar ventas/materiales si existen
+                let materiales = [];
+                // Intentar obtener los materiales de la reparación buscada
+                let repair = null;
+                try {
+                    const res = await fetch(`http://localhost:4000/api/reparaciones/${repairId}`);
+                    if (res.ok) repair = await res.json();
+                } catch (e) {}
+                if (repair && Array.isArray(repair.materiales) && repair.materiales.length > 0) {
+                    materiales = repair.materiales.map(mat => ({
+                        producto_nombre: mat.nombre,
+                        producto_sku: mat.sku,
+                        cantidad: mat.cantidad,
+                        precio_unitario: mat.precio,
+                        subtotal: mat.subtotal
+                    }));
+                }
+                if (materiales.length > 0) {
+                    const ventasResp = await fetch(`http://localhost:4000/api/facturas/${facturaData.id}/ventas`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ventas: materiales })
+                    });
+                    const ventasData = await ventasResp.json();
+                    if (!ventasResp.ok) throw new Error(ventasData.error || 'Error al guardar los materiales/ventas');
+                }
+                hideLoading();
+                alert('Factura guardada correctamente en la base de datos.');
+            } catch (err) {
+                hideLoading();
+                alert('Error al guardar la factura: ' + (err.message || err));
+                return;
+            }
+            // --- Mostrar la factura como antes (vista y formato) ---
             if (receiptConfig.logoURL) {
                 document.getElementById('invoiceLogo').innerHTML = `<img src="${receiptConfig.logoURL}" alt="Logo" class="invoice-logo">`;
             } else {
-                // Logo por defecto
                 document.getElementById('invoiceLogo').innerHTML = `<img src="img/logo-itech-support.png" alt="Logo" class="invoice-logo">`;
             }
-            
-            // Aplicar título, nombre y eslogan configurados o usar valores predeterminados
             document.getElementById('invoiceTitle').textContent = receiptConfig.receiptTitle || 'Factura de Servicio';
             document.getElementById('invoiceCompany').textContent = receiptConfig.companyName || 'Itech Support';
             document.getElementById('invoiceTagline').textContent = receiptConfig.companyTagline || 'Se más seguro con nosotros.';
             document.getElementById('invoiceHeaderNotes').textContent = receiptConfig.headerNotes || '';
-            
-            // Impuesto configurado o valor predeterminado (19% para Colombia)
-            const taxRate = parseFloat(receiptConfig.taxRate || 19);
             document.getElementById('invoiceTaxRate').textContent = taxRate;
-            
-            // Calcular subtotal, impuesto y total
-            const subtotal = cost;
-            const tax = subtotal * (taxRate / 100);
-            const total = subtotal + tax;
-            
-            // Llenar datos en la factura
             document.getElementById('invoiceClientName').textContent = clientName;
             document.getElementById('invoiceClientId').textContent = clientId;
             document.getElementById('invoiceClientPhone').textContent = clientPhone;
             document.getElementById('invoiceClientEmail').textContent = clientEmail;
             document.getElementById('invoiceClientAddress').textContent = clientAddress;
-            
-            // Generar número de factura con prefijo si existe
-            const prefix = receiptConfig.receiptPrefix || 'ITECH';
-            const invoiceNumber = prefix + new Date().getTime().toString().slice(-6);
             document.getElementById('invoiceNumber').textContent = invoiceNumber;
-            
             document.getElementById('invoiceDate').textContent = date;
             document.getElementById('invoicePaymentMethod').textContent = paymentMethod;
-            
-            // Llenar tabla de factura
             const tableBody = document.getElementById('invoiceTableBody');
             tableBody.innerHTML = '';
-            
             const currencySymbol = receiptConfig.currency || '$';
-            
-            // Crear fila para el servicio de reparación
             const row = document.createElement('tr');
-            
-            // Extraer solo el texto plano sin HTML para descripción
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = description;
             const cleanDescription = tempDiv.textContent || tempDiv.innerText || '';
-            
             row.innerHTML = `
                 <td>${issue}</td>
                 <td>${device} ${brandModel}</td>
@@ -652,61 +611,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${currencySymbol} ${subtotal.toLocaleString('es-CO')}</td>
             `;
             tableBody.appendChild(row);
-            
-            // Mostrar totales con formato de moneda colombiana
             document.getElementById('invoiceSubtotal').textContent = subtotal.toLocaleString('es-CO');
             document.getElementById('invoiceTax').textContent = tax.toLocaleString('es-CO');
             document.getElementById('invoiceTotal').textContent = total.toLocaleString('es-CO');
-            
-            // Actualizar símbolos de moneda
             const currencyElements = document.querySelectorAll('.currency-symbol');
             currencyElements.forEach(el => {
                 el.textContent = currencySymbol;
             });
-            
-            // Pie de página del recibo
             document.getElementById('invoiceFooterText').textContent = receiptConfig.footerText || 'Gracias por su preferencia';
             document.getElementById('invoiceTerms').textContent = receiptConfig.termsAndConditions || '';
             document.getElementById('invoiceContact').textContent = receiptConfig.contactInfo || '';
-            
-            // Redes sociales si están configuradas
             const socialDiv = document.getElementById('invoiceSocial');
             socialDiv.innerHTML = '';
-            
             if (receiptConfig.showSocialMedia === 'true') {
                 const facebook = receiptConfig.facebook;
                 const instagram = receiptConfig.instagram;
                 const twitter = receiptConfig.twitter;
-                
                 let socialHTML = '';
-                if (facebook) socialHTML += `<i class="fab fa-facebook"></i> ${facebook} `;
-                if (instagram) socialHTML += `<i class="fab fa-instagram"></i> ${instagram} `;
-                if (twitter) socialHTML += `<i class="fab fa-twitter"></i> ${twitter}`;
-                
+                if (facebook) socialHTML += `<i class=\"fab fa-facebook\"></i> ${facebook} `;
+                if (instagram) socialHTML += `<i class=\"fab fa-instagram\"></i> ${instagram} `;
+                if (twitter) socialHTML += `<i class=\"fab fa-twitter\"></i> ${twitter}`;
                 socialDiv.innerHTML = socialHTML;
             }
-            
-            // Generar QR code si está habilitado
             const qrContainer = document.getElementById('invoiceQrcode');
             qrContainer.innerHTML = '';
-            
             if (receiptConfig.showQRCode === 'true' || receiptConfig.showQRCode === undefined) {
                 const qrData = `Factura: ${invoiceNumber}\nCliente: ${clientName}\nCédula: ${clientId}\nTotal: ${currencySymbol} ${total.toLocaleString('es-CO')}\nFecha: ${date}`;
                 createQRCode(qrContainer, qrData);
             }
-            
-            // Ocultar carga
-            hideLoading();
-            
-            // Mostrar la factura con transición suave
             invoiceSection.style.display = 'block';
             setTimeout(() => {
                 invoiceSection.classList.remove('hidden');
             }, 50);
-            
-            // Desplazarse a la factura con animación suave
             invoiceSection.scrollIntoView({ behavior: 'smooth' });
-            
         }, 1500);
     });
     
@@ -967,12 +904,6 @@ document.addEventListener('DOMContentLoaded', function() {
         btnLimpiarHistorial.addEventListener('click', limpiarHistorial);
     }
 
-    // Función para limpiar el campo de cliente
-    function limpiarCampoCliente() {
-        clientIdInput.value = '';
-        removeError(clientIdInput);
-    }
-    
     // Función para limpiar el campo de reparación
     function limpiarCampoReparacion() {
         repairIdInput.value = '';
@@ -980,10 +911,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Eventos para los botones de limpiar campos
-    if (btnLimpiarCliente) {
-        btnLimpiarCliente.addEventListener('click', limpiarCampoCliente);
-    }
-    
     if (btnLimpiarReparacion) {
         btnLimpiarReparacion.addEventListener('click', limpiarCampoReparacion);
     }

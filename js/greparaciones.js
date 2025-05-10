@@ -113,6 +113,34 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     form.addEventListener('submit', async function(e) {
+        if (window._soloCambioEstado) {
+            e.preventDefault();
+            const estadoSeleccionado = document.getElementById('estado').value;
+            if (!estadoSeleccionado || estadoSeleccionado === 'Seleccione un estado') {
+                alert('Por favor, seleccione un estado válido para la reparación.');
+                return;
+            }
+            try {
+                const resp = await actualizarEstadoReparacion(idEdicion, estadoSeleccionado);
+                if (resp.mensaje) {
+                    alert('Estado actualizado correctamente.');
+                    form.reset();
+                    infoCliente.innerHTML = '';
+                    clienteActual = { nombre: '', email: '', telefono: '' };
+                    localStorage.removeItem('materialesReparacionTemp');
+                    await renderTabla();
+                    document.querySelector('button[type="submit"]').textContent = 'Registrar Reparación';
+                    window._soloCambioEstado = false;
+                    modoEdicion = false;
+                    idEdicion = null;
+                } else {
+                    alert('Error al actualizar estado: ' + (resp.error || 'Error desconocido'));
+                }
+            } catch (err) {
+                alert('Error al actualizar estado: ' + (err.message || err));
+            }
+            return;
+        }
         e.preventDefault();
         let materialesSeleccionados = JSON.parse(localStorage.getItem('materialesReparacionTemp')) || [];
         // Asegurar que cada material tenga sku y cantidad
@@ -147,10 +175,10 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             if (modoEdicion && idEdicion) {
                 await guardarReparacion(datosReparacion, idEdicion);
-                modoEdicion = false;
+        modoEdicion = false;
                 idEdicion = null;
                 alert('Reparación actualizada exitosamente.');
-            } else {
+        } else {
                 const resp = await guardarReparacion(datosReparacion);
                 if (resp.error) {
                     alert('Error al registrar reparación: ' + resp.error);
@@ -190,8 +218,35 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('descripcion').value = rep.descripcion;
         document.getElementById('costo').value = rep.costo;
         document.getElementById('estado').value = rep.estado;
+        if (Array.isArray(rep.materiales)) {
+            const materialesTemp = rep.materiales.map(mat => ({
+                sku: mat.sku,
+                cantidad: mat.cantidad,
+                nombre: mat.nombre,
+                precio: mat.precioUnitario || mat.precio,
+                subtotal: mat.subtotal
+            }));
+            localStorage.setItem('materialesReparacionTemp', JSON.stringify(materialesTemp));
+            document.dispatchEvent(new Event('materialesReparacionCargados'));
+        } else {
+            localStorage.removeItem('materialesReparacionTemp');
+            document.dispatchEvent(new Event('materialesReparacionCargados'));
+        }
         document.querySelector('button[type="submit"]').textContent = 'Actualizar Reparación';
         document.querySelector('#formReparacion').scrollIntoView({ behavior: 'smooth' });
+        // Deshabilitar edición si está completada
+        const disabled = rep.estado === 'Completada';
+        [
+            'cliente', 'dispositivo', 'marcaModelo', 'imei', 'problema', 'descripcion', 'costo', 'estado'
+        ].forEach(id => {
+            document.getElementById(id).disabled = disabled;
+        });
+        document.getElementById('btnMaterialesModal').disabled = disabled;
+        document.getElementById('btnLimpiarForm').disabled = disabled;
+        document.getElementById('btnNotificar').disabled = disabled;
+        if (disabled) {
+            infoCliente.innerHTML += '<br><span style="color:#c00;font-weight:bold;">Esta reparación está completada y no puede ser editada.</span>';
+        }
     };
 
     window.eliminarReparacion = async function(index) {
@@ -242,31 +297,32 @@ document.addEventListener("DOMContentLoaded", () => {
             const tieneMateriales = costoMaterialesNum > 0;
             const infoMateriales = tieneMateriales ? `<br><small class="text-info">Materiales: $${costoMaterialesNum.toFixed(2)}</small>` : '';
             const fechaMostrar = rep.fecha_registro || rep.fecha || '';
+            const bloqueado = rep.estado === 'Completada' || rep.estado === 'Pagada';
             let row = `
                 <tr>
-                    <td data-title=\"#\">${rep.id}</td>
-                    <td data-title=\"Cliente\">${rep.nombreCliente ? rep.nombreCliente : rep.cliente} (${rep.cliente})</td>
-                    <td data-title=\"Dispositivo\">${rep.dispositivo}</td>
-                    <td data-title=\"Marca/Modelo\">${rep.marcaModelo}</td>
-                    <td data-title=\"IMEI/Serial\">${rep.imei}</td>
-                    <td data-title=\"Problema\">${rep.problema}</td>
-                    <td data-title=\"Descripción\">${rep.descripcion}${infoMateriales}</td>
-                    <td data-title=\"Costo\">${rep.costo}</td>
-                    <td data-title=\"Fecha\">${fechaMostrar}</td>
-                    <td data-title=\"Estado\">${rep.estado}</td>
-                    <td data-title=\"Acciones\">
-                        <div class=\"btn-group-actions\">
-                            <button class=\"btn btn-sm btn-warning\" onclick=\"editarReparacion(${index})\">
-                                <i class=\"fas fa-edit\"></i>
+                    <td data-title="#">${rep.id}</td>
+                    <td data-title="Cliente">${rep.nombreCliente ? rep.nombreCliente : rep.cliente} (${rep.cliente})</td>
+                    <td data-title="Dispositivo">${rep.dispositivo}</td>
+                    <td data-title="Marca/Modelo">${rep.marcaModelo}</td>
+                    <td data-title="IMEI/Serial">${rep.imei}</td>
+                    <td data-title="Problema">${rep.problema}</td>
+                    <td data-title="Descripción">${rep.descripcion}${infoMateriales}</td>
+                    <td data-title="Costo">${rep.costo}</td>
+                    <td data-title="Fecha">${fechaMostrar}</td>
+                    <td data-title="Estado">${rep.estado}</td>
+                    <td data-title="Acciones">
+                        <div class="btn-group-actions">
+                            <button class="btn btn-sm btn-warning" onclick="editarReparacion(${index})" ${bloqueado ? 'disabled' : ''}>
+                                <i class="fas fa-edit"></i>
                             </button>
-                            <button class=\"btn btn-sm btn-danger\" onclick=\"eliminarReparacion(${index})\">
-                                <i class=\"fas fa-trash\"></i>
+                            <button class="btn btn-sm btn-danger" onclick="eliminarReparacion(${index})" ${bloqueado ? 'disabled' : ''}>
+                                <i class="fas fa-trash"></i>
                             </button>
-                            <button class=\"btn btn-sm btn-info\" onclick=\"notificarCliente(${index})\">
-                                <i class=\"fas fa-bell\"></i>
+                            <button class="btn btn-sm btn-info" onclick="notificarCliente(${index})">
+                                <i class="fas fa-bell"></i>
                             </button>
-                            <button class=\"btn btn-sm btn-secondary\" onclick=\"imprimirMateriales(${index})\" title=\"Imprimir Materiales\">
-                                <i class=\"fas fa-print\"></i>
+                            <button class="btn btn-sm btn-secondary" onclick="imprimirMateriales(${index})" title="Imprimir Materiales">
+                                <i class="fas fa-print"></i>
                             </button>
                         </div>
                     </td>
@@ -408,6 +464,53 @@ document.addEventListener("DOMContentLoaded", () => {
             alert('Notificación enviada correctamente al cliente.');
         }, 500);
     });
+
+    // Nueva función global para cambio de estado
+    window.cambiarEstadoReparacion = function(index) {
+        const rep = listaReparaciones[index];
+        modoEdicion = true;
+        idEdicion = rep.id;
+        document.getElementById('cliente').value = rep.cliente;
+        clienteActual = {
+            nombre: rep.nombreCliente || '',
+            email: rep.emailCliente || '',
+            telefono: rep.telefonoCliente || ''
+        };
+        if (clienteActual.nombre) {
+            infoCliente.innerHTML = `<strong>Cliente:</strong> ${clienteActual.nombre} | Email: ${clienteActual.email} | Tel: ${clienteActual.telefono}`;
+            infoCliente.style.color = '#28a745';
+        }
+        document.getElementById('dispositivo').value = rep.dispositivo;
+        document.getElementById('marcaModelo').value = rep.marcaModelo;
+        document.getElementById('imei').value = rep.imei;
+        document.getElementById('problema').value = rep.problema;
+        document.getElementById('descripcion').value = rep.descripcion;
+        document.getElementById('costo').value = rep.costo;
+        document.getElementById('estado').value = rep.estado;
+        document.querySelector('#formReparacion').scrollIntoView({ behavior: 'smooth' });
+        // Deshabilitar todos los campos excepto estado
+        [
+            'cliente', 'dispositivo', 'marcaModelo', 'imei', 'problema', 'descripcion', 'costo'
+        ].forEach(id => {
+            document.getElementById(id).disabled = true;
+        });
+        document.getElementById('estado').disabled = false;
+        document.getElementById('btnMaterialesModal').disabled = true;
+        document.getElementById('btnLimpiarForm').disabled = false;
+        document.getElementById('btnNotificar').disabled = true;
+        document.querySelector('button[type="submit"]').textContent = 'Cambiar Estado';
+        // Guardar modo especial para submit
+        window._soloCambioEstado = true;
+    }
+
+    window.actualizarEstadoReparacion = async function(id, nuevoEstado) {
+        const res = await fetch(`${API_BASE}/reparaciones/${id}/estado`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ estado: nuevoEstado })
+        });
+        return await res.json();
+    };
 
     // Inicializar tabla al cargar
     renderTabla();
