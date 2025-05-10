@@ -180,5 +180,21 @@ module.exports = {
       [nuevoEstado, id]
     );
     return result.affectedRows > 0;
+  },
+
+  async obtenerPorMes(mes, anio) {
+    const [rows] = await pool.query(
+      'SELECT *, fecha_registro FROM reparaciones WHERE MONTH(fecha_registro) = ? AND YEAR(fecha_registro) = ?',
+      [mes, anio]
+    );
+    return rows;
+  },
+
+  async obtenerPorRangoFechas(desde, hasta) {
+    const [rows] = await pool.query(
+      'SELECT *, fecha_registro FROM reparaciones WHERE DATE(fecha_registro) BETWEEN ? AND ?',
+      [desde, hasta]
+    );
+    return rows;
   }
 }; 

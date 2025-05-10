@@ -6,7 +6,15 @@ const reparacionesController = require('../controllers/reparacionesController');
 router.get('/buscar', reparacionesController.buscarPorCedulaOImei);
 
 // CRUD de reparaciones
-router.get('/', reparacionesController.listarReparaciones);
+router.get('/', (req, res, next) => {
+  if (req.query.mes && req.query.anio) {
+    return reparacionesController.obtenerReparacionesPorMes(req, res);
+  }
+  if (req.query.desde && req.query.hasta) {
+    return reparacionesController.obtenerReparacionesPorRangoFechas(req, res);
+  }
+  reparacionesController.listarReparaciones(req, res);
+});
 router.get('/:id', reparacionesController.obtenerReparacionPorId);
 router.post('/', reparacionesController.crearReparacion);
 router.put('/:id', reparacionesController.actualizarReparacion);

@@ -100,4 +100,24 @@ exports.buscarPorCedulaOImei = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: 'Error al buscar reparación' });
   }
+};
+
+exports.obtenerReparacionesPorMes = async (req, res) => {
+  try {
+    const { mes, anio } = req.query;
+    const reparaciones = await reparacionesModel.obtenerPorMes(mes, anio);
+    res.json(reparaciones);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+exports.obtenerReparacionesPorRangoFechas = async (req, res) => {
+  try {
+    const { desde, hasta } = req.query;
+    const reparaciones = await reparacionesModel.obtenerPorRangoFechas(desde, hasta);
+    res.json(reparaciones);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 }; 

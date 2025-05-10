@@ -342,9 +342,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('displayClientAddress').textContent = client ? (client.direccion || '') : '';
         // Verificar si la reparación tiene materiales
         const tieneMateriales = repair.materiales && repair.materiales.length > 0;
-        const costoMateriales = tieneMateriales ? repair.costoMateriales : 0;
+        const costoMateriales = tieneMateriales ? (Number(repair.costoMateriales) || 0).toFixed(2) : 0;
         const infoMateriales = tieneMateriales ? 
-            `<br><small class="text-info">Materiales: ${repair.materiales.length} items ($${costoMateriales.toFixed(2)})</small>` : 
+            `<br><small class="text-info">Materiales: ${repair.materiales.length} items ($${costoMateriales})</small>` : 
             '';
         // Mostrar datos de la reparación
         document.getElementById('displayRepairId').textContent = repair.id || repairId;
@@ -370,17 +370,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         // Cambiar a la pantalla de detalles
         transitionToScreen(screen1, screen2);
-    });
-    
-    // Mantener solo repairSearchBtn, btnLimpiarReparacion
-    repairSearchBtn.addEventListener('click', function() {
-        if (!repairIdInput.value) {
-            showError(repairIdInput, 'Por favor, ingrese el ID de reparación');
-            return;
-        } else {
-            removeError(repairIdInput);
-        }
-        searchButton.click();
     });
     
     backToScreen1Button.addEventListener('click', function() {
@@ -795,7 +784,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         tablaMateriales += `<tr class="table-info">
             <td colspan="4" class="text-right"><strong>Total Materiales:</strong></td>
-            <td><strong>$${typeof repair.costoMateriales === 'number' ? repair.costoMateriales.toFixed(2) : repair.costoMateriales}</strong></td>
+            <td><strong>$${(Number(repair.costoMateriales) || 0).toFixed(2)}</strong></td>
         </tr>`;
         tablaMateriales += '</tbody></table>';
         
@@ -914,4 +903,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (btnLimpiarReparacion) {
         btnLimpiarReparacion.addEventListener('click', limpiarCampoReparacion);
     }
+
+    // Permitir buscar con Enter en el input de ID de reparación
+    repairIdInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            searchButton.click();
+        }
+    });
 });

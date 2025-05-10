@@ -16,6 +16,7 @@ app.use('/api/reparaciones', require('./routes/reparaciones'));
 app.use('/api/facturas', require('./routes/facturas'));
 app.use('/api/historial-busquedas', require('./routes/historialBusquedas'));
 app.use('/api/config-recibos', require('./routes/configRecibos'));
+app.use('/api/ventas', require('./routes/ventas'));
 console.log('Rutas de usuarios, configuración de tienda, clientes, inventario, reparaciones, facturas, historial de búsquedas y config de recibos cargadas');
 
 app.get('/', (req, res) => {
