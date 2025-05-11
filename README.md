@@ -1,6 +1,6 @@
 # Itech Support Software Academic
 
-Sistema de gestión para talleres de reparación técnica.
+Sistema de gestión para taller de mantenimiento y reparación de equipos tecnológicos.
 
 ## Características principales
 
@@ -25,9 +25,8 @@ Sistema de gestión para talleres de reparación técnica.
 ### Inventario
 - Control de existencias
 - Gestión de productos, precios y costos
-- Alertas de bajo stock
 
-### Sistema de Roles y Permisos
+### Sistema de Roles y Permisos (PENDIENTE)
 El sistema implementa tres roles diferentes, cada uno con permisos específicos:
 
 #### Administrador
@@ -70,5 +69,4 @@ El sistema implementa tres roles diferentes, cada uno con permisos específicos:
 - HTML5
 - CSS3 (Bootstrap SB Admin 2)
 - JavaScript
-- Almacenamiento local (LocalStorage para usuarios, SessionStorage para sesión activa)
 - Exportación a Excel (XLSX.js)

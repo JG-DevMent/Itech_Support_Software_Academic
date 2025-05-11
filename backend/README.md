@@ -33,4 +33,3 @@ backend/
 ## Notas
 - El backend se desarrolla módulo por módulo.
 - No incluye integración con APIs externas por ahora.
-- Cada módulo se irá probando y documentando aquí. 
