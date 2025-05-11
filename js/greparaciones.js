@@ -133,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     window._soloCambioEstado = false;
                     modoEdicion = false;
                     idEdicion = null;
-                } else {
+            } else {
                     alert('Error al actualizar estado: ' + (resp.error || 'Error desconocido'));
                 }
             } catch (err) {
@@ -175,7 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             if (modoEdicion && idEdicion) {
                 await guardarReparacion(datosReparacion, idEdicion);
-        modoEdicion = false;
+            modoEdicion = false;
                 idEdicion = null;
                 alert('Reparación actualizada exitosamente.');
         } else {
@@ -448,18 +448,18 @@ document.addEventListener("DOMContentLoaded", () => {
             const index = listaReparaciones.findIndex(r => r.id === idEdicion);
             if (index !== -1) {
                 window.notificarCliente(index);
-            } else {
+                } else {
                 alert('No hay reparación seleccionada para notificar.');
             }
-        } else {
+                } else {
             alert('Seleccione una reparación para notificar.');
-        }
+                }
     });
-
+            
     btnEnviarNotificacion.addEventListener('click', function() {
         // Aquí puedes implementar el envío real (correo, SMS, etc.)
         // Por ahora, solo simula el envío y cierra el modal
-        $('#modalNotificacion').modal('hide');
+            $('#modalNotificacion').modal('hide');
         setTimeout(() => {
             alert('Notificación enviada correctamente al cliente.');
         }, 500);
