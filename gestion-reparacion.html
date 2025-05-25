@@ -191,25 +191,29 @@
                     <div class="card-body">
                         <p>Reparaciones Registradas</p>
                         <!-- Botón para mostrar/ocultar filtros -->
-                        <button id="toggleFiltrosBtn" class="btn btn-filtro mb-2">👓 Mostrar Filtros</button>
-                        <!-- Contenedor de filtros (oculto inicialmente) -->
-                        <div id="contenedorFiltros" class="filtros-reparaciones" style="display: none; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
-                            <input type="text" id="filtroCliente" class="form-control" placeholder="Filtrar por Cliente">
-                            <input type="text" id="filtroDispositivo" class="form-control" placeholder="Filtrar por Dispositivo">
-                            <select id="filtroEstado" class="form-control">
-                                <option value="">Todos los estados</option>
-                                <option>Inicio Reparación</option>
-                                <option>En Proceso</option>
-                                <option>Completada</option>
-                                <option>Pendiente</option>
-                            </select>
+                        <div class="row mb-2">
+                            <div class="col-md-4 col-sm-12 mb-2">
+                                <button id="toggleFiltrosBtn" class="btn btn-filtro mb-2">👓 Mostrar Filtros</button>
+                                <!-- Contenedor de filtros (oculto inicialmente) -->
+                                <div id="contenedorFiltros" class="filtros-reparaciones" style="display: none; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+                                    <input type="text" id="filtroCliente" class="form-control" placeholder="Filtrar por Cliente">
+                                    <input type="text" id="filtroDispositivo" class="form-control" placeholder="Filtrar por Dispositivo">
+                                    <select id="filtroEstado" class="form-control">
+                                        <option value="">Todos los estados</option>
+                                        <option>Inicio Reparación</option>
+                                        <option>En Proceso</option>
+                                        <option>Completada</option>
+                                        <option>Pendiente</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         <!-- Búsqueda y Exportar -->
-                        <div class="row mb-3">
-                            <div class="col-md-8 col-sm-12 mb-2">
+                        <div class="row mb-2">
+                            <div class="col-md-4 col-sm-12 mb-2">
                                 <input type="text" id="buscarInput" class="form-control" placeholder="Búsqueda general...">
                             </div>
-                            <div class="col-md-4 col-sm-12 text-right">
+                            <div class="col-md-2 col-sm-12 text-right">
                                 <button id="btnExportar" class="btn btn-success w-100">
                                     <i class="fas fa-file-excel"></i> Exportar a XLSX
                                 </button>
@@ -443,16 +447,6 @@
         </div>
     </div>
     
-    <script src="js/greparaciones.js"></script>
-    <script src="js/materiales-reparacion.js"></script>
-    <script src="js/custom.js"></script>
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="js/sb-admin-2.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
     <!-- Modal de Materiales y Refacciones -->
     <div class="modal fade" id="materialesModal" tabindex="-1" role="dialog" aria-labelledby="materialesModalLabel" aria-hidden="true" data-backdrop="static">
         <div class="modal-dialog modal-lg" role="document">
@@ -511,5 +505,16 @@
             </div>
         </div>
     </div>
+
+    <script src="js/greparaciones.js"></script>
+    <script src="js/materiales-reparacion.js"></script>
+    <script src="js/custom.js"></script>
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="js/sb-admin-2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
 </body>
 </html>
