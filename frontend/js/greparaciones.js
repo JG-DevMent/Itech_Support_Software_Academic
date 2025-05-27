@@ -44,6 +44,23 @@ document.addEventListener("DOMContentLoaded", () => {
         await fetch(`${API_BASE}/reparaciones/${id}`, { method: 'DELETE' });
     }
 
+    // Función para formatear fecha a hora local de Colombia
+    function formatearFechaColombia(fechaISO) {
+        if (!fechaISO) return '';
+        const fecha = new Date(fechaISO);
+        const opciones = {
+            timeZone: 'America/Bogota',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        };
+        // Devuelve: 27/05/2025 10:12:22
+        return fecha.toLocaleString('es-CO', opciones).replace(',', '');
+    }
+
     // ===================== UI Y LÓGICA =====================
     toggleBtn.addEventListener("click", () => {
         const visible = contenedorFiltros.style.display === "flex";
@@ -296,7 +313,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (isNaN(costoMaterialesNum)) costoMaterialesNum = 0;
             const tieneMateriales = costoMaterialesNum > 0;
             const infoMateriales = tieneMateriales ? `<br><small class="text-info">Materiales: $${costoMaterialesNum.toFixed(2)}</small>` : '';
-            const fechaMostrar = rep.fecha_registro || rep.fecha || '';
+            const fechaMostrar = formatearFechaColombia(rep.fecha_registro || rep.fecha || '');
             const bloqueado = rep.estado === 'Completada' || rep.estado === 'Pagada';
             let row = `
                 <tr>
@@ -334,7 +351,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     window.imprimirMateriales = function(index) {
         const rep = listaReparaciones[index];
-        let fechaMostrar = rep.fecha_registro || rep.fecha || '';
+        let fechaMostrar = formatearFechaColombia(rep.fecha_registro || rep.fecha || '');
         let html = `
         <div style='width:700px; margin:auto; font-family:Segoe UI,Arial,sans-serif; background:#fff; border-radius:12px; box-shadow:0 4px 24px #0002; border:1.5px solid #e9ecef; padding:32px 32px 18px 32px;'>
             <div style='display:flex; align-items:center; border-bottom:2.5px solid #218838; margin-bottom:22px; padding-bottom:10px;'>
@@ -377,8 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             html += `<p style='color:#c00;'>No hay materiales registrados para esta reparación.</p>`;
         }
-        html += `
-            <div style='margin-top:32px; text-align:center; color:#888; font-size:1.08em;'>
+        html += `            <div style='margin-top:32px; text-align:center; color:#888; font-size:1.08em;'>
                 <hr style='border:0; border-top:1px solid #e9ecef; margin:18px 0;'>
                 <div>Gracias por confiar en <b style='color:#218838;'>ITECH SUPPORT</b></div>
                 <div style='font-size:0.98em;'>www.itech-support.com</div>

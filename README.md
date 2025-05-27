@@ -70,3 +70,9 @@ El sistema implementa tres roles diferentes, cada uno con permisos específicos:
 - CSS3 (Bootstrap SB Admin 2)
 - JavaScript
 - Exportación a Excel (XLSX.js)
+
+## Estructura del Proyecto
+
+- `frontend/`: Contiene todos los archivos relacionados al frontend (HTML, JS, CSS, imágenes, vendor, etc).
+- `backend/`: Código fuente del backend (Node.js, Express).
+- `db/`: Archivos de base de datos y scripts SQL.
