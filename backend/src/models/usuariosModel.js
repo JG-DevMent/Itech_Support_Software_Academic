@@ -44,5 +44,10 @@ module.exports = {
   async login(username, password) {
     const [rows] = await pool.query('SELECT id, username, email, telefono, rol FROM usuarios WHERE username = ? AND password = ?', [username, password]);
     return rows[0];
+  },
+
+  async obtenerPorEmail(email) {
+    const [rows] = await pool.query('SELECT * FROM usuarios WHERE email = ?', [email]);
+    return rows[0];
   }
 }; 

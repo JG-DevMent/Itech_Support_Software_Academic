@@ -12,4 +12,7 @@ router.delete('/:id', usuariosController.eliminarUsuario);
 // Login
 router.post('/login', usuariosController.loginUsuario);
 
+// Reset password
+router.post('/reset-password', usuariosController.resetPassword);
+
 module.exports = router; 

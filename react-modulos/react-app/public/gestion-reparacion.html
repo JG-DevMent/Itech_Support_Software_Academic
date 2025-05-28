@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITECH SUPPORT - Gestión Reparación</title>
+    <link rel="icon" type="image/png" href="img/faviconitech.png">
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="css/custom.css" rel="stylesheet">
+</head>
+<body id="page-top">
+    <div id="wrapper">
+        <ul class="navbar-nav sidebar sidebar-light accordion" id="accordionSidebar">
+            <div class="logo-container">
+                <a href="home.html">
+                    <img src="img/logo-itech-support.png" alt="ITECH SUPPORT"> 
+                </a>
+            </div>
+            <hr class="sidebar-divider my-0">
+            <li class="nav-item">
+                <a class="nav-link" href="home.html">
+                    <i class="fas fa-home"></i>
+                    <span>Inicio</span>
+                </a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="gestion-reparacion.html">
+                    <i class="fas fa-tools"></i>
+                    <span>Gestión Reparación</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="verificar.html">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Verificar</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="ventas-informes.html">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Ventas e informes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="clientes.html">
+                    <i class="fas fa-users"></i>
+                    <span>Clientes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="inventario.html">
+                    <i class="fas fa-boxes"></i>
+                    <span>Inventario</span>
+                </a>
+            </li>           
+            <li class="nav-item">
+                <a class="nav-link" href="pago-facturacion.html">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Pago y Facturación</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="ayuda-soporte.html">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Ayuda y soporte</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="configuracion.html">
+                    <i class="fas fa-cog"></i>
+                    <span>Ajustes</span>
+                </a>
+            </li>
+            <hr class="sidebar-divider d-none d-md-block">
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="cerrarSesion()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Cerrar sesión</span>
+                </a>
+            </li>
+        </ul>
+        <div id="content-wrapper">
+            <div id="content">
+                <nav class="navbar-title">
+                    <button id="sidebarToggleCustom" class="btn-toggle-sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>Itech Support</h1>
+                </nav>
+                <div class="card-box-center">
+                    <div class="card-body">
+                        <h1 class="text-h1">Gestión Reparación</h1>
+                        <p>Registrar Nueva Reparación</p>
+                        <form id="formReparacion">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Cliente <span style="color:red">*</span></label>
+                                        <div class="input-group">
+                                            <input type="text" id="cliente" class="form-control" placeholder="Cédula Cliente" required>
+                                            <div class="input-group-append">
+                                                <button type="button" id="btnBuscarCliente" class="btn btn-primary">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <small id="infoCliente" class="form-text text-muted"></small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Dispositivo <span style="color:red">*</span></label>
+                                        <input type="text" id="dispositivo" class="form-control" placeholder="Ej: Celular, PC" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Marca/Modelo <span style="color:red">*</span></label>
+                                        <input type="text" id="marcaModelo" class="form-control" placeholder="Ej: iPhone X" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>IMEI/Serial <span style="color:red">*</span></label>
+                                        <input type="text" id="imei" class="form-control" placeholder="" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Problema <span style="color:red">*</span></label>
+                                        <input type="text" id="problema" class="form-control" placeholder="Ej: Pantalla rota" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Descripción <span style="color:red">*</span></label>
+                                <textarea id="descripcion" class="form-control" rows="3" placeholder="Detalles de la reparación" required></textarea>
+                            </div>
+                            
+                            <!-- Botón para abrir modal de Materiales y Refacciones -->
+                            <div class="form-group">
+                                <button type="button" class="btn btn-primary" id="btnMaterialesModal" data-toggle="modal" data-target="#materialesModal">
+                                    <i class="fas fa-tools mr-2"></i>Gestionar Materiales y Refacciones
+                                </button>
+                                <small class="form-text text-muted">Haga clic para buscar y añadir materiales a la reparación.</small>
+                                <!-- Indicador de materiales seleccionados -->
+                                <div id="resumenMateriales" class="mt-2">
+                                    <span class="badge badge-info" id="cantidadMateriales">0 materiales seleccionados</span>
+                                    <span class="badge badge-success" id="costoMaterialesResumen">$0.00</span>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Costo Estimado <span style="color:red">*</span> <small class="text-muted">(Se actualiza automáticamente)</small></label>
+                                        <input type="text" id="costo" class="form-control" placeholder="$" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Estado <span style="color:red">*</span></label>
+                                        <select id="estado" class="form-control" required>
+                                            <option selected disabled>Seleccione un estado</option>
+                                            <option>Inicio Reparación</option>
+                                            <option>En Proceso</option>
+                                            <option>Completada</option>
+                                            <option>Pendiente</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group button-group">
+                                        <button type="submit" class="btn btn-primary">Registrar Reparación</button>
+                                        <button type="button" id="btnNotificar" class="btn btn-info">
+                                            <i class="fas fa-bell"></i> Notificar al Cliente
+                                        </button>
+                                        <button type="button" id="btnLimpiarForm" class="btn btn-secondary">
+                                            <i class="fas fa-eraser"></i> Limpiar Formulario
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="card-box-center">
+                    <div class="card-body">
+                        <p>Reparaciones Registradas</p>
+                        <!-- Botón para mostrar/ocultar filtros -->
+                        <div class="row mb-2">
+                            <div class="col-md-4 col-sm-12 mb-2">
+                                <button id="toggleFiltrosBtn" class="btn btn-filtro mb-2">👓 Mostrar Filtros</button>
+                                <!-- Contenedor de filtros (oculto inicialmente) -->
+                                <div id="contenedorFiltros" class="filtros-reparaciones" style="display: none; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+                                    <input type="text" id="filtroCliente" class="form-control" placeholder="Filtrar por Cliente">
+                                    <input type="text" id="filtroDispositivo" class="form-control" placeholder="Filtrar por Dispositivo">
+                                    <select id="filtroEstado" class="form-control">
+                                        <option value="">Todos los estados</option>
+                                        <option>Inicio Reparación</option>
+                                        <option>En Proceso</option>
+                                        <option>Completada</option>
+                                        <option>Pendiente</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Búsqueda y Exportar -->
+                        <div class="row mb-2">
+                            <div class="col-md-4 col-sm-12 mb-2">
+                                <input type="text" id="buscarInput" class="form-control" placeholder="Búsqueda general...">
+                            </div>
+                            <div class="col-md-2 col-sm-12 text-right">
+                                <button id="btnExportar" class="btn btn-success w-100">
+                                    <i class="fas fa-file-excel"></i> Exportar a XLSX
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Tabla de reparaciones -->
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped mt-2" id="tablaReparaciones">
+                                <thead class="table-color">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Cliente</th>
+                                        <th>Dispositivo</th>
+                                        <th>Marca/Modelo</th>
+                                        <th>IMEI/Serial</th>
+                                        <th>Problema</th>
+                                        <th>Descripción</th>
+                                        <th>Costo</th>
+                                        <th>Fecha</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaBody">
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Notificación -->
+    <div class="modal fade" id="modalNotificacion" tabindex="-1" role="dialog" aria-labelledby="modalNotificacionLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalNotificacionLabel">Enviar Notificación al Cliente</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Método de Notificación</label>
+                        <select id="metodoNotificacion" class="form-control">
+                            <option value="email">Correo Electrónico</option>
+                            <option value="sms">SMS</option>
+                            <option value="ambos">Ambos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Asunto</label>
+                        <input type="text" id="asuntoNotificacion" class="form-control" value="Actualización de su reparación en ITECH SUPPORT">
+                    </div>
+                    <div class="form-group">
+                        <label>Mensaje</label>
+                        <textarea id="mensajeNotificacion" class="form-control" rows="4">Estimado cliente, le informamos que hemos actualizado el estado de su reparación. Por favor contáctenos para más información.</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" id="btnEnviarNotificacion" class="btn btn-primary">Enviar Notificación</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Selección de Productos de Inventario -->
+    <div class="modal fade" id="seleccionProductoModal" tabindex="-1" role="dialog" aria-labelledby="seleccionProductoModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="seleccionProductoModalLabel">Seleccionar Material o Refacción</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <input type="text" id="buscarProductoModal" class="form-control" placeholder="Buscar por nombre, SKU o IMEI...">
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" id="tablaProductosInventario">
+                            <thead class="table-color">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>SKU</th>
+                                    <th>IMEI/Serial</th>
+                                    <th>Precio</th>
+                                    <th>Existencias</th>
+                                    <th>Seleccionar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Se cargarán los productos del inventario -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Establecer Cantidad -->
+    <div class="modal fade" id="cantidadProductoModal" tabindex="-1" role="dialog" aria-labelledby="cantidadProductoModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header modal-header-cantidad">
+                    <h5 class="modal-title" id="cantidadProductoModalLabel">
+                        <i class="fas fa-cubes mr-2"></i>Establecer Cantidad
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <div class="card shadow h-100 py-2 card-producto">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="titulo-card-producto">
+                                                Producto Seleccionado
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="nombreProductoSeleccionado">
+                                                <!-- Nombre del producto -->
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-boxes fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="card shadow h-100 py-2 card-existencias">
+                                <div class="card-body py-2">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="titulo-card-existencias">
+                                                Existencias Disponibles
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="existenciasDisponibles">
+                                                <!-- Existencias disponibles -->
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-warehouse fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card shadow h-100 py-2 card-subtotal">
+                                <div class="card-body py-2">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="titulo-card-subtotal">
+                                                Subtotal Estimado
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="subtotalEstimado">
+                                                $0.00
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="productoSeleccionadoId">
+                    <input type="hidden" id="precioUnitarioSeleccionado">
+                    
+                    <div class="form-group">
+                        <label for="cantidadProducto" class="label-cantidad">
+                            <i class="fas fa-hashtag mr-1"></i>Cantidad a utilizar:
+                        </label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <button class="btn btn-outline-secondary btn-cantidad" type="button" id="decrementarCantidad">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                            <input type="number" id="cantidadProducto" class="form-control input-cantidad" 
+                                min="1" value="1" aria-label="Cantidad" aria-describedby="cantidad-help">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary btn-cantidad" type="button" id="incrementarCantidad">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <span class="input-group-text span-unidades">unidades</span>
+                            </div>
+                        </div>
+                        <small id="cantidad-help" class="form-text text-muted">
+                            Ingrese la cantidad que desea utilizar para esta reparación.
+                        </small>
+                    </div>
+                    
+                    <div class="progress mt-3 mb-1">
+                        <div id="barraProgreso" class="progress-bar progress-bar-striped progress-bar-animated barra-progreso-cantidad" role="progressbar" 
+                            aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="width: 25%;">25%</div>
+                    </div>
+                    <small class="text-muted">Esta barra muestra el porcentaje de existencias que estás utilizando</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-cancelar-cantidad" data-dismiss="modal">
+                        <i class="fas fa-times mr-1"></i>Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btnConfirmarCantidad">
+                        <i class="fas fa-check mr-1"></i>Confirmar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Materiales y Refacciones -->
+    <div class="modal fade" id="materialesModal" tabindex="-1" role="dialog" aria-labelledby="materialesModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title" id="materialesModalLabel">
+                        <i class="fas fa-tools mr-2"></i>Materiales y Refacciones
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <input type="text" id="buscarProducto" class="form-control" placeholder="Buscar producto en inventario...">
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-primary" id="btnBuscarProducto">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tabla de productos seleccionados -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm" id="tablaProductosSeleccionados">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>SKU</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio Unitario</th>
+                                    <th>Subtotal</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Productos añadidos dinámicamente -->
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4" class="text-right font-weight-bold">Total Materiales:</td>
+                                    <td id="totalMateriales" class="font-weight-bold">$0.00</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/greparaciones.js"></script>
+    <script src="js/materiales-reparacion.js"></script>
+    <script src="js/custom.js"></script>
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="js/sb-admin-2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+</body>
+</html>

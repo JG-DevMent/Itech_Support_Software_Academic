@@ -57,4 +57,18 @@ exports.loginUsuario = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: 'Error al iniciar sesión' });
   }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const usuario = await usuariosModel.obtenerPorEmail(email);
+    if (!usuario) {
+      return res.status(404).json({ error: 'No se encontró ninguna cuenta asociada a este correo electrónico.' });
+    }
+    // Aquí deberías enviar el correo real de recuperación, pero por ahora solo responde OK
+    res.json({ mensaje: 'Correo de restablecimiento enviado.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al procesar la solicitud de restablecimiento.' });
+  }
 }; 

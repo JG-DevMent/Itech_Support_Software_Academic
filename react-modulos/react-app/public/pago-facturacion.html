@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITECH SUPPORT - Pago y Facturación</title>
+    <link rel="icon" type="image/png" href="img/faviconitech.png">
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="css/custom.css" rel="stylesheet">
+</head>
+<body id="page-top">
+    <div id="wrapper">
+        <ul class="navbar-nav sidebar sidebar-light accordion" id="accordionSidebar">
+            <div class="logo-container">
+                <a href="home.html">
+                    <img src="img/logo-itech-support.png" alt="ITECH SUPPORT"> 
+                </a>
+            </div>
+            <hr class="sidebar-divider my-0">
+            <li class="nav-item">
+                <a class="nav-link" href="home.html">
+                    <i class="fas fa-home"></i>
+                    <span>Inicio</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="gestion-reparacion.html">
+                    <i class="fas fa-tools"></i>
+                    <span>Gestión Reparación</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="verificar.html">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Verificar</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="ventas-informes.html">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Ventas e informes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="clientes.html">
+                    <i class="fas fa-users"></i>
+                    <span>Clientes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="inventario.html">
+                    <i class="fas fa-boxes"></i>
+                    <span>Inventario</span>
+                </a>
+            </li>           
+            <li class="nav-item active">
+                <a class="nav-link" href="pago-facturacion.html">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Pago y Facturación</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="ayuda-soporte.html">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Ayuda y soporte</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="configuracion.html">
+                    <i class="fas fa-cog"></i>
+                    <span>Ajustes</span>
+                </a>
+            </li>
+            <hr class="sidebar-divider d-none d-md-block">
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="cerrarSesion()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Cerrar sesión</span>
+                </a>
+            </li>
+        </ul>
+
+        <div id="content-wrapper">
+            <div id="content">
+                <nav class="navbar-title">
+                    <button id="sidebarToggleCustom" class="btn-toggle-sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>Itech Support</h1>
+                </nav>
+                <div class="card-box-center">
+                    <div class="card-body">
+                        <h1 class="text-h1">Pago y Facturación</h1>
+                        <div class="pos-system">
+                            <!-- Panel lateral izquierdo (búsqueda y lista) -->
+                            <div class="pos-sidebar" id="screen1">
+                                <div class="col-md-4 col-sm-12 mx-auto mb-2">
+                                    <div class="pos-search-panel ">
+                                        <form id="formBusquedaFacturacion" autocomplete="off">
+                                            <div class="form-group mb-3">
+                                                <label for="repairId" class="font-weight-bold">ID de Reparación <span class="required-mark">*</span></label>
+                                                <div class="input-group input-group-lg">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text bg-white"><i class="fas fa-tools"></i></span>
+                                                    </div>
+                                                    <input type="number" id="repairId" class="form-control" placeholder="ID de reparación" required>
+                                                </div>
+                                                <div class="invalid-feedback" id="repairIdError"></div>
+                                            </div>
+                                            <button id="searchButton" class="btnfactus btn-block btn-lg mt-3" type="button" style="font-weight:bold;"><i class="fas fa-search"></i> Buscar Reparación</button>
+                                        </form>
+                                        
+                                        <div class="pos-history">
+                                            <h4><i class="fas fa-history"></i> Búsquedas Recientes</h4>
+                                            <div class="pos-history-list" id="searchHistory">
+                                                <!-- Se llenará dinámicamente -->
+                                            </div>
+                                            <div class="text-center mt-3">
+                                                <button id="btnLimpiarHistorial" class="btn btn-secondary btn-sm">
+                                                    <i class="fas fa-eraser"></i> Limpiar Historial
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Panel central (información de reparación) - Visible en Pantalla 2 -->
+                            <div class="pos-content hidden" id="screen2">
+                                <div class="col-md-8 col-sm-12 mx-auto mb-2">
+                                    <div class="pos-header">
+                                        <h2><i class="fas fa-info-circle"></i> Detalles de la Reparación</h2>
+                                        <div class="pos-header-actions">
+                                            <button id="backToScreen1Button" class="btn-circle btn-sm btnreverse">
+                                                <i class="fas fa-arrow-left"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="pos-details-container">
+                                        <div class="pos-box client-details">
+                                            <div class="pos-box-header">
+                                                <h3><i class="fas fa-user"></i> Datos del Cliente</h3>
+                                            </div>
+                                            <div class="pos-box-content">
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Cédula/NIT:</span>
+                                                    <span class="detail-value" id="displayClientId"></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Nombre:</span>
+                                                    <span class="detail-value" id="displayClientName"></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Teléfono:</span>
+                                                    <span class="detail-value" id="displayClientPhone"></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Correo:</span>
+                                                    <span class="detail-value" id="displayClientEmail"></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Dirección:</span>
+                                                    <span class="detail-value" id="displayClientAddress"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="pos-box repair-details">
+                                            <div class="pos-box-header">
+                                                <h3><i class="fas fa-tools"></i> Datos de la Reparación</h3>
+                                            </div>
+                                            <div class="pos-box-content">
+                                                <div class="detail-row">
+                                                    <span class="detail-label">ID Reparación:</span>
+                                                    <span class="detail-value" id="displayRepairId"></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Dispositivo:</span>
+                                                    <span class="detail-value" id="displayDevice"></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Marca/Modelo:</span>
+                                                    <span class="detail-value" id="displayBrandModel"></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="detail-label">IMEI/Serial:</span>
+                                                    <span class="detail-value" id="displayImei"></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Problema:</span>
+                                                    <span class="detail-value" id="displayIssue"></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Descripción:</span>
+                                                    <span class="detail-value" id="displayDescription"></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Costo:</span>
+                                                    <span class="detail-value">
+                                                        <span id="currencySymbol" class="currency-symbol">$</span> 
+                                                        <span id="displayCost"></span>
+                                                    </span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Fecha:</span>
+                                                    <span class="detail-value" id="displayDate"></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Estado:</span>
+                                                    <span class="detail-value status-completed" id="displayStatus"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="pos-actions">
+                                        <button id="billingButton" class="btnfactus btn-lg" type="button">
+                                            <i class="fas fa-dollar-sign"></i> Proceder al Pago
+                                        </button>
+                                    </div>
+                                </div>    
+                            </div>
+                            
+                            <!-- Panel de pago (Pantalla 3) -->
+                            <div class="pos-content hidden" id="screen3">
+                                <div class="col-md-8 col-sm-12 mx-auto mb-2">
+                                    <div class="pos-header">
+                                        <h2><i class="fas fa-credit-card"></i> Método de Pago</h2>
+                                        <div class="pos-header-actions">
+                                            <button id="backToScreen2Button" class="btn-circle btn-sm btnreverse">
+                                                <i class="fas fa-arrow-left"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="pos-payment-container">
+                                        <div class="pos-box summary-details">
+                                            <div class="pos-box-header">
+                                                <h3><i class="fas fa-file-invoice-dollar"></i> Resumen</h3>
+                                            </div>
+                                            <div class="pos-box-content">
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Cliente:</span>
+                                                    <span class="detail-value" id="summaryClientName"></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Servicio:</span>
+                                                    <span class="detail-value" id="summaryService"></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Dispositivo:</span>
+                                                    <span class="detail-value" id="summaryDevice"></span>
+                                                </div>
+                                                <div class="detail-row highlight">
+                                                    <span class="detail-label">Total a Pagar:</span>
+                                                    <span class="detail-value total-amount">
+                                                        <span class="currency-symbol">$</span> 
+                                                        <span id="summaryTotal"></span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="pos-box payment-methods">
+                                            <div class="pos-box-header">
+                                                <h3><i class="fas fa-money-bill-wave"></i> Seleccione Método de Pago</h3>
+                                            </div>
+                                            <div class="pos-box-content">
+                                                <div class="payment-options">
+                                                    <div class="payment-option-row">
+                                                        <label class="payment-option" for="payment-cash">
+                                                            <input type="radio" name="paymentMethod" id="payment-cash" value="Efectivo">
+                                                            <div class="payment-option-content">
+                                                                <i class="fas fa-money-bill-wave"></i>
+                                                                <span>Efectivo</span>
+                                                            </div>
+                                                        </label>
+                                                        
+                                                        <label class="payment-option" for="payment-debit">
+                                                            <input type="radio" name="paymentMethod" id="payment-debit" value="Tarjeta Débito">
+                                                            <div class="payment-option-content">
+                                                                <i class="fas fa-credit-card"></i>
+                                                                <span>Tarjeta Débito</span>
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                    
+                                                    <div class="payment-option-row">
+                                                        <label class="payment-option" for="payment-credit">
+                                                            <input type="radio" name="paymentMethod" id="payment-credit" value="Tarjeta Crédito">
+                                                            <div class="payment-option-content">
+                                                                <i class="far fa-credit-card"></i>
+                                                                <span>Tarjeta Crédito</span>
+                                                            </div>
+                                                        </label>
+                                                        
+                                                        <label class="payment-option" for="payment-transfer">
+                                                            <input type="radio" name="paymentMethod" id="payment-transfer" value="Transferencia Bancaria">
+                                                            <div class="payment-option-content">
+                                                                <i class="fas fa-university"></i>
+                                                                <span>Transferencia</span>
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                    
+                                                    <div class="payment-option-row">
+                                                        <label class="payment-option" for="payment-nequi">
+                                                            <input type="radio" name="paymentMethod" id="payment-nequi" value="Nequi">
+                                                            <div class="payment-option-content">
+                                                                <i class="fas fa-mobile-alt"></i>
+                                                                <span>Nequi</span>
+                                                            </div>
+                                                        </label>
+                                                        
+                                                        <label class="payment-option" for="payment-daviplata">
+                                                            <input type="radio" name="paymentMethod" id="payment-daviplata" value="Daviplata">
+                                                            <div class="payment-option-content">
+                                                                <i class="fas fa-wallet"></i>
+                                                                <span>Daviplata</span>
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="payment-instruction"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="pos-actions">
+                                        <button id="generateInvoiceButton" class="btnfactus btn-lg">
+                                            <i class="fas fa-file-invoice"></i> Generar Factura
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Sección para mostrar la factura -->
+                                <div id="invoiceSection" class="hidden mt-4 p-4 border rounded invoice-container">
+                                    <div class="invoice-success-message no-print">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>¡Pago procesado correctamente!</span>
+                                    </div>
+                                    
+                                    <div class="invoice-content">
+                                        <div class="invoice-header">
+                                            <div id="invoiceLogo" class="text-center mb-3"></div>
+                                            <div id="invoiceTitle" class="invoice-title">Factura de Servicio</div>
+                                            <div id="invoiceCompany" class="invoice-company">Itech Support</div>
+                                            <div id="invoiceTagline" class="invoice-tagline">Se más seguro con nosotros.</div>
+                                            <div id="invoiceHeaderNotes" class="small text-muted mt-2"></div>
+                                        </div>
+                                        
+                                        <div class="invoice-details">
+                                            <div class="invoice-details-left">
+                                                <h3>Datos del Cliente</h3>
+                                                <p><strong>Cliente:</strong> <span id="invoiceClientName"></span></p>
+                                                <p><strong>Cédula/NIT:</strong> <span id="invoiceClientId"></span></p>
+                                                <p><strong>Teléfono:</strong> <span id="invoiceClientPhone"></span></p>
+                                                <p><strong>Correo:</strong> <span id="invoiceClientEmail"></span></p>
+                                                <p><strong>Dirección:</strong> <span id="invoiceClientAddress"></span></p>
+                                            </div>
+                                            <div class="invoice-details-right">
+                                                <h3>Detalles de la Factura</h3>
+                                                <p><strong>Factura #:</strong> <span id="invoiceNumber"></span></p>
+                                                <p><strong>Fecha:</strong> <span id="invoiceDate"></span></p>
+                                                <p><strong>Método de Pago:</strong> <span id="invoicePaymentMethod"></span></p>
+                                                <p><strong>Estado:</strong> <span style="color: green; font-weight: bold;">PAGADO</span></p>
+                                            </div>
+                                        </div>
+                                        
+                                        <table class="invoice-table">
+                                            <thead>
+                                                <tr>
+                                                    <th width="40%">Descripción</th>
+                                                    <th width="30%">Dispositivo</th>
+                                                    <th width="15%">IMEI/Serial</th>
+                                                    <th width="15%">Precio</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="invoiceTableBody">
+                                                <!-- Se llenará dinámicamente -->
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <th colspan="3" style="text-align: right;">Subtotal</th>
+                                                    <td><span class="currency-symbol">$</span> <span id="invoiceSubtotal"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <th colspan="3" style="text-align: right;">
+                                                        IVA (<span id="invoiceTaxRate">19</span>%)
+                                                    </th>
+                                                    <td><span class="currency-symbol">$</span> <span id="invoiceTax"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <th colspan="3" style="text-align: right;">Total</th>
+                                                    <td><span class="currency-symbol">$</span> <span id="invoiceTotal"></span></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                        
+                                        <div id="invoiceQrcode" class="text-center mt-3"></div>
+                                        
+                                        <div class="invoice-footer">
+                                            <p id="invoiceFooterText">Gracias por su preferencia</p>
+                                            <p id="invoiceTerms" class="small text-muted"></p>
+                                            <p id="invoiceContact" class="small"></p>
+                                            <div id="invoiceSocial" class="invoice-social"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="invoice-actions no-print">
+                                        <button id="printButton" class="btnfactus">
+                                            <i class="fas fa-print"></i> Imprimir Factura
+                                        </button>
+                                        <button id="emailButton" class="btnfactus">
+                                            <i class="fas fa-envelope"></i> Enviar por Email
+                                        </button>
+                                        <button id="downloadButton" class="btnfactus">
+                                            <i class="fas fa-download"></i> Descargar PDF
+                                        </button>
+                                        <button id="newTransactionButton" class="btnfactus">
+                                            <i class="fas fa-plus-circle"></i> Nueva Transacción
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="js/sb-admin-2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js" integrity="sha256-DJ6QiK+jMjtUmsXGdGNbWcW4E8gF8CQV8YF5EZl5K04=" crossorigin="anonymous"></script>
+    <script src="js/facturacion.js"></script>
+    <script src="js/custom.js"></script>
+</body>
+</html>
