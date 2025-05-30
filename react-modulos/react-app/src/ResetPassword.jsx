@@ -1,25 +1,34 @@
+// Importamos React y useState para manejar el estado
 import React, { useState } from 'react';
+// Importamos useNavigate y Link para la navegación con React Router
 import { useNavigate, Link } from 'react-router-dom';
 
+// Creamos el componente funcional ResetPassword
 function ResetPassword() {
+  // Definimos los estados para el email y el estado de carga
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  // Hook para navegación programática
   const navigate = useNavigate();
 
+  // Función que maneja el envío del formulario de restablecimiento de contraseña
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
+      // Realizamos la petición al backend para enviar el correo de restablecimiento de contraseña
       const response = await fetch('http://localhost:4000/api/usuarios/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
       });
       if (!response.ok) {
+        // Si la respuesta no es exitosa, mostramos un mensaje de error
         alert('No se pudo enviar el correo. Verifique el email.');
         setLoading(false);
         return;
       }
+      // Si la respuesta es exitosa, mostramos un mensaje de éxito
       alert('Correo de restablecimiento enviado.');
       navigate('/');
     } catch (error) {
@@ -28,6 +37,7 @@ function ResetPassword() {
     setLoading(false);
   };
 
+  // Renderizamos el formulario de restablecimiento de contraseña
   return (
     <div className="login-container">
       <div className="card-body-login">
@@ -37,6 +47,7 @@ function ResetPassword() {
           </div>
           <h1 className="h1-login">Restablecer Contraseña</h1>
         </div>
+        {/* Formulario de restablecimiento de contraseña */}
         <form className="user" onSubmit={handleSubmit}>
           <div className="form-group">
             <input
@@ -61,4 +72,5 @@ function ResetPassword() {
   );
 }
 
+// Exportamos el componente ResetPassword para que pueda ser utilizado en otros archivos
 export default ResetPassword; 

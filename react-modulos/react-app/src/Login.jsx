@@ -1,14 +1,21 @@
+// Importamos React y useState para manejar el estado
 import React, { useState } from 'react';
+// Importamos useNavigate y Link para la navegación con React Router
 import { useNavigate, Link } from 'react-router-dom';
 
+// Creamos el componente funcional Login
 function Login() {
+  // Definimos los estados para el usuario y la contraseña
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  // Hook para navegación programática
   const navigate = useNavigate();
 
+  // Función que maneja el envío del formulario de login
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Realizamos la petición al backend para autenticar el usuario
       const response = await fetch('http://localhost:4000/api/usuarios/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -18,6 +25,7 @@ function Login() {
         alert('Usuario o contraseña incorrectos. Intente nuevamente.');
         return;
       }
+      // Si la autenticación es exitosa, guardamos el usuario en sessionStorage
       const user = await response.json();
       sessionStorage.setItem('currentUser', JSON.stringify(user));
       alert('¡Bienvenido ' + user.username + '!');
@@ -27,6 +35,7 @@ function Login() {
     }
   };
 
+  // Renderizamos el formulario de login
   return (
     <div className="login-container">
       <div className="card-body-login">
@@ -36,6 +45,7 @@ function Login() {
           </div>
           <h1 className="h1-login">¡Bienvenido a ITECH SUPPORT!</h1>
         </div>
+        {/* Formulario de login */}
         <form className="user" onSubmit={handleSubmit}>
           <div className="form-group">
             <input
@@ -71,4 +81,5 @@ function Login() {
   );
 }
 
+// Exportamos el componente Login para que pueda ser utilizado en otros archivos
 export default Login; 

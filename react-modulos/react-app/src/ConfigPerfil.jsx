@@ -1,9 +1,14 @@
+// Importamos React y useState para manejar el estado
 import React, { useState, useEffect } from 'react';
+// Importamos Link para la navegación con React Router
 import { Link } from 'react-router-dom';
 
+// Creamos el componente funcional ConfigPerfil
 function ConfigPerfil() {
+  // Definimos los estados para los usuarios y el estado de mostrar la lista de usuarios
   const [usuarios, setUsuarios] = useState([]);
   const [mostrarLista, setMostrarLista] = useState(false);
+  // Definimos el estado para el formulario de usuario
   const [form, setForm] = useState({
     username: '',
     email: '',
@@ -12,12 +17,14 @@ function ConfigPerfil() {
     role: ''
   });
 
+  // Hook para la ejecución de efectos
   useEffect(() => {
     if (mostrarLista) {
       fetchUsuarios();
     }
   }, [mostrarLista]);
 
+  // Función para obtener los usuarios
   const fetchUsuarios = async () => {
     try {
       const res = await fetch('http://localhost:4000/api/usuarios');
@@ -28,13 +35,16 @@ function ConfigPerfil() {
     }
   };
 
+  // Función para manejar los cambios en el formulario
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // Función para manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Realizamos la petición al backend para crear un nuevo usuario
       const res = await fetch('http://localhost:4000/api/usuarios', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -52,6 +62,7 @@ function ConfigPerfil() {
     }
   };
 
+  // Renderizamos el componente ConfigPerfil
   return (
     <div className="card-box">
       <div className="card-body">
@@ -70,6 +81,7 @@ function ConfigPerfil() {
           </button>
         </div>
         {mostrarLista ? (
+          // Lista de usuarios
           <div id="userListContainer">
             <h2 className="text-h2 mb-3">Lista de Usuarios</h2>
             <div className="table-responsive">
@@ -96,6 +108,7 @@ function ConfigPerfil() {
             </div>
           </div>
         ) : (
+          // Formulario para crear un nuevo usuario
           <form id="profileForm" className="formbox" onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="username">Nombre de Usuario <span className="text-danger">*</span></label>
@@ -137,4 +150,5 @@ function ConfigPerfil() {
   );
 }
 
+// Exportamos el componente ConfigPerfil para que pueda ser utilizado en otros archivos
 export default ConfigPerfil; 
