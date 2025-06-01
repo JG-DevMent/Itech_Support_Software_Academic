@@ -1,5 +1,6 @@
 const usuariosModel = require('../models/usuariosModel');
 
+// Listar todos los usuarios
 exports.listarUsuarios = async (req, res) => {
   try {
     const usuarios = await usuariosModel.obtenerTodos();
@@ -9,6 +10,7 @@ exports.listarUsuarios = async (req, res) => {
   }
 };
 
+// Obtener un usuario por ID
 exports.obtenerUsuarioPorId = async (req, res) => {
   try {
     const usuario = await usuariosModel.obtenerPorId(req.params.id);
@@ -19,6 +21,7 @@ exports.obtenerUsuarioPorId = async (req, res) => {
   }
 };
 
+// Crear un nuevo usuario
 exports.crearUsuario = async (req, res) => {
   try {
     const nuevoUsuario = await usuariosModel.crear(req.body);
@@ -28,6 +31,7 @@ exports.crearUsuario = async (req, res) => {
   }
 };
 
+// Actualizar un usuario por ID
 exports.actualizarUsuario = async (req, res) => {
   try {
     const actualizado = await usuariosModel.actualizar(req.params.id, req.body);
@@ -38,6 +42,7 @@ exports.actualizarUsuario = async (req, res) => {
   }
 };
 
+// Eliminar un usuario por ID
 exports.eliminarUsuario = async (req, res) => {
   try {
     const eliminado = await usuariosModel.eliminar(req.params.id);
@@ -48,6 +53,7 @@ exports.eliminarUsuario = async (req, res) => {
   }
 };
 
+// Iniciar sesión de usuario
 exports.loginUsuario = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -59,6 +65,7 @@ exports.loginUsuario = async (req, res) => {
   }
 };
 
+// Restablecer contraseña
 exports.resetPassword = async (req, res) => {
   try {
     const { email } = req.body;
