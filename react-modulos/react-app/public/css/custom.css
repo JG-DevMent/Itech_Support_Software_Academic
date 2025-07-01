@@ -1414,13 +1414,13 @@ h3 {
 .logo-container img{
     max-width: 90%;
     height: auto;
-    border-radius: 50%; /* Hace que el logo sea circular */
+    border-radius: 30%; /* Hace que el logo sea circular */
 }
 
 .logo-container-login img {
     max-width: 50%;
     height: auto;
-    border-radius: 50%; /* Hace que el logo sea circular */
+    border-radius: 30%; /* Hace que el logo sea circular */
 }
 
 /* Estilos para la página de Verificar */
