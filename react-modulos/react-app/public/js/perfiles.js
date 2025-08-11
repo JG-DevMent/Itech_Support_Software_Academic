@@ -246,8 +246,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (userListContainer) {
         loadUserTable();
     }
+});
     
-    // Crear usuario administrador por defecto si no existe ninguno
+    /*// Crear usuario administrador por defecto si no existe ninguno
     function createDefaultAdmin() {
         const users = JSON.parse(localStorage.getItem('users')) || [];
         
@@ -269,5 +270,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Inicializar con un usuario administrador por defecto
-    createDefaultAdmin();
-});
+    createDefaultAdmin(); 
+}); */
