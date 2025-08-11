@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const repairs = await getRepairsFromBackend();
             if (repairs.length === 0) {
-                console.log('No hay reparaciones disponibles en el backend');
+                console.log('No hay reparaciones disponible');
                 return;
             }
             searchHistory.innerHTML = '';
@@ -206,9 +206,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const clientName = repair.nombreCliente || repair.cliente || 'Cliente';
                 addToSearchHistory(id.toString(), clientName);
             });
-            console.log('Historial de búsquedas cargado con las últimas reparaciones (backend)');
+            console.log('Historial de búsquedas cargado con las últimas reparaciones');
         } catch (error) {
-            console.error('Error cargando reparaciones para el historial (backend):', error);
+            console.error('Error cargando reparaciones para el historial:', error);
         }
     }
     

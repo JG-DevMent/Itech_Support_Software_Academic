@@ -336,12 +336,7 @@
                                     </div>
                                 </div>
                                 <!-- Sección para mostrar la factura -->
-                                <div id="invoiceSection" class="hidden mt-4 p-4 border rounded invoice-container">
-                                    <div class="invoice-success-message no-print">
-                                        <i class="fas fa-check-circle"></i>
-                                        <span>¡Pago procesado correctamente!</span>
-                                    </div>
-                                    
+                                <div id="invoiceSection" class="hidden mt-4 p-4 border rounded invoice-container">                                    
                                     <div class="invoice-content">
                                         <div class="invoice-header">
                                             <div id="invoiceLogo" class="text-center mb-3"></div>
@@ -434,6 +429,14 @@
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="js/sb-admin-2.min.js"></script>
+        <!-- Librería html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+            integrity="sha512-BNaRQnY1Wk6yex/2Q7V7mKcJavk13Hv2XhN6jXbC9G1mpV+fNflQoXwFTvKizxT3wCzI2v23UmyIZ3jzlcNn3g=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- Librería jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+            integrity="sha512-Ys7gZj8J7cRU8nZrAZMszQ0XUWWV3UyS+dX9zOibV6UwlF4iUlR1wWMLWf+cP1FJXUeQyT1Lk6PBb0ijR9xKnQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js" integrity="sha256-DJ6QiK+jMjtUmsXGdGNbWcW4E8gF8CQV8YF5EZl5K04=" crossorigin="anonymous"></script>
     <script src="js/facturacion.js"></script>

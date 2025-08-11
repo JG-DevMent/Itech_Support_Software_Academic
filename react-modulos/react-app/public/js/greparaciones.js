@@ -226,7 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         if (clienteActual.nombre) {
             infoCliente.innerHTML = `<strong>Cliente:</strong> ${clienteActual.nombre} | Email: ${clienteActual.email} | Tel: ${clienteActual.telefono}`;
-            infoCliente.style.color = '#28a745';
+            infoCliente.style.color = '#69b4fa';
         }
         document.getElementById('dispositivo').value = rep.dispositivo;
         document.getElementById('marcaModelo').value = rep.marcaModelo;
@@ -348,64 +348,153 @@ document.addEventListener("DOMContentLoaded", () => {
             tablaCuerpo.innerHTML += row;
         });
     }
-    
+
+// NUEVA VERSIÓN MEJORADA DE IMPRESIÓN
     window.imprimirMateriales = function(index) {
-        const rep = listaReparaciones[index];
-        let fechaMostrar = formatearFechaColombia(rep.fecha_registro || rep.fecha || '');
-        let html = `
-        <div style='width:700px; margin:auto; font-family:Segoe UI,Arial,sans-serif; background:#fff; border-radius:12px; box-shadow:0 4px 24px #0002; border:1.5px solid #e9ecef; padding:32px 32px 18px 32px;'>
-            <div style='display:flex; align-items:center; border-bottom:2.5px solid #218838; margin-bottom:22px; padding-bottom:10px;'>
-                <img src='img/logo-itech-support.png' alt='ITECH SUPPORT' style='height:60px; margin-right:24px;'>
+    const rep = listaReparaciones[index];
+    let fechaMostrar = formatearFechaColombia(rep.fecha_registro || rep.fecha || '');
+
+    let estilos = `
+        <style>
+            @page {
+                size: A4;
+                margin: 20mm;
+            }
+            body {
+                font-family: 'Segoe UI', Arial, sans-serif;
+                color: #333;
+                background: #fff;
+                margin: 0;
+                padding: 0;
+            }
+            .contenedor {
+                max-width: 800px;
+                margin: auto;
+                padding: 20px 30px;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            }
+            .cabecera {
+                display: flex;
+                align-items: center;
+                border-bottom: 3px solid #69b4fa;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+            }
+            .cabecera img {
+                height: 60px;
+                margin-right: 20px;
+            }
+            .cabecera h1 {
+                margin: 0;
+                color: #69b4fa;
+                font-size: 2em;
+            }
+            .subtitulo {
+                font-size: 1.1em;
+                color: #555;
+            }
+            .datos {
+                font-size: 1.05em;
+                margin-bottom: 20px;
+                line-height: 1.5em;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 1em;
+                margin-bottom: 20px;
+            }
+            thead {
+                background: #e7f1ff;
+            }
+            th, td {
+                border: 1px solid #ccc;
+                padding: 8px;
+            }
+            th {
+                color: #69b4fa;
+                text-align: left;
+            }
+            td {
+                color: #333;
+            }
+            .pie {
+                text-align: center;
+                font-size: 0.9em;
+                color: #777;
+                margin-top: 30px;
+            }
+            .pie b {
+                color: #69b4fa;
+            }
+        </style>
+    `;
+
+    let html = `
+        <div class="contenedor">
+            <div class="cabecera">
+                <img src="img/logo-itech-support.png" alt="ITECH SUPPORT">
                 <div>
-                    <h1 style='margin:0; color:#218838; font-size:2.3em; letter-spacing:1px;'>ITECH SUPPORT</h1>
-                    <div style='font-size:1.15em; color:#444; font-weight:500;'>Materiales usados en la reparación</div>
+                    <h1>Itech Support</h1>
+                    <div class="subtitulo">Materiales usados en la reparación</div>
                 </div>
             </div>
-            <div style='margin-bottom:14px; font-size:1.13em; color:#222;'>
-                <strong>ID Reparación:</strong> <span style='color:#007bff;'>${rep.id}</span><br>
+            <div class="datos">
+                <strong>ID Reparación:</strong> <span style="color:#69b4fa;">${rep.id}</span><br>
                 <strong>Cliente:</strong> ${rep.nombreCliente ? rep.nombreCliente : rep.cliente} (${rep.cliente})<br>
                 <strong>Dispositivo:</strong> ${rep.dispositivo}<br>
-                <strong>IMEI/Serial:</strong> <span style='color:#555;'>${rep.imei}</span><br>
+                <strong>IMEI/Serial:</strong> <span style="color:#555;">${rep.imei}</span><br>
                 <strong>Fecha:</strong> ${fechaMostrar}<br>
                 <strong>Estado:</strong> ${rep.estado}
             </div>
-            <hr style='border:0; border-top:1.5px solid #e9ecef; margin:18px 0;'>
-        `;
-        if (rep.materiales && rep.materiales.length > 0) {
-            html += `<table style='width:100%; border-collapse:collapse; margin-bottom:20px; font-size:1.08em;'>
-                <thead style='background:#e9ecef;'>
+    `;
+
+    if (rep.materiales && rep.materiales.length > 0) {
+        html += `
+            <table>
+                <thead>
                     <tr>
-                        <th style='padding:10px; border:1px solid #ccc; color:#218838;'>Nombre</th>
-                        <th style='padding:10px; border:1px solid #ccc; color:#218838;'>Cantidad</th>
-                        <th style='padding:10px; border:1px solid #ccc; color:#218838;'>Precio</th>
-                        <th style='padding:10px; border:1px solid #ccc; color:#218838;'>Subtotal</th>
+                        <th>Nombre</th>
+                        <th style="text-align:center;">Cantidad</th>
+                        <th style="text-align:right;">Precio</th>
+                        <th style="text-align:right;">Subtotal</th>
                     </tr>
                 </thead>
-                <tbody>`;
-            rep.materiales.forEach(mat => {
-                html += `<tr>
-                    <td style='padding:9px; border:1px solid #ccc;'>${mat.nombre}</td>
-                    <td style='padding:9px; border:1px solid #ccc; text-align:center;'>${mat.cantidad}</td>
-                    <td style='padding:9px; border:1px solid #ccc; text-align:right;'>${mat.precio}</td>
-                    <td style='padding:9px; border:1px solid #ccc; text-align:right;'>${mat.subtotal}</td>
-                </tr>`;
-            });
-            html += `</tbody></table>`;
-        } else {
-            html += `<p style='color:#c00;'>No hay materiales registrados para esta reparación.</p>`;
-        }
-        html += `            <div style='margin-top:32px; text-align:center; color:#888; font-size:1.08em;'>
-                <hr style='border:0; border-top:1px solid #e9ecef; margin:18px 0;'>
-                <div>Gracias por confiar en <b style='color:#218838;'>ITECH SUPPORT</b></div>
-                <div style='font-size:0.98em;'>www.itech-support.com</div>
-            </div>
-        </div>`;
-        const ventana = window.open('', '', 'width=800,height=600');
-        ventana.document.write(`<html><head><title>Impresión de Materiales</title></head><body>${html}</body></html>`);
-        ventana.document.close();
-        ventana.print();
+                <tbody>
+        `;
+        rep.materiales.forEach(mat => {
+            html += `
+                <tr>
+                    <td>${mat.nombre}</td>
+                    <td style="text-align:center;">${mat.cantidad}</td>
+                    <td style="text-align:right;">${mat.precio}</td>
+                    <td style="text-align:right;">${mat.subtotal}</td>
+                </tr>
+            `;
+        });
+        html += `</tbody></table>`;
+    } else {
+        html += `<p style="color:#c00;">No hay materiales registrados para esta reparación.</p>`;
     }
 
+    html += `
+            <div class="pie">
+                <hr style="border:0; border-top:1px solid #ccc; margin:18px 0;">
+                <div>Gracias por confiar en <b>Itech Support</b></div>
+                <div>www.itechsupport.com</div>
+            </div>
+        </div>
+    `;
+
+    const ventana = window.open('', '', 'width=800,height=600');
+    ventana.document.write(`<html><head><title>Impresión de Materiales</title>${estilos}</head><body>${html}</body></html>`);
+    ventana.document.close();
+    ventana.print();
+};
+
+    // Filtros
     filtroCliente.addEventListener('input', aplicarFiltros);
     filtroDispositivo.addEventListener('input', aplicarFiltros);
     filtroEstado.addEventListener('change', aplicarFiltros);
@@ -494,7 +583,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         if (clienteActual.nombre) {
             infoCliente.innerHTML = `<strong>Cliente:</strong> ${clienteActual.nombre} | Email: ${clienteActual.email} | Tel: ${clienteActual.telefono}`;
-            infoCliente.style.color = '#28a745';
+            infoCliente.style.color = '#69b4fa';
         }
         document.getElementById('dispositivo').value = rep.dispositivo;
         document.getElementById('marcaModelo').value = rep.marcaModelo;
