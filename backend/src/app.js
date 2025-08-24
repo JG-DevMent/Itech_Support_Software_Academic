@@ -18,6 +18,11 @@ app.use('/api/historial-busquedas', require('./routes/historialBusquedas'));
 app.use('/api/ventas', require('./routes/ventas'));
 console.log('Rutas de usuarios, configuración de tienda, clientes, inventario, reparaciones, facturas, historial de búsquedas y ventas cargadas');
 
+// Ruta protegida de ejemplo para probar JWT
+app.get('/api/protected', require('./middleware/auth').authenticateToken, (req, res) => {
+  res.json({ mensaje: 'Ruta protegida accesible', usuario: req.user });
+});
+
 app.get('/', (req, res) => {
   res.send('API de Itech Support corriendo');
 });

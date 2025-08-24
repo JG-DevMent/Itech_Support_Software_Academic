@@ -24,14 +24,27 @@ function ConfigPerfil() {
     }
   }, [mostrarLista]);
 
+  // Función auxiliar para obtener el token
+  const getToken = () => sessionStorage.getItem('jwtToken');
+
   // Función para obtener los usuarios
   const fetchUsuarios = async () => {
     try {
-      const res = await fetch('http://localhost:4000/api/usuarios');
+      const token = getToken();
+      const res = await fetch('http://localhost:4000/api/usuarios', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error('No autorizado o error en servidor');
+      }
+
       const data = await res.json();
       setUsuarios(data);
     } catch (error) {
-      alert('Error al cargar usuarios');
+      alert('Error al cargar usuarios: ' + error.message);
     }
   };
 
@@ -44,16 +57,21 @@ function ConfigPerfil() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Realizamos la petición al backend para crear un nuevo usuario
+      const token = getToken();
       const res = await fetch('http://localhost:4000/api/usuarios', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(form)
       });
+
       if (!res.ok) {
         alert('Error al crear usuario');
         return;
       }
+
       alert('Usuario creado correctamente');
       setForm({ username: '', email: '', password: '', phone: '', role: '' });
       if (mostrarLista) fetchUsuarios();
@@ -151,4 +169,4 @@ function ConfigPerfil() {
 }
 
 // Exportamos el componente ConfigPerfil para que pueda ser utilizado en otros archivos
-export default ConfigPerfil; 
+export default ConfigPerfil;

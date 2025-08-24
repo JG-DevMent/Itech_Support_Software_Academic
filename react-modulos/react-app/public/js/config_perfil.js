@@ -1,39 +1,49 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
+    // Obtener token guardado (SessionStorage o LocalStorage según tu implementación)
+    const token = sessionStorage.getItem('jwtToken') || localStorage.getItem('jwtToken');
+
+    // Si no hay token, no debe permitir cargar usuarios
+    if (!token) {
+        alert('No tienes sesión activa. Por favor inicia sesión.');
+        window.location.href = '/login.html'; // ajusta ruta según tu login
+        return;
+    }
+
     // Cargar usuarios al inicio
     cargarUsuarios();
-    
+
     // Configuración de botones y formulario
     const showUserListBtn = document.getElementById('showUserList');
     const showUserFormBtn = document.getElementById('showUserForm');
     const userListContainer = document.getElementById('userListContainer');
     const profileForm = document.getElementById('profileForm');
     const cancelButton = document.getElementById('cancelButton');
-    
-    showUserListBtn.addEventListener('click', function() {
+
+    showUserListBtn.addEventListener('click', function () {
         userListContainer.style.display = 'block';
         profileForm.style.display = 'none';
         cargarUsuarios(); // Recargar usuarios al mostrar la lista
     });
-    
-    showUserFormBtn.addEventListener('click', function() {
+
+    showUserFormBtn.addEventListener('click', function () {
         userListContainer.style.display = 'none';
         profileForm.style.display = 'block';
         resetForm();
     });
-    
-    cancelButton.addEventListener('click', function() {
+
+    cancelButton.addEventListener('click', function () {
         resetForm();
         userListContainer.style.display = 'block';
         profileForm.style.display = 'none';
     });
-    
+
     // Manejo del formulario
     let editando = false;
     let usuarioEditandoId = null;
-    
-    profileForm.addEventListener('submit', async function(e) {
+
+    profileForm.addEventListener('submit', async function (e) {
         e.preventDefault();
-        
+
         const usuario = {
             username: document.getElementById('username').value,
             email: document.getElementById('email').value,
@@ -41,12 +51,16 @@ document.addEventListener('DOMContentLoaded', function() {
             telefono: document.getElementById('phone').value,
             rol: document.getElementById('role').value
         };
+
         try {
             if (editando && usuarioEditandoId) {
                 // Actualizar usuario
                 const response = await fetch(`http://localhost:4000/api/usuarios/${usuarioEditandoId}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
                     body: JSON.stringify(usuario)
                 });
                 if (!response.ok) throw new Error('Error actualizando usuario');
@@ -55,7 +69,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Crear usuario
                 const response = await fetch('http://localhost:4000/api/usuarios', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
                     body: JSON.stringify(usuario)
                 });
                 if (!response.ok) {
@@ -73,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Error de conexión con el servidor.');
         }
     });
-    
+
     // Función para resetear el formulario
     function resetForm() {
         profileForm.reset();
@@ -81,12 +98,18 @@ document.addEventListener('DOMContentLoaded', function() {
         usuarioEditandoId = null;
         document.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Guardar Usuario';
     }
-    
+
     // Función para cargar usuarios
     async function cargarUsuarios() {
         try {
-            const response = await fetch('http://localhost:4000/api/usuarios');
+            const response = await fetch('http://localhost:4000/api/usuarios', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!response.ok) throw new Error('No autorizado o error en el servidor');
             const usuarios = await response.json();
+
             const tbody = document.getElementById('userTableBody');
             tbody.innerHTML = '';
             if (!usuarios.length) {
@@ -117,14 +140,14 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             // Configurar botones de editar
             document.querySelectorAll('.editar-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', function () {
                     const id = this.getAttribute('data-id');
                     editarUsuario(id);
                 });
             });
             // Configurar botones de eliminar
             document.querySelectorAll('.eliminar-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', function () {
                     const id = this.getAttribute('data-id');
                     eliminarUsuario(id);
                 });
@@ -133,11 +156,15 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Error cargando usuarios desde el servidor.');
         }
     }
-    
+
     // Función para editar usuario
     async function editarUsuario(id) {
         try {
-            const response = await fetch(`http://localhost:4000/api/usuarios/${id}`);
+            const response = await fetch(`http://localhost:4000/api/usuarios/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             if (!response.ok) throw new Error('Usuario no encontrado');
             const usuario = await response.json();
             document.getElementById('username').value = usuario.username;
@@ -155,13 +182,16 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Error al cargar usuario para editar.');
         }
     }
-    
+
     // Función para eliminar usuario
     async function eliminarUsuario(id) {
         if (confirm('¿Estás seguro de eliminar este usuario?')) {
             try {
                 const response = await fetch(`http://localhost:4000/api/usuarios/${id}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
                 if (!response.ok) throw new Error('Error eliminando usuario');
                 cargarUsuarios();
@@ -171,4 +201,4 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-}); 
+});

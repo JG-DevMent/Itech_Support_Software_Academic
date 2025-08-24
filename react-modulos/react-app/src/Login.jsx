@@ -22,13 +22,22 @@ function Login() {
         body: JSON.stringify({ username, password })
       });
       if (!response.ok) {
-        alert('Usuario o contraseña incorrectos. Intente nuevamente.');
+        const errorData = await response.json();
+        alert(errorData.error || 'Usuario o contraseña incorrectos. Intente nuevamente.');
         return;
       }
-      // Si la autenticación es exitosa, guardamos el usuario en sessionStorage
-      const user = await response.json();
-      sessionStorage.setItem('currentUser', JSON.stringify(user));
-      alert('¡Bienvenido ' + user.username + '!');
+      
+      // Si la autenticación es exitosa, guardamos el usuario y token en sessionStorage
+      const userData = await response.json();
+      
+      // Guardar token JWT
+      sessionStorage.setItem('jwtToken', userData.token);
+      
+      // Guardar datos del usuario (sin el token)
+      const { token, ...userInfo } = userData;
+      sessionStorage.setItem('currentUser', JSON.stringify(userInfo));
+      
+      alert('¡Bienvenido ' + userInfo.username + '!');
       window.location.href = '/home.html';
     } catch (error) {
       alert('Error de conexión con el servidor.');

@@ -48,10 +48,20 @@ module.exports = {
     return result.affectedRows > 0;
   },
 
-  //Login de usuario
+  //Login de usuario - Diferenciando mayúsculas y minúsculas
   async login(username, password) {
-    const [rows] = await pool.query('SELECT id, username, email, telefono, rol FROM usuarios WHERE username = ? AND password = ?', [username, password]);
+    // Usamos BINARY para hacer la comparación case-sensitive
+    const [rows] = await pool.query(
+      'SELECT id, username, email, telefono, rol, password FROM usuarios WHERE BINARY username = ? AND BINARY password = ?', 
+      [username, password]
+    );
     return rows[0];
+  },
+
+  // Obtener un usuario por username (case-sensitive)
+  async obtenerPorUsername(username) {
+    const [rows] = await pool.query('SELECT * FROM usuarios WHERE BINARY username = ?', [username]);
+    return rows;
   },
 
   // Obtener un usuario por email
