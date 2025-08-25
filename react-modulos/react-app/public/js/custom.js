@@ -304,61 +304,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Ejecutar la configuración del sidebar
     setupSidebarToggle();
     
-    //Graficas Dashboard SIMULACION (si estamos en home.html)
-    if (window.location.pathname.includes('home.html')) {
-        try {
-            // Gráfica 1: Refacciones más utilizadas
-            new Chart(document.getElementById("refaccionesutilizadas"), { 
-                type: 'bar',
-                data: {
-                    labels: ["Pantallas", "Baterias", "Cámaras", "Memoria", "U Almacenamiento", "Teclados"],
-                    datasets: [{
-                        label: "Refacciones",
-                        data: [10, 20, 15, 25, 30, 22],
-                        backgroundColor: 'rgba(149, 116, 29, 0.6)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Refacciones más utilizadas'
-                        }
-                    }
-                }
-            });
-
-            // Gráfica 2: Progreso de Clientes
-            new Chart(document.getElementById("progresoClientes"), {
-                type: 'line',
-                data: {
-                    labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun"],
-                    datasets: [{
-                        label: "Clientes Nuevos",
-                        data: [5, 10, 8, 12, 15, 14],
-                        borderColor: 'rgba(173, 139, 51, 0.9)',
-                        backgroundColor: 'rgba(173, 139, 51, 0.3)',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Progreso de Clientes'
-                        }
-                    }
-                }
-            });
-            
-        } catch (error) {
-            console.log("Error al cargar gráficas:", error);
-        }
-    }
-    
     // Código para el botón de chat (Ayuda y soporte)
     if (typeof toggleChat === 'function') {
         const chatButton = document.querySelector('.chat-button');
@@ -392,4 +337,3 @@ function cerrarSesion() {
   localStorage.clear();
   window.location.href = "/";
 }
-

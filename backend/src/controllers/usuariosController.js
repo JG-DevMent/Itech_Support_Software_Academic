@@ -81,7 +81,7 @@ exports.loginUsuario = async (req, res) => {
         rol: usuario.rol 
       },
       process.env.JWT_SECRET || 'L1k+qB&7cF$8Wm^2!zH*R9sX0nTj',
-      { expiresIn: '2h' }
+      { expiresIn: '24h' }
     );
     
     // Enviar respuesta con token y datos del usuario (sin contraseña)
