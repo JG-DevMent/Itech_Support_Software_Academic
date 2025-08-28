@@ -68,5 +68,14 @@ module.exports = {
   async obtenerPorEmail(email) {
     const [rows] = await pool.query('SELECT * FROM usuarios WHERE email = ?', [email]);
     return rows[0];
+  },
+
+  // Nuevo método para actualizar contraseña por email
+  async actualizarClave(email, nuevaClave) {
+    const [result] = await pool.query(
+      'UPDATE usuarios SET password = ? WHERE email = ?',
+      [nuevaClave, email]
+    );
+    return result.affectedRows > 0;
   }
 }; 

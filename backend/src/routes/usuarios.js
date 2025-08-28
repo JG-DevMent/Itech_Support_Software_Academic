@@ -1,17 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const usuariosController = require('../controllers/usuariosController');
-const { authenticateToken, requireRole } = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
 
 // Rutas públicas (sin autenticación)
 router.post('/login', usuariosController.loginUsuario);
 router.post('/reset-password', usuariosController.resetPassword);
+router.post('/confirm-reset-password', usuariosController.confirmResetPassword);
 
 // Rutas protegidas (requieren autenticación)
-router.get('/', authenticateToken, requireRole(['admin']), usuariosController.listarUsuarios);
+router.get('/', authenticateToken, usuariosController.listarUsuarios);
 router.get('/:id', authenticateToken, usuariosController.obtenerUsuarioPorId);
-router.post('/', authenticateToken, requireRole(['admin']), usuariosController.crearUsuario);
-router.put('/:id', authenticateToken, requireRole(['admin']), usuariosController.actualizarUsuario);
-router.delete('/:id', authenticateToken, requireRole(['admin']), usuariosController.eliminarUsuario);
+router.post('/', authenticateToken, usuariosController.crearUsuario);
+router.put('/:id', authenticateToken, usuariosController.actualizarUsuario);
+router.delete('/:id', authenticateToken, usuariosController.eliminarUsuario);
 
-module.exports = router; 
+module.exports = router;

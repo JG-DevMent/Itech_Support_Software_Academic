@@ -1,5 +1,6 @@
-const usuariosModel = require('../models/usuariosModel');
-const bcrypt = require('bcryptjs');
+const usuariosModel = require('../models/usuariosModel'); 
+const { enviarCorreo } = require('../services/emailService'); 
+const bcrypt = require('bcryptjs'); 
 const jwt = require('jsonwebtoken');
 
 // Listar todos los usuarios
@@ -80,8 +81,8 @@ exports.loginUsuario = async (req, res) => {
         username: usuario.username, 
         rol: usuario.rol 
       },
-      process.env.JWT_SECRET || 'L1k+qB&7cF$8Wm^2!zH*R9sX0nTj',
-      { expiresIn: '24h' }
+      process.env.JWT_SECRET,
+      { expiresIn: '2h' }
     );
     
     // Enviar respuesta con token y datos del usuario (sin contraseña)
@@ -98,7 +99,7 @@ exports.loginUsuario = async (req, res) => {
   }
 };
 
-// Restablecer contraseña
+// Paso 1: solicitar restablecimiento (envío de correo)
 exports.resetPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -106,9 +107,72 @@ exports.resetPassword = async (req, res) => {
     if (!usuario) {
       return res.status(404).json({ error: 'No se encontró ninguna cuenta asociada a este correo electrónico.' });
     }
-    // Aquí deberías enviar el correo real de recuperación, pero por ahora solo responde OK
-    res.json({ mensaje: 'Correo de restablecimiento enviado.' });
+
+    // Generar token temporal (5 min de validez)
+    const resetToken = jwt.sign(
+      { email: usuario.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '5m' } //
+    );
+
+    const resetLink = `http://localhost:3000/reset-password-form.html?token=${resetToken}`;
+
+    await enviarCorreo(
+      email,
+      "Restablecimiento de contraseña - Itech Support",
+      `<p>Hola <b>${usuario.username}</b>,</p>
+       <p>Hemos recibido una solicitud para restablecer tu contraseña.</p>
+       <p>Puedes hacerlo en el siguiente enlace:</p>
+       <a href="${resetLink}">${resetLink}</a>
+       <p>Este enlace expirará en 5 minutos.</p>
+       <p>Si no solicitaste este cambio, ignora este correo.</p>`
+    );
+
+    res.json({ mensaje: 'Correo de restablecimiento enviado correctamente.' });
   } catch (error) {
+    console.error("Error en resetPassword:", error);
     res.status(500).json({ error: 'Error al procesar la solicitud de restablecimiento.' });
   }
-}; 
+};
+
+// Paso 2: confirmar nueva contraseña
+exports.confirmResetPassword = async (req, res) => {
+  try {
+    const { token, nuevaClave } = req.body;
+
+    if (!token || !nuevaClave) {
+      return res.status(400).json({ error: 'Faltan datos.' });
+    }
+
+    // Validar requisitos de la contraseña
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    if (!passwordRegex.test(nuevaClave)) {
+      return res.status(400).json({
+        error:
+          'La contraseña debe tener mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un carácter especial.'
+      });
+    }
+
+    // Verificar token (JWT)
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Pasar la contraseña en limpio al modelo
+    const actualizado = await usuariosModel.actualizarClave(
+      decoded.email,
+      nuevaClave
+    );
+
+    if (!actualizado) {
+      return res.status(404).json({
+        error: 'No se pudo actualizar la contraseña.'
+      });
+    }
+
+    res.json({ mensaje: 'Contraseña actualizada correctamente.' });
+  } catch (error) {
+    console.error('Error en confirmResetPassword:', error);
+    res.status(400).json({ error: 'Token inválido o expirado.' });
+  }
+};
