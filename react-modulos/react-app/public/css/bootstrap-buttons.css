@@ -1,0 +1,314 @@
+/* Estilos Bootstrap modernos para reemplazar botones grises y personalizados */
+
+/* Botón para agregar elementos - estilo flotante moderno */
+.btn-add-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    color: white;
+    padding: 12px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px;
+    text-decoration: none;
+}
+
+.btn-add-modern:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    transform: translateY(-2px);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-add-modern:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+}
+
+.btn-add-modern i {
+    font-size: 16px;
+}
+
+/* Botón de conteo/reconteo con icono */
+.btn-count-modern {
+    background-color: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    color: #495057;
+    padding: 8px 16px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-count-modern:hover {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    color: #343a40;
+    transform: translateY(-1px);
+}
+
+.btn-count-modern i {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+/* Botones de acción específicos */
+.btn-primary-modern {
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(78, 115, 223, 0.2);
+    color: white;
+    font-weight: 500;
+    padding: 10px 20px;
+    transition: all 0.2s ease;
+}
+
+.btn-primary-modern:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #2c5aa0 100%);
+    box-shadow: 0 4px 15px rgba(78, 115, 223, 0.3);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-secondary-modern {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    color: #6c757d;
+    font-weight: 500;
+    padding: 10px 20px;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary-modern:hover {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    color: #495057;
+    transform: translateY(-1px);
+}
+
+.btn-success-modern {
+    background: linear-gradient(135deg, #1cc88a 0%, #17a673 100%);
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(28, 200, 138, 0.2);
+    color: white;
+    font-weight: 500;
+    padding: 10px 20px;
+    transition: all 0.2s ease;
+}
+
+.btn-success-modern:hover {
+    background: linear-gradient(135deg, #17a085 0%, #138065 100%);
+    box-shadow: 0 4px 15px rgba(28, 200, 138, 0.3);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-warning-modern {
+    background: linear-gradient(135deg, #f6c23e 0%, #d9ae2a 100%);
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(246, 194, 62, 0.2);
+    color: white;
+    font-weight: 500;
+    padding: 10px 20px;
+    transition: all 0.2s ease;
+}
+
+.btn-warning-modern:hover {
+    background: linear-gradient(135deg, #e6b023 0%, #c9a21c 100%);
+    box-shadow: 0 4px 15px rgba(246, 194, 62, 0.3);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-danger-modern {
+    background: linear-gradient(135deg, #e74a3b 0%, #c0392b 100%);
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(231, 74, 59, 0.2);
+    color: white;
+    font-weight: 500;
+    padding: 10px 20px;
+    transition: all 0.2s ease;
+}
+
+.btn-danger-modern:hover {
+    background: linear-gradient(135deg, #dc2f17 0%, #a93226 100%);
+    box-shadow: 0 4px 15px rgba(231, 74, 59, 0.3);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-info-modern {
+    background: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(54, 185, 204, 0.2);
+    color: white;
+    font-weight: 500;
+    padding: 10px 20px;
+    transition: all 0.2s ease;
+}
+
+.btn-info-modern:hover {
+    background: linear-gradient(135deg, #2980b9 0%, #1b4f72 100%);
+    box-shadow: 0 4px 15px rgba(54, 185, 204, 0.3);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Botones outline modernos */
+.btn-outline-primary-modern {
+    background-color: transparent;
+    border: 2px solid #4e73df;
+    border-radius: 8px;
+    color: #4e73df;
+    font-weight: 500;
+    padding: 8px 18px;
+    transition: all 0.2s ease;
+}
+
+.btn-outline-primary-modern:hover {
+    background-color: #4e73df;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-outline-secondary-modern {
+    background-color: transparent;
+    border: 2px solid #6c757d;
+    border-radius: 8px;
+    color: #6c757d;
+    font-weight: 500;
+    padding: 8px 18px;
+    transition: all 0.2s ease;
+}
+
+.btn-outline-secondary-modern:hover {
+    background-color: #6c757d;
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Botones pequeños para tablas */
+.btn-sm-modern {
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 6px;
+}
+
+/* Botones en grupos */
+.btn-group-modern {
+    display: inline-flex;
+    gap: 5px;
+}
+
+.btn-group-modern .btn {
+    border-radius: 6px !important;
+}
+
+/* Estados focus y active mejorados */
+.btn-add-modern:focus,
+.btn-primary-modern:focus,
+.btn-secondary-modern:focus,
+.btn-success-modern:focus,
+.btn-warning-modern:focus,
+.btn-danger-modern:focus,
+.btn-info-modern:focus,
+.btn-count-modern:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.25);
+}
+
+.btn-outline-primary-modern:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.25);
+}
+
+.btn-outline-secondary-modern:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.25);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .btn-add-modern {
+        padding: 10px 16px;
+        min-width: 44px;
+    }
+    
+    .btn-primary-modern,
+    .btn-secondary-modern,
+    .btn-success-modern,
+    .btn-warning-modern,
+    .btn-danger-modern,
+    .btn-info-modern {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+    
+    .btn-group-modern {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-group-modern .btn {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+}
+
+/* Animaciones adicionales */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(78, 115, 223, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(78, 115, 223, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(78, 115, 223, 0);
+    }
+}
+
+.btn-pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Botones disabled mejorados */
+.btn-add-modern:disabled,
+.btn-primary-modern:disabled,
+.btn-secondary-modern:disabled,
+.btn-success-modern:disabled,
+.btn-warning-modern:disabled,
+.btn-danger-modern:disabled,
+.btn-info-modern:disabled,
+.btn-count-modern:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.btn-add-modern:disabled:hover,
+.btn-primary-modern:disabled:hover,
+.btn-secondary-modern:disabled:hover,
+.btn-success-modern:disabled:hover,
+.btn-warning-modern:disabled:hover,
+.btn-danger-modern:disabled:hover,
+.btn-info-modern:disabled:hover,
+.btn-count-modern:disabled:hover {
+    background: inherit;
+    box-shadow: inherit;
+    transform: none;
+}

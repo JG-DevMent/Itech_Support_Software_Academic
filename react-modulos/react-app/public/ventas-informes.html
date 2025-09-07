@@ -8,6 +8,7 @@
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
     <link href="css/custom.css" rel="stylesheet">
+    <link href="css/bootstrap-buttons.css" rel="stylesheet">
 </head>
 <body id="page-top">
     <div id="wrapper">
@@ -91,40 +92,233 @@
                 <div class="card-box-center">
                     <div class="card-body">
                         <h1 class="text-h1">Ventas e informes</h1>
-                        <main>
-                            <div class="contenido">
-                                <section class="ventas-hoy">
-                                    <h3>Ventas</h3> 
-                                    <div class="card-venta">
-                                        <i class="fas fa-dollar-sign"></i>
-                                        <div>
-                                            <p>Ventas de hoy:</p>
-                                            <span>$ 0</span>
+                        
+                        <!-- Sección de Ventas Mejorada -->
+                        <div class="card-box-center mb-4">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h3><i class="fas fa-shopping-cart mr-2"></i>Gestión de Ventas</h3>
+                                    <button class="btn btn-success" data-toggle="modal" data-target="#nuevaVentaModal">
+                                        <i class="fas fa-plus mr-1"></i>Nueva Venta
+                                    </button>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="card-venta">
+                                            <i class="fas fa-dollar-sign"></i>
+                                            <div>
+                                                <p>Ventas de hoy:</p>
+                                                <span id="ventasHoy">$0</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </section>
-
-                                <section class="informes">
-                                    <h3>Informes</h3>
-                                    <ul class="lista-informes">
-                                        <li><a href="#" class="informe-link" data-informe="reparaciones"><i class="fas fa-tools"></i> Informe de reparaciones de la tienda</a></li>
-                                        <li><a href="#" class="informe-link" data-informe="mensual-reparaciones"><i class="fas fa-wrench"></i> Informe mensual de reparaciones</a></li>
-                                        <li><a href="#" class="informe-link" data-informe="articulos"><i class="fas fa-box-open"></i> Informe de artículos</a></li>
-                                        <li><a href="#" class="informe-link" data-informe="inventario"><i class="fas fa-warehouse"></i> Informe de costo total del inventario</a></li>
-                                    </ul>
-                                </section>
+                                    <div class="col-md-4">
+                                        <div class="card-venta bg-info text-white">
+                                            <i class="fas fa-chart-bar"></i>
+                                            <div>
+                                                <p>Total productos vendidos:</p>
+                                                <span id="totalProductosVendidos">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card-venta bg-warning text-white">
+                                            <i class="fas fa-boxes"></i>
+                                            <div>
+                                                <p>Productos en stock:</p>
+                                                <span id="productosEnStock">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Tabla de ventas recientes -->
+                                <div class="mt-4">
+                                    <h4><i class="fas fa-history mr-2"></i>Ventas Recientes</h4>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped" id="tablaVentasRecientes">
+                                            <thead class="table-dark">
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Producto</th>
+                                                    <th>SKU</th>
+                                                    <th>Cantidad</th>
+                                                    <th>Precio Unit.</th>
+                                                    <th>Subtotal</th>
+                                                    <th>Fecha</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="ventasRecientesBody">
+                                                <!-- Se llena dinámicamente -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
-                        </main>
+                        </div>
+
+                        <!-- Sección de Informes -->
+                        <div class="card-box-center">
+                            <div class="card-body">
+                                <h3><i class="fas fa-chart-line mr-2"></i>Informes</h3>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <ul class="lista-informes">
+                                            <li><a href="#" class="informe-link btn btn-outline-primary btn-block" data-informe="reparaciones"><i class="fas fa-tools"></i> Informe de reparaciones</a></li>
+                                            <li><a href="#" class="informe-link btn btn-outline-info btn-block" data-informe="mensual-reparaciones"><i class="fas fa-wrench"></i> Informe mensual de reparaciones</a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="lista-informes">
+                                            <li><a href="#" class="informe-link btn btn-outline-success btn-block" data-informe="articulos"><i class="fas fa-box-open"></i> Informe de artículos</a></li>
+                                            <li><a href="#" class="informe-link btn btn-outline-warning btn-block" data-informe="inventario"><i class="fas fa-warehouse"></i> Informe de inventario</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    
+    <!-- Modal Nueva Venta -->
+    <div class="modal fade" id="nuevaVentaModal" tabindex="-1" role="dialog" aria-labelledby="nuevaVentaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <form id="formNuevaVenta">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="nuevaVentaModalLabel">
+                            <i class="fas fa-shopping-cart mr-2"></i>Nueva Venta de Producto
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Búsqueda de producto -->
+                        <div class="form-group">
+                            <label for="buscarProducto">
+                                <i class="fas fa-search mr-1"></i>Buscar Producto <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="buscarProducto" placeholder="Escribe para buscar por nombre o SKU..." autocomplete="off">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary" type="button" id="btnBuscarProducto">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="dropdown-menu w-100" id="resultadosProducto" style="max-height: 200px; overflow-y: auto;">
+                                <!-- Resultados de búsqueda dinámicos -->
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="nombreProductoVenta">Producto Seleccionado</label>
+                                    <input type="text" class="form-control" id="nombreProductoVenta" readonly>
+                                    <input type="hidden" id="idProductoVenta">
+                                    <input type="hidden" id="skuProductoVenta">
+                                    <input type="hidden" id="precioProductoVenta">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="stockDisponible">Stock Disponible</label>
+                                    <input type="text" class="form-control" id="stockDisponible" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="cantidadVenta">
+                                        <i class="fas fa-hashtag mr-1"></i>Cantidad <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number" class="form-control" id="cantidadVenta" min="1" placeholder="1" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="precioUnitarioVenta">
+                                        <i class="fas fa-dollar-sign mr-1"></i>Precio Unitario
+                                    </label>
+                                    <input type="number" class="form-control" id="precioUnitarioVenta" step="0.01" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="subtotalVenta">
+                                        <i class="fas fa-calculator mr-1"></i>Subtotal
+                                    </label>
+                                    <input type="number" class="form-control" id="subtotalVenta" step="0.01" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="metodoPagoVenta">
+                                        <i class="fas fa-credit-card mr-1"></i>Método de Pago <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-control" id="metodoPagoVenta" required>
+                                        <option value="">Selecciona método de pago</option>
+                                        <option value="efectivo">Efectivo</option>
+                                        <option value="tarjeta">Tarjeta</option>
+                                        <option value="transferencia">Transferencia</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="clienteVenta">
+                                        <i class="fas fa-user mr-1"></i>Cliente (Opcional)
+                                    </label>
+                                    <input type="text" class="form-control" id="clienteVenta" placeholder="Nombre del cliente">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="observacionesVenta">
+                                <i class="fas fa-comment mr-1"></i>Observaciones
+                            </label>
+                            <textarea class="form-control" id="observacionesVenta" rows="2" placeholder="Observaciones adicionales sobre la venta..."></textarea>
+                        </div>
+
+                        <!-- Resumen de venta -->
+                        <div class="alert alert-info d-none" id="resumenVenta">
+                            <h6><i class="fas fa-info-circle mr-1"></i>Resumen de la Venta</h6>
+                            <div id="detalleResumenVenta"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            <i class="fas fa-times mr-1"></i>Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-success" id="guardarVentaBtn">
+                            <i class="fas fa-save mr-1"></i>Registrar Venta
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="js/sb-admin-2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/notificaciones.js"></script>
     <script src="js/custom.js"></script>
     <script src="js/ventas.js"></script>
 </body>

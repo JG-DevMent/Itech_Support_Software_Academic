@@ -8,6 +8,7 @@
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
     <link href="css/custom.css" rel="stylesheet">
+    <link href="css/bootstrap-buttons.css" rel="stylesheet">
 </head>
 <body id="page-top">
     <div id="wrapper">
@@ -108,7 +109,7 @@
                                                 </div>
                                                 <div class="invalid-feedback" id="repairIdError"></div>
                                             </div>
-                                            <button id="searchButton" class="btnfactus btn-block btn-lg mt-3" type="button" style="font-weight:bold;"><i class="fas fa-search"></i> Buscar Reparación</button>
+                                            <button id="searchButton" class="btn btn-primary-modern btn-block btn-lg mt-3" type="button"><i class="fas fa-search mr-1"></i> Buscar Reparación</button>
                                         </form>
                                         
                                         <div class="pos-history">
@@ -216,8 +217,8 @@
                                     </div>
                                     
                                     <div class="pos-actions">
-                                        <button id="billingButton" class="btnfactus btn-lg" type="button">
-                                            <i class="fas fa-dollar-sign"></i> Proceder al Pago
+                                        <button id="billingButton" class="btn btn-success-modern btn-lg" type="button">
+                                            <i class="fas fa-dollar-sign mr-1"></i> Proceder al Pago
                                         </button>
                                     </div>
                                 </div>    
@@ -330,8 +331,8 @@
                                     </div>
                                     
                                     <div class="pos-actions">
-                                        <button id="generateInvoiceButton" class="btnfactus btn-lg">
-                                            <i class="fas fa-file-invoice"></i> Generar Factura
+                                        <button id="generateInvoiceButton" class="btn btn-warning-modern btn-lg">
+                                            <i class="fas fa-file-invoice mr-1"></i> Generar Factura
                                         </button>
                                     </div>
                                 </div>
@@ -405,17 +406,17 @@
                                     </div>
                                     
                                     <div class="invoice-actions no-print">
-                                        <button id="printButton" class="btnfactus">
-                                            <i class="fas fa-print"></i> Imprimir Factura
+                                        <button id="printButton" class="btn btn-info-modern">
+                                            <i class="fas fa-print mr-1"></i> Imprimir Factura
                                         </button>
-                                        <button id="emailButton" class="btnfactus">
-                                            <i class="fas fa-envelope"></i> Enviar por Email
+                                        <button id="emailButton" class="btn btn-secondary-modern">
+                                            <i class="fas fa-envelope mr-1"></i> Enviar por Email
                                         </button>
-                                        <button id="downloadButton" class="btnfactus">
-                                            <i class="fas fa-download"></i> Descargar PDF
+                                        <button id="downloadButton" class="btn btn-success-modern">
+                                            <i class="fas fa-download mr-1"></i> Descargar PDF
                                         </button>
-                                        <button id="newTransactionButton" class="btnfactus">
-                                            <i class="fas fa-plus-circle"></i> Nueva Transacción
+                                        <button id="newTransactionButton" class="btn btn-primary-modern">
+                                            <i class="fas fa-plus-circle mr-1"></i> Nueva Transacción
                                         </button>
                                     </div>
                                 </div>
@@ -439,6 +440,8 @@
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js" integrity="sha256-DJ6QiK+jMjtUmsXGdGNbWcW4E8gF8CQV8YF5EZl5K04=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/notificaciones.js"></script>
     <script src="js/facturacion.js"></script>
     <script src="js/custom.js"></script>
 </body>

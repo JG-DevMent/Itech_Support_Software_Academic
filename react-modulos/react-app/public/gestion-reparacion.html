@@ -8,6 +8,7 @@
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
     <link href="css/custom.css" rel="stylesheet">
+    <link href="css/bootstrap-buttons.css" rel="stylesheet">
 </head>
 <body id="page-top">
     <div id="wrapper">
@@ -174,12 +175,14 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group button-group">
-                                        <button type="submit" class="btn btn-primary">Registrar Reparación</button>
-                                        <button type="button" id="btnNotificar" class="btn btn-info">
-                                            <i class="fas fa-bell"></i> Notificar al Cliente
+                                        <button type="submit" class="btn btn-primary-modern">
+                                            <i class="fas fa-save mr-1"></i> Registrar Reparación
                                         </button>
-                                        <button type="button" id="btnLimpiarForm" class="btn btn-secondary">
-                                            <i class="fas fa-eraser"></i> Limpiar Formulario
+                                        <button type="button" id="btnNotificar" class="btn btn-info-modern">
+                                            <i class="fas fa-bell mr-1"></i> Notificar al Cliente
+                                        </button>
+                                        <button type="button" id="btnLimpiarForm" class="btn btn-secondary-modern">
+                                            <i class="fas fa-eraser mr-1"></i> Limpiar Formulario
                                         </button>
                                     </div>
                                 </div>
@@ -193,7 +196,7 @@
                         <!-- Botón para mostrar/ocultar filtros -->
                         <div class="row mb-2">
                             <div class="col-md-4 col-sm-12 mb-2">
-                                <button id="toggleFiltrosBtn" class="btn btn-filtro mb-2">👓 Mostrar Filtros</button>
+                                <button id="toggleFiltrosBtn" class="btn btn-info-modern mb-2"><i class="fas fa-filter mr-1"></i> Mostrar Filtros</button>
                                 <!-- Contenedor de filtros (oculto inicialmente) -->
                                 <div id="contenedorFiltros" class="filtros-reparaciones" style="display: none; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
                                     <input type="text" id="filtroCliente" class="form-control" placeholder="Filtrar por Cliente">
@@ -515,6 +518,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/notificaciones.js"></script>
     
 </body>
 </html>

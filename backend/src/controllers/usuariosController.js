@@ -2,61 +2,243 @@ const usuariosModel = require('../models/usuariosModel');
 const { enviarCorreo } = require('../services/emailService'); 
 const bcrypt = require('bcryptjs'); 
 const jwt = require('jsonwebtoken');
+const { validateRole, getRolePermissions, getAccessibleModules } = require('../middleware/auth');
 
-// Listar todos los usuarios
+// Listar todos los usuarios con información de permisos
 exports.listarUsuarios = async (req, res) => {
   try {
     const usuarios = await usuariosModel.obtenerTodos();
-    res.json(usuarios);
+    
+    // Enriquecer cada usuario con información de permisos
+    const usuariosConPermisos = usuarios.map(usuario => ({
+      ...usuario,
+      permissions: getRolePermissions(usuario.rol),
+      accessibleModules: getAccessibleModules(usuario.rol),
+      isValidRole: validateRole(usuario.rol)
+    }));
+    
+    res.json(usuariosConPermisos);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener usuarios' });
   }
 };
 
-// Obtener un usuario por ID
+// Obtener un usuario por ID con información de permisos
 exports.obtenerUsuarioPorId = async (req, res) => {
   try {
     const usuario = await usuariosModel.obtenerPorId(req.params.id);
     if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
-    res.json(usuario);
+    
+    // Enriquecer con información de permisos
+    const usuarioConPermisos = {
+      ...usuario,
+      permissions: getRolePermissions(usuario.rol),
+      accessibleModules: getAccessibleModules(usuario.rol),
+      isValidRole: validateRole(usuario.rol)
+    };
+    
+    res.json(usuarioConPermisos);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener usuario' });
   }
 };
 
-// Crear un nuevo usuario
+// Crear un nuevo usuario con validación de roles
 exports.crearUsuario = async (req, res) => {
   try {
-    const nuevoUsuario = await usuariosModel.crear(req.body);
-    res.status(201).json(nuevoUsuario);
+    const userData = req.body;
+    
+    // Validar rol antes de crear
+    if (userData.rol && !validateRole(userData.rol)) {
+      return res.status(400).json({ 
+        error: 'Rol no válido',
+        availableRoles: ['Administrador', 'Técnico', 'Vendedor', 'Usuario']
+      });
+    }
+    
+    const nuevoUsuario = await usuariosModel.crear(userData);
+    
+    // Enriquecer respuesta con permisos
+    const usuarioConPermisos = {
+      ...nuevoUsuario,
+      permissions: getRolePermissions(nuevoUsuario.rol),
+      accessibleModules: getAccessibleModules(nuevoUsuario.rol)
+    };
+    
+    res.status(201).json(usuarioConPermisos);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
 
-// Actualizar un usuario por ID
+// Actualizar un usuario por ID con validación de roles
 exports.actualizarUsuario = async (req, res) => {
   try {
-    const actualizado = await usuariosModel.actualizar(req.params.id, req.body);
-    if (!actualizado) return res.status(404).json({ error: 'Usuario no encontrado' });
-    res.json({ mensaje: 'Usuario actualizado correctamente' });
+    const { id } = req.params;
+    const userData = req.body;
+    
+    // Validar rol si se está actualizando
+    if (userData.rol && !validateRole(userData.rol)) {
+      return res.status(400).json({ 
+        error: 'Rol no válido',
+        availableRoles: ['Administrador', 'Técnico', 'Vendedor', 'Usuario']
+      });
+    }
+    
+    // Verificar que el usuario existe
+    const usuarioExistente = await usuariosModel.obtenerPorId(id);
+    if (!usuarioExistente) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    
+    // Prevenir que un usuario se quite a sí mismo los permisos de administrador
+    if (req.user && req.user.id == id && req.user.rol === 'Administrador' && userData.rol !== 'Administrador') {
+      return res.status(400).json({ 
+        error: 'No puedes remover tus propios permisos de administrador' 
+      });
+    }
+    
+    const actualizado = await usuariosModel.actualizar(id, userData);
+    
+    if (!actualizado) {
+      return res.status(500).json({ error: 'Error al actualizar usuario' });
+    }
+    
+    // Obtener usuario actualizado para respuesta
+    const usuarioActualizado = await usuariosModel.obtenerPorId(id);
+    const usuarioConPermisos = {
+      ...usuarioActualizado,
+      permissions: getRolePermissions(usuarioActualizado.rol),
+      accessibleModules: getAccessibleModules(usuarioActualizado.rol)
+    };
+    
+    res.json({ 
+      mensaje: 'Usuario actualizado correctamente',
+      usuario: usuarioConPermisos
+    });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
 
-// Eliminar un usuario por ID
+// Eliminar un usuario por ID con validaciones de seguridad
 exports.eliminarUsuario = async (req, res) => {
   try {
-    const eliminado = await usuariosModel.eliminar(req.params.id);
-    if (!eliminado) return res.status(404).json({ error: 'Usuario no encontrado' });
-    res.json({ mensaje: 'Usuario eliminado correctamente' });
+    const { id } = req.params;
+    
+    // Verificar que el usuario existe
+    const usuario = await usuariosModel.obtenerPorId(id);
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    
+    // Prevenir que un usuario se elimine a sí mismo
+    if (req.user && req.user.id == id) {
+      return res.status(400).json({ 
+        error: 'No puedes eliminar tu propia cuenta' 
+      });
+    }
+    
+    // Verificar que no sea el último administrador
+    if (usuario.rol === 'Administrador') {
+      const administradores = await usuariosModel.obtenerTodos();
+      const adminCount = administradores.filter(u => u.rol === 'Administrador').length;
+      if (adminCount <= 1) {
+        return res.status(400).json({ 
+          error: 'No se puede eliminar el último administrador del sistema' 
+        });
+      }
+    }
+    
+    const eliminado = await usuariosModel.eliminar(id);
+    if (!eliminado) return res.status(500).json({ error: 'Error al eliminar usuario' });
+    
+    res.json({ 
+      mensaje: 'Usuario eliminado correctamente',
+      usuarioEliminado: {
+        id: usuario.id,
+        username: usuario.username,
+        rol: usuario.rol
+      }
+    });
   } catch (error) {
     res.status(500).json({ error: 'Error al eliminar usuario' });
   }
 };
 
-// Iniciar sesión de usuario con JWT
+// Obtener roles disponibles y sus permisos
+exports.obtenerRoles = async (req, res) => {
+  try {
+    const roles = ['Administrador', 'Técnico', 'Vendedor', 'Usuario'];
+    
+    const rolesConInfo = roles.map(rol => ({
+      name: rol,
+      permissions: getRolePermissions(rol),
+      accessibleModules: getAccessibleModules(rol),
+      description: getDescriptionForRole(rol)
+    }));
+    
+    res.json({
+      roles: rolesConInfo,
+      availableRoles: roles
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Cambiar rol de usuario (endpoint específico)
+exports.cambiarRol = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nuevoRol } = req.body;
+    
+    if (!validateRole(nuevoRol)) {
+      return res.status(400).json({ 
+        error: 'Rol no válido',
+        availableRoles: ['Administrador', 'Técnico', 'Vendedor', 'Usuario']
+      });
+    }
+    
+    // Verificar que el usuario existe
+    const usuario = await usuariosModel.obtenerPorId(id);
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    
+    // Prevenir que un admin se quite sus propios permisos
+    if (req.user && req.user.id == id && req.user.rol === 'Administrador' && nuevoRol !== 'Administrador') {
+      return res.status(400).json({ 
+        error: 'No puedes remover tus propios permisos de administrador' 
+      });
+    }
+    
+    // Actualizar solo el rol
+    const actualizado = await usuariosModel.actualizar(id, {
+      ...usuario,
+      rol: nuevoRol
+    });
+    
+    if (actualizado) {
+      const usuarioActualizado = await usuariosModel.obtenerPorId(id);
+      res.json({
+        mensaje: `Rol actualizado a ${nuevoRol} correctamente`,
+        usuario: {
+          ...usuarioActualizado,
+          permissions: getRolePermissions(nuevoRol),
+          accessibleModules: getAccessibleModules(nuevoRol)
+        }
+      });
+    } else {
+      res.status(500).json({ error: 'Error al actualizar rol' });
+    }
+    
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+// Iniciar sesión de usuario con JWT (mantenida para compatibilidad)
 exports.loginUsuario = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -74,15 +256,18 @@ exports.loginUsuario = async (req, res) => {
       return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
     
-    // Generar token JWT
+    // Generar token JWT con permisos
     const token = jwt.sign(
       { 
         id: usuario.id, 
         username: usuario.username, 
-        rol: usuario.rol 
+        email: usuario.email,
+        rol: usuario.rol,
+        permissions: getRolePermissions(usuario.rol),
+        accessibleModules: getAccessibleModules(usuario.rol)
       },
       process.env.JWT_SECRET,
-      { expiresIn: '2h' }
+      { expiresIn: '8h' }
     );
     
     // Enviar respuesta con token y datos del usuario (sin contraseña)
@@ -90,6 +275,8 @@ exports.loginUsuario = async (req, res) => {
     res.json({
       ...usuarioSinPassword,
       token,
+      permissions: getRolePermissions(usuario.rol),
+      accessibleModules: getAccessibleModules(usuario.rol),
       mensaje: 'Login exitoso'
     });
     
@@ -176,3 +363,14 @@ exports.confirmResetPassword = async (req, res) => {
     res.status(400).json({ error: 'Token inválido o expirado.' });
   }
 };
+
+// Función auxiliar para obtener descripciones de roles
+function getDescriptionForRole(role) {
+  const descriptions = {
+    'Administrador': 'Acceso completo a todas las funcionalidades del sistema',
+    'Técnico': 'Enfocado en reparaciones y gestión de inventario técnico',
+    'Vendedor': 'Especializado en ventas, clientes y facturación',
+    'Usuario': 'Acceso básico limitado a consultas propias'
+  };
+  return descriptions[role] || 'Sin descripción disponible';
+}

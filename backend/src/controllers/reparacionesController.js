@@ -1,4 +1,6 @@
 const reparacionesModel = require('../models/reparacionesModel');
+const clientesModel = require('../models/clientesModel');
+const { notificarCambioEstado } = require('../services/emailService');
 const pool = require('../db');
 
 exports.listarReparaciones = async (req, res) => {
@@ -44,9 +46,53 @@ exports.crearReparacion = async (req, res) => {
 
 exports.actualizarReparacion = async (req, res) => {
   try {
-    const actualizado = await reparacionesModel.actualizar(req.params.id, req.body);
-    if (!actualizado) return res.status(404).json({ error: 'Reparación no encontrada' });
-    res.json({ mensaje: 'Reparación actualizada correctamente' });
+    const reparacionId = req.params.id;
+    
+    // Obtener la reparación antes de actualizar para comparar estados
+    const reparacionAnterior = await reparacionesModel.obtenerPorId(reparacionId);
+    if (!reparacionAnterior) {
+      return res.status(404).json({ error: 'Reparación no encontrada' });
+    }
+
+    const actualizado = await reparacionesModel.actualizar(reparacionId, req.body);
+    if (!actualizado) {
+      return res.status(404).json({ error: 'Error actualizando reparación' });
+    }
+
+    // Verificar si el estado cambió y enviar notificación
+    const estadoAnterior = reparacionAnterior.estado;
+    const estadoNuevo = req.body.estado;
+    
+    if (estadoNuevo && estadoNuevo !== estadoAnterior) {
+      try {
+        // Obtener información del cliente para notificar
+        const cliente = await clientesModel.obtenerPorCedula(reparacionAnterior.cliente);
+        
+        if (cliente && (cliente.correo || reparacionAnterior.emailCliente)) {
+          // Obtener la reparación actualizada
+          const reparacionActualizada = await reparacionesModel.obtenerPorId(reparacionId);
+          
+          // Enviar notificación de cambio de estado
+          const resultadoNotificacion = await notificarCambioEstado(cliente, reparacionActualizada, estadoNuevo);
+          
+          if (resultadoNotificacion.success) {
+            console.log(`Notificación enviada para reparación ${reparacionId}: ${estadoAnterior} -> ${estadoNuevo}`);
+          } else {
+            console.error(`Error enviando notificación para reparación ${reparacionId}:`, resultadoNotificacion.error);
+          }
+        }
+      } catch (notifError) {
+        console.error('Error enviando notificación automática:', notifError);
+        // No fallar la actualización por error en notificación
+      }
+    }
+
+    res.json({ 
+      mensaje: 'Reparación actualizada correctamente',
+      cambioEstado: estadoNuevo !== estadoAnterior,
+      estadoAnterior: estadoAnterior,
+      estadoNuevo: estadoNuevo
+    });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
