@@ -31,11 +31,11 @@ document.addEventListener('DOMContentLoaded', function() {
     personalizarMensajeBienvenida();
 });
 
-// Función para personalizar el mensaje de bienvenida según el rol
+// Función para personalizar el mensaje de bienvenida según el rol (actualizada)
 function personalizarMensajeBienvenida() {
     // Obtener usuario actual de la sesión
     const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-    if (!currentUser || !currentUser.role) return;
+    if (!currentUser || !currentUser.rol) return;
     
     const welcomeContent = document.querySelector('.welcome-content');
     if (!welcomeContent) return;
@@ -48,7 +48,7 @@ function personalizarMensajeBienvenida() {
     // Mensaje personalizado según rol
     let welcomeMessage = '';
     
-    switch (currentUser.role) {
+    switch (currentUser.rol) {
         case 'Administrador':
             h1.textContent = `Bienvenido, Administrador`;
             welcomeMessage = 'Tienes acceso completo al sistema. Gestiona usuarios, reparaciones, inventario y más.';
@@ -60,6 +60,10 @@ function personalizarMensajeBienvenida() {
         case 'Vendedor':
             h1.textContent = `Bienvenido, Vendedor`;
             welcomeMessage = 'Administra clientes, genera facturas y consulta el estado de los equipos.';
+            break;
+        case 'Usuario':
+            h1.textContent = `Bienvenido, Usuario`;
+            welcomeMessage = 'Consulta el estado de tus reparaciones y gestiona tu información.';
             break;
         default:
             return; // No modificar si no es ninguno de los roles anteriores
@@ -75,34 +79,36 @@ function personalizarMensajeBienvenida() {
     }
 }
 
-// Función para gestionar la visibilidad de botones según el rol
+// Función para gestionar la visibilidad de botones según el rol (actualizada)
 function gestionarBotonesSegunRol() {
-    // Obtener usuario actual de la sesión
+    // Usar el RoleManager para verificar permisos
     const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-    if (!currentUser || !currentUser.role) return;
+    if (!currentUser) return;
     
-    const userRole = currentUser.role;
     const actionButtons = document.querySelectorAll('.quick-actions-grid .action-btn');
     
-    // Definir los botones que cada rol puede ver
-    const rolePermissions = {
-        'Administrador': ['gestion-reparacion.html', 'clientes.html', 'inventario.html', 'pago-facturacion.html', 'verificar.html', 'ventas-informes.html'],
-        'Técnico': ['gestion-reparacion.html', 'verificar.html', 'inventario.html', 'clientes.html'],
-        'Vendedor': ['clientes.html', 'pago-facturacion.html', 'verificar.html', 'ventas-informes.html']
+    // Mapear botones a módulos requeridos
+    const buttonModuleMap = {
+        'gestion-reparacion.html': 'reparaciones',
+        'clientes.html': 'clientes', 
+        'inventario.html': 'inventario',
+        'pago-facturacion.html': 'facturas',
+        'verificar.html': 'reparaciones', // Verificar también requiere acceso a reparaciones
+        'ventas-informes.html': 'ventas'
     };
     
-    // Determinar permisos según el rol
-    const allowedPages = rolePermissions[userRole] || [];
-    
-    // Iterar por cada botón y mostrar/ocultar según corresponda
+    // Iterar por cada botón y mostrar/ocultar según permisos
     actionButtons.forEach(button => {
         const href = button.getAttribute('href');
-        if (!allowedPages.includes(href)) {
-            // Si el botón no está en la lista de permitidos, ocultarlo
-            button.style.display = 'none';
-        } else {
-            // Asegurarse de que esté visible
-            button.style.display = 'flex';
+        const requiredModule = buttonModuleMap[href];
+        
+        if (requiredModule) {
+            const hasAccess = currentUser.accessibleModules && currentUser.accessibleModules.includes(requiredModule);
+            if (!hasAccess) {
+                button.style.display = 'none';
+            } else {
+                button.style.display = 'flex';
+            }
         }
     });
     
@@ -110,13 +116,13 @@ function gestionarBotonesSegunRol() {
     reorganizarCuadricula();
 }
 
-// Función para actualizar los consejos según el rol del usuario
+// Función para actualizar los consejos según el rol del usuario (actualizada)
 function actualizarConsejosSegunRol() {
     // Obtener usuario actual de la sesión
     const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-    if (!currentUser || !currentUser.role) return;
+    if (!currentUser || !currentUser.rol) return;
     
-    const userRole = currentUser.role;
+    const userRole = currentUser.rol;
     const tipsList = document.querySelector('.tips-list');
     if (!tipsList) return;
     
@@ -208,47 +214,71 @@ function reorganizarCuadricula() {
     }
 }
 
-// Función para simular datos dinámicos
-function actualizarDatosEstadisticas() {
+// Función para obtener datos reales del backend
+async function actualizarDatosEstadisticas() {
     // Obtener usuario actual de la sesión
     const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-    if (!currentUser || !currentUser.role) return;
+    if (!currentUser || !currentUser.rol) return;
     
-    const userRole = currentUser.role;
+    const userRole = currentUser.rol;
     
-    // Simulación de actualización de datos (en un caso real, estos vendrían de una API o base de datos)
-    const datos = {
-        reparacionesActivas: {
-            valor: 12,
-            tendencia: 8,
-            positiva: true
-        },
-        reparacionesCompletadas: {
-            valor: 28,
-            tendencia: 12,
-            positiva: true
-        },
-        clientesNuevos: {
-            valor: 5,
-            tendencia: 3,
-            positiva: true
-        },
-        ingresosMes: {
-            valor: 8540,
-            tendencia: 15,
-            positiva: true
+    try {
+        // Obtener token para autenticación
+        const token = sessionStorage.getItem('jwtToken');
+        if (!token) {
+            console.error('No se encontró token de autenticación');
+            return;
         }
-    };
+
+        // Obtener estadísticas reales del backend
+        const response = await fetch('http://localhost:4000/api/dashboard/estadisticas', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const datos = await response.json();
+        
+        // Actualizar también las gráficas
+        await cargarGraficasDashboard();
+        
+    } catch (error) {
+        console.error('Error obteniendo estadísticas del dashboard:', error);
+        
+        // Usar datos de respaldo si hay error
+        const datos = {
+            reparacionesActivas: { valor: 0, tendencia: 0, positiva: true },
+            reparacionesCompletadas: { valor: 0, tendencia: 0, positiva: true },
+            clientesNuevos: { valor: 0, tendencia: 0, positiva: true },
+            ingresosMes: { valor: 0, tendencia: 0, positiva: true }
+        };
+        
+        mostrarDatosEnCards(datos, userRole);
+        return;
+    }
+    
+    // Mostrar datos en las cards
+    mostrarDatosEnCards(datos, userRole);
+}
+
+// Función separada para mostrar datos en las cards
+function mostrarDatosEnCards(datos, userRole) {
     
     // Configuración de visibilidad de cards según rol
     const cardVisibility = {
         'Administrador': ['card-reparaciones', 'card-completadas', 'card-clientes', 'card-ingresos'],
-        'Técnico': ['card-reparaciones', 'card-completadas', 'card-ingresos'],
-        'Vendedor': ['card-clientes', 'card-ingresos']
+        'Técnico': ['card-reparaciones', 'card-completadas'],
+        'Vendedor': ['card-clientes', 'card-ingresos'],
+        'Usuario': ['card-reparaciones']
     };
     
     // Obtener tarjetas visibles para este rol
-    const visibleCards = cardVisibility[userRole] || cardVisibility['Administrador'];
+    const visibleCards = cardVisibility[userRole] || cardVisibility['Usuario'];
     
     // Mostrar/ocultar tarjetas según rol
     const allCards = ['card-reparaciones', 'card-completadas', 'card-clientes', 'card-ingresos'];
@@ -265,48 +295,58 @@ function actualizarDatosEstadisticas() {
     
     // Actualizar DOM con los valores para las tarjetas visibles
     if (visibleCards.includes('card-reparaciones')) {
-        document.getElementById('reparacionesActivas').textContent = datos.reparacionesActivas.valor;
-        
-        tippy('#card-reparaciones', {
-            content: `Tienes ${datos.reparacionesActivas.valor} reparaciones activas actualmente. ${datos.reparacionesActivas.positiva ? 'Aumento' : 'Disminución'} del ${datos.reparacionesActivas.tendencia}% respecto al mes anterior.`,
-            placement: 'bottom'
-        });
+        const element = document.getElementById('reparacionesActivas');
+        if (element) {
+            element.textContent = datos.reparacionesActivas.valor;
+        }
     }
     
     if (visibleCards.includes('card-completadas')) {
-        document.getElementById('reparacionesCompletadas').textContent = datos.reparacionesCompletadas.valor;
+        const element = document.getElementById('reparacionesCompletadas');
+        if (element) {
+            element.textContent = datos.reparacionesCompletadas.valor;
+        }
         
-        tippy('#card-completadas', {
-            content: `Has completado ${datos.reparacionesCompletadas.valor} reparaciones este mes. ${datos.reparacionesCompletadas.positiva ? 'Aumento' : 'Disminución'} del ${datos.reparacionesCompletadas.tendencia}% respecto al mes anterior.`,
-            placement: 'bottom'
-        });
+        // Actualizar tendencia
+        const trendElement = element?.closest('.summary-card')?.querySelector('.summary-trend');
+        if (trendElement) {
+            trendElement.className = `summary-trend ${datos.reparacionesCompletadas.positiva ? 'positive' : 'negative'}`;
+            trendElement.innerHTML = `<i class="fas fa-arrow-${datos.reparacionesCompletadas.positiva ? 'up' : 'down'}"></i> ${datos.reparacionesCompletadas.tendencia}%`;
+        }
     }
     
     if (visibleCards.includes('card-clientes')) {
-        document.getElementById('clientesNuevos').textContent = datos.clientesNuevos.valor;
+        const element = document.getElementById('clientesNuevos');
+        if (element) {
+            element.textContent = datos.clientesNuevos.valor;
+        }
         
-        tippy('#card-clientes', {
-            content: `Has registrado ${datos.clientesNuevos.valor} clientes nuevos este mes. ${datos.clientesNuevos.positiva ? 'Aumento' : 'Disminución'} del ${datos.clientesNuevos.tendencia}% respecto al mes anterior.`,
-            placement: 'bottom'
-        });
+        // Actualizar tendencia
+        const trendElement = element?.closest('.summary-card')?.querySelector('.summary-trend');
+        if (trendElement) {
+            trendElement.className = `summary-trend ${datos.clientesNuevos.positiva ? 'positive' : 'negative'}`;
+            trendElement.innerHTML = `<i class="fas fa-arrow-${datos.clientesNuevos.positiva ? 'up' : 'down'}"></i> ${datos.clientesNuevos.tendencia}%`;
+        }
     }
     
     if (visibleCards.includes('card-ingresos')) {
-        document.getElementById('ingresosMes').textContent = '$' + datos.ingresosMes.valor.toLocaleString();
+        const element = document.getElementById('ingresosMes');
+        if (element) {
+            element.textContent = '$' + datos.ingresosMes.valor.toLocaleString('es-CO');
+        }
         
-        tippy('#card-ingresos', {
-            content: `Tus ingresos este mes suman $${datos.ingresosMes.valor.toLocaleString()}. ${datos.ingresosMes.positiva ? 'Aumento' : 'Disminución'} del ${datos.ingresosMes.tendencia}% respecto al mes anterior.`,
-            placement: 'bottom'
-        });
+        // Actualizar tendencia
+        const trendElement = element?.closest('.summary-card')?.querySelector('.summary-trend');
+        if (trendElement) {
+            trendElement.className = `summary-trend ${datos.ingresosMes.positiva ? 'positive' : 'negative'}`;
+            trendElement.innerHTML = `<i class="fas fa-arrow-${datos.ingresosMes.positiva ? 'up' : 'down'}"></i> ${datos.ingresosMes.tendencia}%`;
+        }
     }
     
     // Ajustar grid de estadísticas según número de tarjetas visibles
     const dashboardSummary = document.querySelector('.dashboard-summary');
     if (dashboardSummary) {
         const visibleCardCount = visibleCards.length;
-        
-        // Usar atributos de datos para el CSS
-        dashboardSummary.setAttribute('data-visible-cards', visibleCardCount.toString());
         
         if (visibleCardCount <= 2) {
             dashboardSummary.style.gridTemplateColumns = 'repeat(2, 1fr)';
@@ -316,6 +356,175 @@ function actualizarDatosEstadisticas() {
             dashboardSummary.style.gridTemplateColumns = 'repeat(4, 1fr)';
         }
     }
+}
+
+// Variables globales para las gráficas
+let chartEstadosReparacion = null;
+let chartIngresosDiarios = null;
+
+// Función para cargar las gráficas del dashboard
+async function cargarGraficasDashboard() {
+    try {
+        const token = sessionStorage.getItem('jwtToken');
+        if (!token) return;
+
+        const response = await fetch('http://localhost:4000/api/dashboard/graficas', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const datosGraficas = await response.json();
+        
+        // Crear gráfica de estados de reparación (solo para administradores y técnicos)
+        const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+        if (currentUser && ['Administrador', 'Técnico'].includes(currentUser.rol)) {
+            const container = document.getElementById('chartEstadosContainer');
+            if (container) {
+                container.style.display = 'block';
+                crearGraficaEstados(datosGraficas.estadosReparacion);
+            }
+        }
+        
+        // Crear gráfica de ingresos diarios (para administradores y vendedores)
+        if (currentUser && ['Administrador', 'Vendedor'].includes(currentUser.rol)) {
+            const container = document.getElementById('chartIngresosContainer');
+            if (container) {
+                container.style.display = 'block';
+                crearGraficaIngresos(datosGraficas.ingresosDiarios);
+            }
+        }
+
+    } catch (error) {
+        console.error('Error cargando gráficas del dashboard:', error);
+    }
+}
+
+// Función para crear gráfica de estados de reparación
+function crearGraficaEstados(datos) {
+    const ctx = document.getElementById('chartEstadosReparacion');
+    if (!ctx) return;
+
+    // Destruir gráfica existente si existe
+    if (chartEstadosReparacion) {
+        chartEstadosReparacion.destroy();
+    }
+
+    chartEstadosReparacion = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: datos.labels,
+            datasets: [{
+                data: datos.data,
+                backgroundColor: [
+                    '#4e73df',
+                    '#1cc88a', 
+                    '#36b9cc',
+                    '#f6c23e',
+                    '#e74a3b',
+                    '#858796'
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 15,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Estados de Reparación',
+                    font: {
+                        size: 14,
+                        weight: 'bold'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Función para crear gráfica de ingresos diarios
+function crearGraficaIngresos(datos) {
+    const ctx = document.getElementById('chartIngresosDiarios');
+    if (!ctx) return;
+
+    // Destruir gráfica existente si existe
+    if (chartIngresosDiarios) {
+        chartIngresosDiarios.destroy();
+    }
+
+    chartIngresosDiarios = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: datos.labels,
+            datasets: [{
+                label: 'Ingresos ($)',
+                data: datos.data,
+                borderColor: '#4e73df',
+                backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3,
+                pointBackgroundColor: '#4e73df',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Ingresos Últimos 7 Días',
+                    font: {
+                        size: 14,
+                        weight: 'bold'
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString('es-CO');
+                        }
+                    }
+                }
+            },
+            elements: {
+                point: {
+                    hoverRadius: 7
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        }
+    });
 }
 
 // Añadir efectos visuales a las tarjetas

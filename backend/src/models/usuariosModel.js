@@ -77,5 +77,35 @@ module.exports = {
       [nuevaClave, email]
     );
     return result.affectedRows > 0;
+  },
+
+  // Contar usuarios por rol específico
+  async contarPorRol(rol) {
+    const [rows] = await pool.query(
+      'SELECT COUNT(*) as count FROM usuarios WHERE rol = ?',
+      [rol]
+    );
+    return rows[0].count;
+  },
+
+  // Obtener estadísticas de usuarios
+  async obtenerEstadisticas() {
+    const [rows] = await pool.query(`
+      SELECT 
+        rol,
+        COUNT(*) as cantidad 
+      FROM usuarios 
+      GROUP BY rol
+    `);
+    return rows;
+  },
+
+  // Verificar si existe al menos un administrador
+  async existeAdministrador() {
+    const [rows] = await pool.query(
+      'SELECT COUNT(*) as count FROM usuarios WHERE rol = ?',
+      ['Administrador']
+    );
+    return rows[0].count > 0;
   }
 }; 

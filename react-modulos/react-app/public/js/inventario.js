@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const tablaBody = document.getElementById('inventarioBody');
   const buscarInput = document.getElementById('inventariobusqueda');
+  const filtroCategoria = document.getElementById('filtroCategoria');
   const btnBuscar = document.getElementById('btnInventario');
   const btnExportar = document.getElementById('exportarInventario');
   const btnRecontar = document.getElementById('btnRecontar');
@@ -10,40 +11,99 @@ document.addEventListener('DOMContentLoaded', () => {
   let idEditar = null;
   let inventarioCache = [];
 
-  async function cargarInventario(filtro = '') {
+  async function cargarInventario(filtro = '', categoria = '') {
     try {
-      const response = await fetch('http://localhost:4000/api/inventario');
+      // Obtener token de autenticación
+      const token = sessionStorage.getItem('jwtToken');
+      if (!token) {
+        alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      // Construir URL con parámetros de filtro si es necesario
+      let url = 'http://localhost:4000/api/inventario';
+      if (filtro && categoria) {
+        url = `http://localhost:4000/api/inventario/search/productos?termino=${encodeURIComponent(filtro)}&categoria=${categoria}`;
+      } else if (filtro) {
+        url = `http://localhost:4000/api/inventario/search/productos?termino=${encodeURIComponent(filtro)}`;
+      } else if (categoria) {
+        url = `http://localhost:4000/api/inventario/categoria/${categoria}`;
+      }
+
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
+          window.location.href = 'index.html';
+          return;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const inventario = await response.json();
       inventarioCache = inventario;
-      tablaBody.innerHTML = '';
-      inventario
-        .filter(item => item.nombre.toLowerCase().includes(filtro.toLowerCase()))
-        .forEach((item) => {
-          const fila = document.createElement('tr');
-          fila.innerHTML = `
-              <td data-title="Producto">${item.nombre}</td>
-              <td data-title="Precio">${item.precio}</td>
-              <td data-title="Costo">${item.costo}</td>
-              <td data-title="SKU">${item.sku}</td>
-              <td data-title="IMEI">${item.imei}</td>
-              <td data-title="Garantía">${item.garantia}</td>
-              <td data-title="Existencias">${item.existencias}</td>
-              <td data-title="Acciones">
-                  <div class="btn-group-actions">
-                      <button class="btn btn-warning btn-sm editar" data-id="${item.id}">
-                          <i class="fas fa-edit"></i>
-                      </button>
-                      <button class="btn btn-danger btn-sm eliminar" data-id="${item.id}">
-                          <i class="fas fa-trash"></i>
-                      </button>
-                  </div>
-              </td>
-          `;
-          tablaBody.appendChild(fila);
-        });
+      mostrarInventarioEnTabla(inventario);
+
     } catch (error) {
+      console.error('Error cargando inventario:', error);
       alert('Error cargando inventario desde el servidor.');
     }
+  }
+
+  function mostrarInventarioEnTabla(inventario) {
+    tablaBody.innerHTML = '';
+    
+    if (inventario.length === 0) {
+      tablaBody.innerHTML = '<tr><td colspan="9" class="text-center">No se encontraron productos</td></tr>';
+      return;
+    }
+
+    inventario.forEach((item) => {
+      const fila = document.createElement('tr');
+      const categoriaBadge = obtenerBadgeCategoria(item.categoria || 'ambos');
+      
+      fila.innerHTML = `
+          <td data-title="Producto">${item.nombre}</td>
+          <td data-title="Precio">$${parseFloat(item.precio || 0).toLocaleString('es-CO')}</td>
+          <td data-title="Costo">$${parseFloat(item.costo || 0).toLocaleString('es-CO')}</td>
+          <td data-title="SKU">${item.sku}</td>
+          <td data-title="IMEI">${item.imei || 'N/A'}</td>
+          <td data-title="Garantía">${item.garantia}</td>
+          <td data-title="Categoría">${categoriaBadge}</td>
+          <td data-title="Existencias">
+              <span class="badge ${item.existencias <= 5 ? 'badge-danger' : 'badge-success'}">
+                  ${item.existencias}
+              </span>
+          </td>
+          <td data-title="Acciones">
+              <div class="btn-group-actions">
+                  <button class="btn btn-warning btn-sm editar" data-id="${item.id}" title="Editar producto">
+                      <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-danger btn-sm eliminar" data-id="${item.id}" title="Eliminar producto">
+                      <i class="fas fa-trash"></i>
+                  </button>
+              </div>
+          </td>
+      `;
+      tablaBody.appendChild(fila);
+    });
+  }
+
+  function obtenerBadgeCategoria(categoria) {
+    const badges = {
+      'servicio': '<span class="badge badge-info">Servicio</span>',
+      'venta': '<span class="badge badge-success">Venta</span>',
+      'ambos': '<span class="badge badge-primary">Ambos</span>'
+    };
+    return badges[categoria] || badges['ambos'];
   }
 
   btnGuardar.addEventListener('click', async () => {
@@ -53,27 +113,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const sku = document.getElementById('sku').value.trim();
     const imei = document.getElementById('imeiosn').value.trim();
     const garantia = document.getElementById('garantia').value.trim();
+    const categoria = document.getElementById('categoria').value;
     const existencias = parseInt(document.getElementById('existencias').value.trim());
 
-    if (!nombre || !precio || !costo || !sku || !imei || !garantia || isNaN(existencias)) {
+    if (!nombre || !precio || !costo || !sku || !imei || !garantia || !categoria || isNaN(existencias)) {
+      alert('Por favor completa todos los campos obligatorios');
       return;
     }
 
-    const nuevoArticulo = { nombre, precio, costo, sku, imei, garantia, existencias };
+    const nuevoArticulo = { nombre, precio, costo, sku, imei, garantia, categoria, existencias };
+    const token = sessionStorage.getItem('jwtToken');
+    if (!token) {
+      alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
+      window.location.href = 'index.html';
+      return;
+    }
+
     try {
       if (idEditar) {
         const response = await fetch(`http://localhost:4000/api/inventario/${idEditar}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify(nuevoArticulo)
         });
-        if (!response.ok) throw new Error('Error actualizando producto');
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Error actualizando producto');
+        }
         alert('Producto actualizado correctamente');
         idEditar = null;
       } else {
         const response = await fetch('http://localhost:4000/api/inventario', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify(nuevoArticulo)
         });
         if (!response.ok) {
@@ -87,49 +165,91 @@ document.addEventListener('DOMContentLoaded', () => {
       $('#agregarArticuloModal').modal('hide');
       document.getElementById('formInventario').reset();
     } catch (error) {
-      alert('Error de conexión con el servidor.');
+      console.error('Error guardando producto:', error);
+      alert('Error: ' + error.message);
     }
   });
 
   btnBuscar.addEventListener('click', () => {
-    cargarInventario(buscarInput.value.trim());
+    cargarInventario(buscarInput.value.trim(), filtroCategoria.value);
   });
 
   buscarInput.addEventListener('keyup', (e) => {
     if (e.key === 'Enter') btnBuscar.click();
   });
 
+  // Event listener para el filtro de categoría
+  filtroCategoria.addEventListener('change', () => {
+    cargarInventario(buscarInput.value.trim(), filtroCategoria.value);
+  });
+
   tablaBody.addEventListener('click', async (e) => {
     const id = e.target.closest('button')?.getAttribute('data-id');
+    const token = sessionStorage.getItem('jwtToken');
+    
+    if (!token) {
+      alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
+      window.location.href = 'index.html';
+      return;
+    }
+
     if (e.target.closest('.eliminar')) {
       if (confirm('¿Seguro que deseas eliminar este artículo del inventario?')) {
         try {
           const response = await fetch(`http://localhost:4000/api/inventario/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
           });
-          if (!response.ok) throw new Error('Error eliminando producto');
+          
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Error eliminando producto');
+          }
+          
+          alert('Producto eliminado correctamente');
           await cargarInventario();
         } catch (error) {
-          alert('Error de conexión con el servidor.');
+          console.error('Error eliminando producto:', error);
+          alert('Error: ' + error.message);
         }
       }
     }
+    
     if (e.target.closest('.editar')) {
       try {
-        const response = await fetch(`http://localhost:4000/api/inventario/${id}`);
-        if (!response.ok) throw new Error('Producto no encontrado');
+        const response = await fetch(`http://localhost:4000/api/inventario/producto/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Producto no encontrado');
+        }
+        
         const item = await response.json();
         document.getElementById('nombreArticulo').value = item.nombre;
         document.getElementById('precioVenta').value = item.precio;
         document.getElementById('costoTienda').value = item.costo;
         document.getElementById('sku').value = item.sku;
-        document.getElementById('imeiosn').value = item.imei;
+        document.getElementById('imeiosn').value = item.imei || '';
         document.getElementById('garantia').value = item.garantia;
+        document.getElementById('categoria').value = item.categoria || 'ambos';
         document.getElementById('existencias').value = item.existencias;
+        
+        // Cambiar título del modal
+        document.getElementById('agregarArticuloModalLabel').textContent = 'Editar producto';
+        
         idEditar = id;
         $('#agregarArticuloModal').modal('show');
       } catch (error) {
-        alert('Error al cargar producto para editar.');
+        console.error('Error cargando producto para editar:', error);
+        alert('Error: ' + error.message);
       }
     }
   });
@@ -165,12 +285,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function limpiarBusqueda() {
     buscarInput.value = '';
+    filtroCategoria.value = '';
     cargarInventario();
   }
 
   if (btnLimpiarInventario) {
     btnLimpiarInventario.addEventListener('click', limpiarBusqueda);
   }
+
+  // Event listener para limpiar el modal cuando se abre para crear nuevo producto
+  $('#agregarArticuloModal').on('hidden.bs.modal', function () {
+    document.getElementById('formInventario').reset();
+    document.getElementById('agregarArticuloModalLabel').textContent = 'Agregar dispositivo';
+    idEditar = null;
+  });
+
+  // Event listener para cuando se abre el modal (para crear nuevo producto)
+  $('.btn-addinventario').on('click', function() {
+    document.getElementById('agregarArticuloModalLabel').textContent = 'Agregar dispositivo';
+    document.getElementById('formInventario').reset();
+    idEditar = null;
+  });
 
   cargarInventario();
 });

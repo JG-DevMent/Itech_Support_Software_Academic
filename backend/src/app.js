@@ -8,6 +8,9 @@ app.use(cors());
 app.use(express.json());
 
 // Importar rutas (se agregarán por módulos)
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/dashboard', require('./routes/dashboard'));
+app.use('/api/notificaciones', require('./routes/notificaciones'));
 app.use('/api/usuarios', require('./routes/usuarios'));
 app.use('/api/config-tienda', require('./routes/configTienda'));
 app.use('/api/clientes', require('./routes/clientes'));
@@ -16,7 +19,7 @@ app.use('/api/reparaciones', require('./routes/reparaciones'));
 app.use('/api/facturas', require('./routes/facturas'));
 app.use('/api/historial-busquedas', require('./routes/historialBusquedas'));
 app.use('/api/ventas', require('./routes/ventas'));
-console.log('Rutas de usuarios, configuración de tienda, clientes, inventario, reparaciones, facturas, historial de búsquedas y ventas cargadas');
+console.log('Rutas de autenticación, dashboard, notificaciones, usuarios, configuración de tienda, clientes, inventario, reparaciones, facturas, historial de búsquedas y ventas cargadas');
 
 // Ruta protegida de ejemplo para probar JWT
 app.get('/api/protected', require('./middleware/auth').authenticateToken, (req, res) => {

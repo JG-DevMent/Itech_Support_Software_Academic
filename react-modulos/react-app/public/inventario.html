@@ -8,6 +8,7 @@
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
     <link href="css/custom.css" rel="stylesheet">
+    <link href="css/bootstrap-buttons.css" rel="stylesheet">
 </head>
 <body id="page-top">
     <div id="wrapper">
@@ -92,14 +93,22 @@
                     <div class="card-body">
                         <h1 class="text-h1">Inventario</h1>
                         <div class="busqueda-inventario">
-                            <input type="text" id="inventariobusqueda" class="form-control" placeholder="Buscar producto">
+                            <input type="text" id="inventariobusqueda" class="form-control" placeholder="Buscar producto por nombre o SKU">
+                            
+                            <select id="filtroCategoria" class="form-control">
+                                <option value="">Todas las categorías</option>
+                                <option value="servicio">Solo servicios</option>
+                                <option value="venta">Solo ventas</option>
+                                <option value="ambos">Ambos usos</option>
+                            </select>
+                            
                             <button id="btnInventario" class="btn btn-primary">Buscar</button> 
                             <button id="btnLimpiarInventario" class="btn btn-secondary">
                                 <i class="fas fa-eraser"></i> Limpiar
                             </button>
                             <div>
-                                <button class="btn-addinventario" data-toggle="modal" data-target="#agregarArticuloModal">
-                                    <i class="fas fa-plus"></i>
+                                <button class="btn-add-modern" data-toggle="modal" data-target="#agregarArticuloModal" title="Agregar nuevo producto">
+                                    <i class="fas fa-plus mr-1"></i>Agregar Producto
                                 </button>
                             </div>
                         </div>    
@@ -110,8 +119,8 @@
                         <p>Inventario Registrado</p>
                         <div class="form-group button-group">
                             <div class="col-md-8 col-sm-12 d-flex row mb-2" style="gap: 10px;">
-                                <button class="btn btn-warninginventario" id="btnRecontar">
-                                    <i class="fas fa-list"></i> Recuento de inventario
+                                <button class="btn btn-count-modern" id="btnRecontar">
+                                    <i class="fas fa-calculator"></i> Recuento de inventario
                                 </button>
                                 <div class="col-md-1.5 col-sm-8 mb-2">
                                     <button id="exportarInventario" class="btn btn-success">
@@ -130,6 +139,7 @@
                                         <th>SKU</th>
                                         <th>IMEI</th>
                                         <th>Garantía</th>
+                                        <th>Categoría</th>
                                         <th>Existencias</th>
                                         <th>Acciones</th>
                                     </tr>
@@ -179,6 +189,21 @@
                         <div class="form-group">
                             <label>Garantía <span style="color:red">*</span></label>
                             <input type="text" id="garantia" class="form-control" placeholder="Ninguno" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="categoria">Categoría <span style="color:red">*</span></label>
+                            <select id="categoria" class="form-control" required>
+                                <option value="">Selecciona una categoría</option>
+                                <option value="servicio">Solo para servicios y reparaciones</option>
+                                <option value="venta">Solo para venta directa</option>
+                                <option value="ambos">Ambos usos (servicios y ventas)</option>
+                            </select>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Servicio:</strong> Productos usados en reparaciones | 
+                                <strong>Venta:</strong> Productos para venta directa | 
+                                <strong>Ambos:</strong> Disponible para cualquier uso
+                            </small>
                         </div>
                         <div class="form-group">
                             <label for="existencias">Existencias <span style="color:red">*</span></label>

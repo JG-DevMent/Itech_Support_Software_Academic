@@ -20,17 +20,30 @@ module.exports = {
     if (existe.length > 0) {
       throw new Error('El SKU ya existe');
     }
+    
+    // Validar categoría
+    const categoria = producto.categoria || 'ambos';
+    if (!['servicio', 'venta', 'ambos'].includes(categoria)) {
+      throw new Error('Categoría no válida');
+    }
+    
     const [result] = await pool.query(
-      'INSERT INTO inventario (nombre, precio, costo, sku, imei, garantia, existencias) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [producto.nombre, producto.precio, producto.costo, producto.sku, producto.imei || '', producto.garantia, producto.existencias]
+      'INSERT INTO inventario (nombre, precio, costo, sku, imei, garantia, categoria, existencias) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [producto.nombre, producto.precio, producto.costo, producto.sku, producto.imei || '', producto.garantia, categoria, producto.existencias]
     );
-    return { id: result.insertId, ...producto };
+    return { id: result.insertId, ...producto, categoria };
   },
 
   async actualizar(id, producto) {
+    // Validar categoría si se proporciona
+    const categoria = producto.categoria || 'ambos';
+    if (!['servicio', 'venta', 'ambos'].includes(categoria)) {
+      throw new Error('Categoría no válida');
+    }
+    
     const [result] = await pool.query(
-      'UPDATE inventario SET nombre = ?, precio = ?, costo = ?, sku = ?, imei = ?, garantia = ?, existencias = ? WHERE id = ?',
-      [producto.nombre, producto.precio, producto.costo, producto.sku, producto.imei || '', producto.garantia, producto.existencias, id]
+      'UPDATE inventario SET nombre = ?, precio = ?, costo = ?, sku = ?, imei = ?, garantia = ?, categoria = ?, existencias = ? WHERE id = ?',
+      [producto.nombre, producto.precio, producto.costo, producto.sku, producto.imei || '', producto.garantia, categoria, producto.existencias, id]
     );
     return result.affectedRows > 0;
   },
@@ -57,5 +70,52 @@ module.exports = {
     const nuevasExistencias = existenciasActuales + cantidad;
     await connection.query('UPDATE inventario SET existencias = ? WHERE sku = ?', [nuevasExistencias, sku]);
     return true;
+  },
+
+  // Obtener productos por categoría
+  async obtenerPorCategoria(categoria) {
+    const [rows] = await pool.query('SELECT * FROM inventario WHERE categoria = ? OR categoria = "ambos"', [categoria]);
+    return rows;
+  },
+
+  // Obtener productos solo para servicios
+  async obtenerParaServicios() {
+    const [rows] = await pool.query('SELECT * FROM inventario WHERE categoria IN ("servicio", "ambos")');
+    return rows;
+  },
+
+  // Obtener productos solo para ventas
+  async obtenerParaVentas() {
+    const [rows] = await pool.query('SELECT * FROM inventario WHERE categoria IN ("venta", "ambos")');
+    return rows;
+  },
+
+  // Obtener estadísticas por categoría
+  async obtenerEstadisticasCategorias() {
+    const [rows] = await pool.query(`
+      SELECT 
+        categoria,
+        COUNT(*) as total_productos,
+        SUM(existencias) as total_existencias,
+        ROUND(AVG(precio), 2) as precio_promedio,
+        ROUND(SUM(precio * existencias), 2) as valor_total
+      FROM inventario 
+      GROUP BY categoria
+    `);
+    return rows;
+  },
+
+  // Buscar productos por nombre o SKU con filtro de categoría
+  async buscarPorTermino(termino, categoria = null) {
+    let query = 'SELECT * FROM inventario WHERE (nombre LIKE ? OR sku LIKE ?)';
+    let params = [`%${termino}%`, `%${termino}%`];
+    
+    if (categoria) {
+      query += ' AND (categoria = ? OR categoria = "ambos")';
+      params.push(categoria);
+    }
+    
+    const [rows] = await pool.query(query, params);
+    return rows;
   }
 }; 
