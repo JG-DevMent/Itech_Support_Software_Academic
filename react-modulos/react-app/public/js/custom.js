@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!publicPages.includes(currentPage)) {
             // Si no es página pública, verificar autenticación
             const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+            /*console.log('Usuario cargado desde sessionStorage:', currentUser);*/
+
             if (!currentUser) {
                 alert('Debes iniciar sesión para acceder a esta página');
                 window.location.href = '/';
@@ -25,16 +27,35 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Función para verificar y aplicar restricciones según rol
     function checkRoleAccess(user) {
-        if (!user.role) return; // Si no hay rol definido, no aplicar restricciones
+        //Verificar y compatibilidad de role y rol
+        const userRole = user.role || user.rol;
+
+        if (!userRole) {
+            console.log('No hay rol definido para el usuario');
+            console.log('Usuario completo:', user);
+            return; // Si no hay rol definido, no aplicar restricciones
+        }
+        
+        // Normalizar el rol para que funcione con el resto del código
+        user.role = userRole;
         
         // Obtener la página actual
         const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+
+        console.log('Verificando acceso:', {
+            user: user.username,
+            role: user.role,
+            originalRol: user.rol,
+            currentPage: currentPage,
+            userData: user
+        });
         
         // Páginas públicas que todos los roles pueden acceder
         const publicForAllRoles = [];
         
         // Si la página es accesible para todos los roles, permitir acceso
         if (publicForAllRoles.includes(currentPage)) {
+            /*console.log('Página pública, permitiendo acceso');*/
             return true;
         }
         
@@ -57,11 +78,17 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         
         // Verificar restricciones de acceso
-        const userRole = user.role;
-        const restrictions = roleAccess[userRole];
+        const restrictions = roleAccess[user.role];
+
+        console.log('Restricciones para el rol:', {
+            userRole: user.role,
+            restrictions: restrictions,
+            isRestricted: restrictions && restrictions.restricted.includes(currentPage),
+        });
         
         if (restrictions && restrictions.restricted.includes(currentPage)) {
             // Si la página actual está restringida para este rol
+            /*console.log('ACCESO DENEGADO: Página restringida para este rol');*/
             alert('No tienes permiso para acceder a esta página');
             window.location.href = 'home.html';
             return false;
@@ -70,18 +97,20 @@ document.addEventListener('DOMContentLoaded', function() {
         // Aplicar restricciones de solo lectura si corresponde
         if (restrictions && restrictions.readOnly && restrictions.readOnly.includes(currentPage)) {
             // Si la página es de solo lectura para este rol
+            /*console.log('Aplicando restricciones de solo lectura');*/
             applyReadOnlyRestrictions();
         }
         
         // Actualizar el menú lateral según permisos del rol
-        updateSidebarMenu(userRole, roleAccess, publicForAllRoles);
+        updateSidebarMenu(user.role, roleAccess, publicForAllRoles);
         
         // Mostrar información del usuario actual
         displayUserInfo(user);
         
         // Restricciones específicas por rol y página
-        applySpecificRoleRestrictions(userRole, currentPage);
-        
+        applySpecificRoleRestrictions(user.role, currentPage);
+
+        console.log('Acceso permitido');
         return true;
     }
     

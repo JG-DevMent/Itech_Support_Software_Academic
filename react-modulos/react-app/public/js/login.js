@@ -20,7 +20,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const user = await response.json();
-            sessionStorage.setItem('currentUser', JSON.stringify(user));
+
+            // Mapear 'rol' del backend a 'role' para el frontend
+            const userData = {
+                ...user,
+                role: user.rol // Mapear rol del backend a role para el frontend
+            };
+            
+            sessionStorage.setItem('currentUser', JSON.stringify(userData));
+            /*console.log('Usuario guardado en sessionStorage:', userData);*/            
             alert('¡Bienvenido ' + user.username + '!');
             window.location.href = 'home.html';
         } catch (error) {

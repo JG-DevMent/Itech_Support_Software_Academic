@@ -26,7 +26,7 @@ Sistema de gestión para taller de mantenimiento y reparación de equipos tecnol
 - Control de existencias
 - Gestión de productos, precios y costos
 
-### Sistema de Roles y Permisos (PENDIENTE)
+### Sistema de Roles y Permisos 
 El sistema implementa tres roles diferentes, cada uno con permisos específicos:
 
 #### Administrador
@@ -65,6 +65,29 @@ El sistema implementa tres roles diferentes, cada uno con permisos específicos:
 - Validación de permisos en todas las páginas
 - Restricciones de interfaz según el rol del usuario
 
+### Implementación del Sistema de Roles
+#### Frontend (JavaScript)
+- **Archivo principal**: `react-modulos/react-app/public/js/custom.js`
+- **Función clave**: `checkRoleAccess(user)` - Verifica permisos de acceso a páginas
+- **Compatibilidad**: Funciona con campos `rol` (backend) y `role` (frontend)
+- **Restricciones por página**:
+  - **Técnico**: Sin acceso a configuración, ventas, facturación
+  - **Vendedor**: Sin acceso a gestión de reparaciones, configuración
+  - **Administrador**: Acceso completo a todas las páginas
+
+#### Backend (Node.js/Express)
+- **Middleware**: `backend/src/middleware/auth.js` - Autenticación JWT
+- **Controlador**: `backend/src/controllers/usuariosController.js` - Login con rol
+- **Base de datos**: Campo `rol` en tabla usuarios
+
+#### Páginas Restringidas por Rol
+- **Técnico**: `configuracion.html`, `config_perfil.html`, `config_tienda.html`, `ventas-informes.html`, `pago-facturacion.html`
+- **Vendedor**: `configuracion.html`, `config_perfil.html`, `config_tienda.html`, `gestion-reparacion.html`
+- **Administrador**: Sin restricciones
+
+#### Funcionalidades de Solo Lectura
+- **Técnico en clientes**: Puede buscar pero no crear/editar/eliminar clientes
+
 ## Tecnologías utilizadas
 - HTML5
 - CSS3 (Bootstrap SB Admin 2)
@@ -72,7 +95,6 @@ El sistema implementa tres roles diferentes, cada uno con permisos específicos:
 - Exportación a Excel (XLSX.js)
 
 ## Estructura del Proyecto
-
 - `frontend/`: Contiene todos los archivos relacionados al frontend (HTML, JS, CSS, imágenes, vendor, etc).
 - `backend/`: Código fuente del backend (Node.js, Express).
 - `db/`: Archivos de base de datos y scripts SQL.

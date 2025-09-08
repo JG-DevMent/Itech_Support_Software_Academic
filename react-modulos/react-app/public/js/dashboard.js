@@ -35,8 +35,15 @@ document.addEventListener('DOMContentLoaded', function() {
 function personalizarMensajeBienvenida() {
     // Obtener usuario actual de la sesión
     const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-    if (!currentUser || !currentUser.role) return;
-    
+    if (!currentUser) return;
+
+    //Verificar y compatibilidad de role y rol
+    const userRole = currentUser.role || currentUser.rol;
+    if (!userRole) return;
+
+    //Normalizar el rol
+    currentUser.role = userRole;
+
     const welcomeContent = document.querySelector('.welcome-content');
     if (!welcomeContent) return;
     
@@ -79,9 +86,14 @@ function personalizarMensajeBienvenida() {
 function gestionarBotonesSegunRol() {
     // Obtener usuario actual de la sesión
     const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-    if (!currentUser || !currentUser.role) return;
+    if (!currentUser) return;
     
-    const userRole = currentUser.role;
+    //Verificar y compatibilidad de role y rol
+    const userRole = currentUser.role || currentUser.rol;
+    if (!userRole) return;
+
+    //Normalizar el rol
+    currentUser.role = userRole;
     const actionButtons = document.querySelectorAll('.quick-actions-grid .action-btn');
     
     // Definir los botones que cada rol puede ver
@@ -114,9 +126,14 @@ function gestionarBotonesSegunRol() {
 function actualizarConsejosSegunRol() {
     // Obtener usuario actual de la sesión
     const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-    if (!currentUser || !currentUser.role) return;
-    
-    const userRole = currentUser.role;
+    if (!currentUser) return;
+
+    //Verificar y compatibilidad de role y rol
+    const userRole = currentUser.role || currentUser.rol;
+    if (!userRole) return;
+
+    //Normalizar el rol
+    currentUser.role = userRole;    
     const tipsList = document.querySelector('.tips-list');
     if (!tipsList) return;
     
