@@ -1,4 +1,4 @@
-# react-modulos/react-app/Dockerfile
+# Etapa 1: construir React
 FROM node:18 as build
 
 WORKDIR /app
@@ -9,11 +9,14 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# Stage final: servir build estático con nginx
+# Etapa 2: servir con Nginx
 FROM nginx:alpine
+
+# Copiar build de React
 COPY --from=build /app/build /usr/share/nginx/html
 
-# Nginx sirve en el puerto 80 dentro del contenedor
-EXPOSE 80
+# Copiar configuración personalizada de Nginx
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
