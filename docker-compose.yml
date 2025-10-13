@@ -10,10 +10,13 @@ services:
       MYSQL_DATABASE: itech_support
       MYSQL_USER: useradmin
       MYSQL_PASSWORD: "itech1023522704@A"
+      TZ: America/Bogota
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro 
     networks:
       - itech_network
 
@@ -22,15 +25,12 @@ services:
     container_name: backend_itech
     restart: always
     working_dir: /app
+    env_file:
+      - ./backend/.env
     environment:
-      DB_HOST: mysql           
-      DB_USER: useradmin
-      DB_PASSWORD: "itech1023522704@A"
-      DB_NAME: itech_support
-      DB_PORT: 3306    
-      PORT: 4000
+      DB_HOST: mysql
     ports:
-      - "4000:4000"            # host:container -> 4000 en host al 4000 del contenedor
+      - "4000:4000"
     depends_on:
       - mysql
     networks:
@@ -43,7 +43,7 @@ services:
     environment:
       - NODE_ENV=production
     ports:
-      - "3000:80"              # mapear 3000 del host al 80 interno de nginx
+      - "3000:80"
     depends_on:
       - backend
     networks:

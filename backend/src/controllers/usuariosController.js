@@ -82,7 +82,7 @@ exports.loginUsuario = async (req, res) => {
         rol: usuario.rol 
       },
       process.env.JWT_SECRET,
-      { expiresIn: '2h' }
+      { expiresIn: '1h' }
     );
     
     // Enviar respuesta con token y datos del usuario (sin contraseña)
@@ -114,8 +114,12 @@ exports.resetPassword = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '5m' } //
     );
+    
+    // URL del FRONTEND
+    const FRONTEND_URL = process.env.FRONTEND_URL || "http://192.168.1.7:3000";
 
-    const resetLink = `http://localhost:3000/reset-password-form.html?token=${resetToken}`;
+    // Enlace de restablecimiento
+    const resetLink = `${FRONTEND_URL}/reset-password-form.html?token=${resetToken}`;
 
     await enviarCorreo(
       email,

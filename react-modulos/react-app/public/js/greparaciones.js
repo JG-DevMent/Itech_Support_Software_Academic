@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let modoEdicion = false;
     let idEdicion = null;
     let clienteActual = { nombre: '', email: '', telefono: '' };
-    const API_BASE = 'http://localhost:4000/api';
+    const API_BASE = `${window.API_BASE_URL}/api`;
 
     // ===================== FUNCIONES FETCH =====================
     async function cargarReparaciones() {
@@ -42,23 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     async function eliminarReparacionBackend(id) {
         await fetch(`${API_BASE}/reparaciones/${id}`, { method: 'DELETE' });
-    }
-
-    // Función para formatear fecha a hora local de Colombia
-    function formatearFechaColombia(fechaISO) {
-        if (!fechaISO) return '';
-        const fecha = new Date(fechaISO);
-        const opciones = {
-            timeZone: 'America/Bogota',
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        };
-        // Devuelve: 27/05/2025 10:12:22
-        return fecha.toLocaleString('es-CO', opciones).replace(',', '');
     }
 
     // ===================== UI Y LÓGICA =====================
@@ -313,7 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (isNaN(costoMaterialesNum)) costoMaterialesNum = 0;
             const tieneMateriales = costoMaterialesNum > 0;
             const infoMateriales = tieneMateriales ? `<br><small class="text-info">Materiales: $${costoMaterialesNum.toFixed(2)}</small>` : '';
-            const fechaMostrar = formatearFechaColombia(rep.fecha_registro || rep.fecha || '');
+            const fechaMostrar = rep.fecha_registro || rep.fecha || '';
             const bloqueado = rep.estado === 'Completada' || rep.estado === 'Pagada';
             let row = `
                 <tr>
@@ -352,7 +335,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // NUEVA VERSIÓN MEJORADA DE IMPRESIÓN
     window.imprimirMateriales = function(index) {
     const rep = listaReparaciones[index];
-    let fechaMostrar = formatearFechaColombia(rep.fecha_registro || rep.fecha || '');
+    let fechaMostrar = rep.fecha_registro || rep.fecha || '';
 
     let estilos = `
         <style>

@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let nombreArchivo = '';
         if (tipo === 'reparaciones') {
             // Informe de todas las reparaciones
-            const res = await fetch('http://localhost:4000/api/reparaciones');
+            const res = await fetch(`${window.API_BASE_URL}/api/reparaciones`);
             const reparaciones = await res.json();
             ws_data = [
                 ['ID', 'Cliente', 'Dispositivo', 'Marca/Modelo', 'IMEI/Serial', 'Problema', 'Descripción', 'Costo', 'Fecha', 'Estado']
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Obtener primer y último día del mes
             const primerDia = new Date(anio, mes - 1, 1).toISOString().split('T')[0];
             const ultimoDia = new Date(anio, mes, 0).toISOString().split('T')[0];
-            const res = await fetch(`http://localhost:4000/api/reparaciones?desde=${primerDia}&hasta=${ultimoDia}`);
+            const res = await fetch(`${window.API_BASE_URL}/api/reparaciones?desde=${primerDia}&hasta=${ultimoDia}`);
             const reparaciones = await res.json();
             ws_data = [
                 ['ID', 'Cliente', 'Dispositivo', 'Marca/Modelo', 'IMEI/Serial', 'Problema', 'Descripción', 'Costo', 'Fecha', 'Estado']
@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
             nombreArchivo = 'informe_reparaciones_mensual.xlsx';
         } else if (tipo === 'articulos') {
             // Informe de artículos/inventario
-            const res = await fetch('http://localhost:4000/api/inventario');
+            const res = await fetch(`${window.API_BASE_URL}/api/inventario`);
             const inventario = await res.json();
             ws_data = [
                 ['Producto', 'Precio', 'Costo', 'SKU', 'IMEI', 'Garantía', 'Existencias']
@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
             nombreArchivo = 'informe_articulos.xlsx';
         } else if (tipo === 'inventario') {
             // Informe de costo total del inventario
-            const res = await fetch('http://localhost:4000/api/inventario');
+            const res = await fetch(`${window.API_BASE_URL}/api/inventario`);
             const inventario = await res.json();
             let total = 0;
             ws_data = [
@@ -114,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function mostrarVentasHoy() {
         try {
-            const res = await fetch('http://localhost:4000/api/ventas/hoy');
+            const res = await fetch(`${window.API_BASE_URL}/api/ventas/hoy`);
             const data = await res.json();
             document.querySelector('.card-venta span').textContent = `$${parseFloat(data.total || 0).toLocaleString('es-CO')}`;
         } catch (error) {

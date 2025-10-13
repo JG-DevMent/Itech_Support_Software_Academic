@@ -11,12 +11,15 @@ function Login() {
   // Hook para navegación programática
   const navigate = useNavigate();
 
+  //Definimos la URL base de la API desde una variable global
+  const API_BASE_URL = window.API_BASE_URL || "http://localhost:4000";
+
   // Función que maneja el envío del formulario de login
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       // Realizamos la petición al backend para autenticar el usuario
-      const response = await fetch('http://localhost:4000/api/usuarios/login', {
+      const response = await fetch(`${window.API_BASE_URL}/api/usuarios/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })

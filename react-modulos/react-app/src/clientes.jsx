@@ -21,7 +21,7 @@ function Clientes() {
 
   const obtenerClientes = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/clientes');
+      const response = await fetch(`${window.API_BASE_URL}/api/clientes`);
       const data = await response.json();
       setClientes(data);
     } catch (error) {
@@ -43,7 +43,7 @@ function Clientes() {
     e.preventDefault();
     try {
       if (modoEdicion && clienteEditandoId) {
-        const response = await fetch(`http://localhost:4000/api/clientes/${clienteEditandoId}`, {
+        const response = await fetch(`${window.API_BASE_URL}/api/clientes/${clienteEditandoId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(form)
@@ -51,7 +51,7 @@ function Clientes() {
         if (!response.ok) throw new Error('Error actualizando cliente');
         alert('Cliente actualizado correctamente');
       } else {
-        const response = await fetch('http://localhost:4000/api/clientes', {
+        const response = await fetch(`${window.API_BASE_URL}/api/clientes`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(form)
@@ -73,7 +73,7 @@ function Clientes() {
 
   const handleEditar = async (id) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/clientes/${id}`);
+      const response = await fetch(`${window.API_BASE_URL}/api/clientes/${id}`);
       if (!response.ok) throw new Error('Cliente no encontrado');
       const cliente = await response.json();
       setForm(cliente);
@@ -88,7 +88,7 @@ function Clientes() {
   const handleEliminar = async (id) => {
     if (window.confirm('¿Seguro que deseas eliminar este cliente?')) {
       try {
-        const response = await fetch(`http://localhost:4000/api/clientes/${id}`, {
+        const response = await fetch(`${window.API_BASE_URL}/api/clientes/${id}`, {
           method: 'DELETE'
         });
         if (!response.ok) throw new Error('Error eliminando cliente');
@@ -105,7 +105,7 @@ function Clientes() {
       return;
     }
     try {
-      const response = await fetch('http://localhost:4000/api/clientes');
+      const response = await fetch(`${window.API_BASE_URL}/api/clientes`);
       const data = await response.json();
       const filtrados = data.filter(cliente => cliente.cedula.toLowerCase().includes(busqueda.trim().toLowerCase()));
       setClientes(filtrados);

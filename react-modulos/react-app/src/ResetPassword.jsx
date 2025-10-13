@@ -17,7 +17,7 @@ function ResetPassword() {
     setLoading(true);
     try {
       // Realizamos la petición al backend para enviar el correo de restablecimiento de contraseña
-      const response = await fetch('http://localhost:4000/api/usuarios/reset-password', {
+      const response = await fetch(`${window.API_BASE_URL}/api/usuarios/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })

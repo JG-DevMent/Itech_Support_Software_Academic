@@ -215,14 +215,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Reemplazar funciones de obtención local por fetch
     async function getRepairsFromBackend() {
         try {
-            const res = await fetch('http://localhost:4000/api/reparaciones');
+            const res = await fetch(`${window.API_BASE_URL}/api/reparaciones`);
             if (!res.ok) return [];
             return await res.json();
         } catch (e) { return []; }
     }
     async function getClientsFromBackend() {
         try {
-            const res = await fetch('http://localhost:4000/api/clientes');
+            const res = await fetch(`${window.API_BASE_URL}/api/clientes`);
             if (!res.ok) return [];
             return await res.json();
         } catch (e) { return []; }
@@ -231,14 +231,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Reemplazar findRepairById y findClientById para usar fetch
     async function fetchRepairById(repairId) {
         try {
-            const res = await fetch(`http://localhost:4000/api/reparaciones/${repairId}`);
+            const res = await fetch(`${window.API_BASE_URL}/api/reparaciones/${repairId}`);
             if (!res.ok) return null;
             return await res.json();
         } catch (e) { return null; }
     }
     async function fetchClientByCedula(cedula) {
         try {
-            const res = await fetch(`http://localhost:4000/api/clientes?cedula=${encodeURIComponent(cedula)}`);
+            const res = await fetch(`${window.API_BASE_URL}/api/clientes?cedula=${encodeURIComponent(cedula)}`);
             if (!res.ok) return null;
             const data = await res.json();
             return data.length > 0 ? data[0] : null;
@@ -527,7 +527,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     metodo_pago: paymentMethod,
                     estado: 'Pagada'
                 };
-                const facturaResp = await fetch('http://localhost:4000/api/facturas', {
+                const facturaResp = await fetch(`${window.API_BASE_URL}/api/facturas`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(facturaPayload)
@@ -539,7 +539,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Intentar obtener los materiales de la reparación buscada
                 let repair = null;
                 try {
-                    const res = await fetch(`http://localhost:4000/api/reparaciones/${repairId}`);
+                    const res = await fetch(`${window.API_BASE_URL}/api/reparaciones/${repairId}`);
                     if (res.ok) repair = await res.json();
                 } catch (e) {}
                 if (repair && Array.isArray(repair.materiales) && repair.materiales.length > 0) {
@@ -552,7 +552,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }));
                 }
                 if (materiales.length > 0) {
-                    const ventasResp = await fetch(`http://localhost:4000/api/facturas/${facturaData.id}/ventas`, {
+                    const ventasResp = await fetch(`${window.API_BASE_URL}/api/facturas/${facturaData.id}/ventas`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ ventas: materiales })

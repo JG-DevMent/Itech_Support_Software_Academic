@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
       try {
         if (editando && usuarioEditandoId) {
           // Actualizar usuario
-          const response = await fetch(`http://localhost:4000/api/usuarios/${usuarioEditandoId}`, {
+          const response = await fetch(`${window.API_BASE_URL}/api/usuarios/${usuarioEditandoId}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function () {
           alert('Usuario actualizado correctamente');
         } else {
           // Crear usuario
-          const response = await fetch('http://localhost:4000/api/usuarios', {
+          const response = await fetch(`${window.API_BASE_URL}/api/usuarios`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Función para cargar usuarios
     async function cargarUsuarios() {
       try {
-        const response = await fetch('http://localhost:4000/api/usuarios', {
+        const response = await fetch(`${window.API_BASE_URL}/api/usuarios`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
   
@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Función para editar usuario
     async function editarUsuario(id) {
       try {
-        const response = await fetch(`http://localhost:4000/api/usuarios/${id}`, {
+        const response = await fetch(`${window.API_BASE_URL}/api/usuarios/${id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
   
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function () {
     async function eliminarUsuario(id) {
       if (confirm('¿Estás seguro de eliminar este usuario?')) {
         try {
-          const response = await fetch(`http://localhost:4000/api/usuarios/${id}`, {
+          const response = await fetch(`${window.API_BASE_URL}/api/usuarios/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
           });

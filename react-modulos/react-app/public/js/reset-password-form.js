@@ -11,7 +11,7 @@ document.getElementById('resetForm').addEventListener('submit', async (e) => {
     return;
     }
 
-    const res = await fetch('http://localhost:4000/api/usuarios/confirm-reset-password', {
+    const res = await fetch(`${window.API_BASE_URL}/api/usuarios/confirm-reset-password`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ token, nuevaClave })

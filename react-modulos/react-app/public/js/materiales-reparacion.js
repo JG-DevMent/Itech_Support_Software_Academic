@@ -111,7 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tablaProductosInventario.innerHTML = "";
         let inventario = [];
         try {
-            const response = await fetch('http://localhost:4000/api/inventario');
+            const response = await fetch(`${window.API_BASE_URL}/api/inventario`);
             inventario = await response.json();
         } catch (error) {
             const row = tablaProductosInventario.insertRow();

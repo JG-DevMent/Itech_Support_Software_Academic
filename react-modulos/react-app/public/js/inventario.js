@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function cargarInventario(filtro = '') {
     try {
-      const response = await fetch('http://localhost:4000/api/inventario');
+      const response = await fetch(`${window.API_BASE_URL}/api/inventario`);
       const inventario = await response.json();
       inventarioCache = inventario;
       tablaBody.innerHTML = '';
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const nuevoArticulo = { nombre, precio, costo, sku, imei, garantia, existencias };
     try {
       if (idEditar) {
-        const response = await fetch(`http://localhost:4000/api/inventario/${idEditar}`, {
+        const response = await fetch(`${window.API_BASE_URL}/api/inventario/${idEditar}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(nuevoArticulo)
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Producto actualizado correctamente');
         idEditar = null;
       } else {
-        const response = await fetch('http://localhost:4000/api/inventario', {
+        const response = await fetch(`${window.API_BASE_URL}/api/inventario`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(nuevoArticulo)
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target.closest('.eliminar')) {
       if (confirm('¿Seguro que deseas eliminar este artículo del inventario?')) {
         try {
-          const response = await fetch(`http://localhost:4000/api/inventario/${id}`, {
+          const response = await fetch(`${window.API_BASE_URL}/api/inventario/${id}`, {
             method: 'DELETE'
           });
           if (!response.ok) throw new Error('Error eliminando producto');
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (e.target.closest('.editar')) {
       try {
-        const response = await fetch(`http://localhost:4000/api/inventario/${id}`);
+        const response = await fetch(`${window.API_BASE_URL}/api/inventario/${id}`);
         if (!response.ok) throw new Error('Producto no encontrado');
         const item = await response.json();
         document.getElementById('nombreArticulo').value = item.nombre;
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   btnRecontar.addEventListener('click', async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/inventario');
+      const response = await fetch(`${window.API_BASE_URL}/api/inventario`);
       const inventario = await response.json();
       const total = inventario.reduce((sum, item) => sum + (parseInt(item.existencias) || 0), 0);
       alert(`Total productos registrados: ${inventario.length} \nTotal unidades en inventario: ${total}`);
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   btnExportar.addEventListener('click', async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/inventario');
+      const response = await fetch(`${window.API_BASE_URL}/api/inventario`);
       const inventario = await response.json();
       if (inventario.length === 0) return alert('No hay productos para exportar.');
       const ws_data = [

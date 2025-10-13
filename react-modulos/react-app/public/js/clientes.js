@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let clienteEditandoId = null;
 
     async function obtenerClientes() {
-        const response = await fetch('http://localhost:4000/api/clientes');
+        const response = await fetch(`${window.API_BASE_URL}/api/clientes`);
         return await response.json();
     }
 
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
         try {
             if (modoEdicion && clienteEditandoId) {
-                const response = await fetch(`http://localhost:4000/api/clientes/${clienteEditandoId}`, {
+                const response = await fetch(`${window.API_BASE_URL}/api/clientes/${clienteEditandoId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(cliente)
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!response.ok) throw new Error('Error actualizando cliente');
                 alert('Cliente actualizado correctamente');
             } else {
-                const response = await fetch('http://localhost:4000/api/clientes', {
+                const response = await fetch(`${window.API_BASE_URL}/api/clientes`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(cliente)
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.target.classList.contains('eliminar-btn')) {
             if (confirm('¿Seguro que deseas eliminar este cliente?')) {
                 try {
-                    const response = await fetch(`http://localhost:4000/api/clientes/${id}`, {
+                    const response = await fetch(`${window.API_BASE_URL}/api/clientes/${id}`, {
                         method: 'DELETE'
                     });
                     if (!response.ok) throw new Error('Error eliminando cliente');
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         if (e.target.classList.contains('editar-btn')) {
             try {
-                const response = await fetch(`http://localhost:4000/api/clientes/${id}`);
+                const response = await fetch(`${window.API_BASE_URL}/api/clientes/${id}`);
                 if (!response.ok) throw new Error('Cliente no encontrado');
                 const cliente = await response.json();
                 inputs[0].value = cliente.nombre;

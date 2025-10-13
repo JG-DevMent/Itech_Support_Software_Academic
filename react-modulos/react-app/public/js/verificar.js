@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         try {
-            const res = await fetch(`http://localhost:4000/api/reparaciones/buscar?valor=${encodeURIComponent(valor)}`);
+            const res = await fetch(`${window.API_BASE_URL}/api/reparaciones/buscar?valor=${encodeURIComponent(valor)}`);
             const resultados = await res.json();
             if (Array.isArray(resultados) && resultados.length > 0) {
                 resultadoDiv.innerHTML = `

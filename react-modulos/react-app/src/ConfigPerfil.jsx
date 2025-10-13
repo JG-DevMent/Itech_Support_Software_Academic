@@ -31,7 +31,7 @@ function ConfigPerfil() {
   const fetchUsuarios = async () => {
     try {
       const token = getToken();
-      const res = await fetch('http://localhost:4000/api/usuarios', {
+      const res = await fetch(`${window.API_BASE_URL}/api/usuarios`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -58,7 +58,7 @@ function ConfigPerfil() {
     e.preventDefault();
     try {
       const token = getToken();
-      const res = await fetch('http://localhost:4000/api/usuarios', {
+      const res = await fetch(`${window.API_BASE_URL}/api/usuarios`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

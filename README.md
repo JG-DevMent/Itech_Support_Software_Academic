@@ -46,7 +46,6 @@ El sistema implementa tres roles diferentes, cada uno con permisos específicos:
 - Sin acceso a ventas e informes
 - Sin acceso a pago y facturación
 - Sin acceso a configuración
-- Restricciones en la interfaz de usuario (ej. no puede ver el botón de "Nueva Reparación" en la página de inicio)
 
 #### Vendedor
 - Enfocado en atención al cliente y ventas
@@ -93,8 +92,13 @@ El sistema implementa tres roles diferentes, cada uno con permisos específicos:
 - CSS3 (Bootstrap SB Admin 2)
 - JavaScript
 - Exportación a Excel (XLSX.js)
+- React JS
+- Node JS y Express JS
 
 ## Estructura del Proyecto
-- `frontend/`: Contiene todos los archivos relacionados al frontend (HTML, JS, CSS, imágenes, vendor, etc).
+- `react-modulos/react-app/`: Contiene todos los archivos relacionados al frontend (HTML, JS, CSS, imágenes, vendor, React, etc).
 - `backend/`: Código fuente del backend (Node.js, Express).
 - `db/`: Archivos de base de datos y scripts SQL.
+- `package-lock.json`: Versionamiento proyecto.
+- `docker-compose.yml/`: Contiene la configuracion de despliegue de Producción del proyecto.
+- `README.md`: Informacion general proyecto.
