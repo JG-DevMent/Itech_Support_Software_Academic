@@ -1,3 +1,12 @@
+/*
+  Proyecto: Itech Support
+  Autor: Juan Guillermo Ramírez C
+  Correo: jgrc20042507@gmail.com
+  GitHub: github.com/JG-DevMent/
+  Fecha: 2025-08-13
+  Versión: 1.0.0
+*/
+
 // Utilidades para manejo de autenticación JWT en React
 
 // Función para obtener el token JWT del sessionStorage

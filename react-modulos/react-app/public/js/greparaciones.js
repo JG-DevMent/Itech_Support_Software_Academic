@@ -1,3 +1,12 @@
+/*
+  Proyecto: Itech Support
+  Autor: Juan Guillermo Ramírez C
+  Correo: jgrc20042507@gmail.com
+  GitHub: github.com/JG-DevMent/
+  Fecha: 2025-05-13
+  Versión: 1.0.0
+*/
+
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("formReparacion");
     const tablaCuerpo = document.getElementById("tablaBody");
@@ -296,7 +305,21 @@ document.addEventListener("DOMContentLoaded", () => {
             if (isNaN(costoMaterialesNum)) costoMaterialesNum = 0;
             const tieneMateriales = costoMaterialesNum > 0;
             const infoMateriales = tieneMateriales ? `<br><small class="text-info">Materiales: $${costoMaterialesNum.toFixed(2)}</small>` : '';
-            const fechaMostrar = rep.fecha_registro || rep.fecha || '';
+            /*const fechaMostrar = rep.fecha_registro || rep.fecha || '';*/
+            let fechaMostrar = '';
+            if (rep.fecha_registro) {
+                const fecha = new Date(rep.fecha_registro);
+                const opciones = {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true,
+                    timeZone: 'America/Bogota'
+                };
+                fechaMostrar = fecha.toLocaleString('es-CO', opciones).replace(',', '');
+            }
             const bloqueado = rep.estado === 'Completada' || rep.estado === 'Pagada';
             let row = `
                 <tr>
@@ -335,7 +358,21 @@ document.addEventListener("DOMContentLoaded", () => {
 // NUEVA VERSIÓN MEJORADA DE IMPRESIÓN
     window.imprimirMateriales = function(index) {
     const rep = listaReparaciones[index];
-    let fechaMostrar = rep.fecha_registro || rep.fecha || '';
+    /*let fechaMostrar = rep.fecha_registro || rep.fecha || '';*/
+    let fechaMostrar = '';
+    if (rep.fecha_registro) {
+        const fecha = new Date(rep.fecha_registro);
+        const opciones = {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+            timeZone: 'America/Bogota'
+        };
+        fechaMostrar = fecha.toLocaleString('es-CO', opciones).replace(',', '');
+    }
 
     let estilos = `
         <style>

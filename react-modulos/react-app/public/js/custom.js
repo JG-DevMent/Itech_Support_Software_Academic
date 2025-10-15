@@ -1,3 +1,12 @@
+/*
+  Proyecto: Itech Support
+  Autor: Juan Guillermo Ramírez C
+  Correo: jgrc20042507@gmail.com
+  GitHub: github.com/JG-DevMent/
+  Fecha: 2025-05-13
+  Versión: 1.0.0
+*/
+
 // Código para el cerrar menú de navegación(Desplegable)
 document.addEventListener('DOMContentLoaded', function() {
     // Función para verificar si el usuario está en una página protegida

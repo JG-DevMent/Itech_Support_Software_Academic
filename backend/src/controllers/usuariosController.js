@@ -99,6 +99,8 @@ exports.loginUsuario = async (req, res) => {
   }
 };
 
+//Enviar correo de restablecimiento de contraseña
+
 // Paso 1: solicitar restablecimiento (envío de correo)
 exports.resetPassword = async (req, res) => {
   try {

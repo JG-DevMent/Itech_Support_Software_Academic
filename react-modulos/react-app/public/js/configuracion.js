@@ -1,10 +1,11 @@
-//Código para el modal de configuración
-
-
-
-
-
-
+/*
+  Proyecto: Itech Support
+  Autor: Juan Guillermo Ramírez C
+  Correo: jgrc20042507@gmail.com
+  GitHub: github.com/JG-DevMent/
+  Fecha: 2025-05-13
+  Versión: 1.0.0
+*/
 
 // Cargar datos de la tienda desde LocalStorage (si existen)
 document.addEventListener('DOMContentLoaded', function() {

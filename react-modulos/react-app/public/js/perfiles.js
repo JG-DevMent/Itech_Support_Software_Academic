@@ -1,3 +1,12 @@
+/*
+  Proyecto: Itech Support
+  Autor: Juan Guillermo Ramírez C
+  Correo: jgrc20042507@gmail.com
+  GitHub: github.com/JG-DevMent/
+  Fecha: 2025-05-13
+  Versión: 1.0.0
+*/
+
 // Cargar datos del perfil desde LocalStorage (si existen)
 document.addEventListener('DOMContentLoaded', function() {
     const profileData = JSON.parse(localStorage.getItem('userProfile')) || {};
@@ -247,28 +256,3 @@ document.addEventListener('DOMContentLoaded', function() {
         loadUserTable();
     }
 });
-    
-    /*// Crear usuario administrador por defecto si no existe ninguno
-    function createDefaultAdmin() {
-        const users = JSON.parse(localStorage.getItem('users')) || [];
-        
-        // Si no hay usuarios, crear un administrador por defecto
-        if (users.length === 0) {
-            const defaultAdmin = {
-                id: Date.now(),
-                username: 'admin',
-                email: 'admin@itechsupport.com',
-                password: 'admin123',
-                phone: '',
-                role: 'Administrador'
-            };
-            
-            users.push(defaultAdmin);
-            localStorage.setItem('users', JSON.stringify(users));
-            console.log('Usuario administrador por defecto creado');
-        }
-    }
-    
-    // Inicializar con un usuario administrador por defecto
-    createDefaultAdmin(); 
-}); */

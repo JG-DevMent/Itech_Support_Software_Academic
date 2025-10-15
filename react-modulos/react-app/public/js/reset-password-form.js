@@ -1,3 +1,12 @@
+/*
+  Proyecto: Itech Support
+  Autor: Juan Guillermo Ramírez C
+  Correo: jgrc20042507@gmail.com
+  GitHub: github.com/JG-DevMent/
+  Fecha: 2025-05-13
+  Versión: 1.0.0
+*/
+
 const params = new URLSearchParams(window.location.search);
 const token = params.get('token');
 

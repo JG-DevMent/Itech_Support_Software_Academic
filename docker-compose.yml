@@ -29,6 +29,10 @@ services:
       - ./backend/.env
     environment:
       DB_HOST: mysql
+      TZ: America/Bogota
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     ports:
       - "4000:4000"
     depends_on:
@@ -42,6 +46,10 @@ services:
     restart: always
     environment:
       - NODE_ENV=production
+      - TZ=America/Bogota
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     ports:
       - "3000:80"
     depends_on:

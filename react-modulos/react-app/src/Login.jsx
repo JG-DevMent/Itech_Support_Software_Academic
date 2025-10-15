@@ -1,3 +1,12 @@
+/*
+  Proyecto: Itech Support
+  Autor: Juan Guillermo Ramírez C
+  Correo: jgrc20042507@gmail.com
+  GitHub: github.com/JG-DevMent/
+  Fecha: 2025-05-13
+  Versión: 1.0.0
+*/
+
 // Importamos React y useState para manejar el estado
 import React, { useState } from 'react';
 // Importamos useNavigate y Link para la navegación con React Router

@@ -1,7 +1,11 @@
-/**
- * Integración de Inventario con Reparaciones
- * Este archivo maneja la selección de productos del inventario para usarlos en reparaciones
- */
+/*
+  Proyecto: Itech Support
+  Autor: Juan Guillermo Ramírez C
+  Correo: jgrc20042507@gmail.com
+  GitHub: github.com/JG-DevMent/
+  Fecha: 2025-05-13
+  Versión: 1.0.0
+*/
 
 document.addEventListener("DOMContentLoaded", () => {
     // Asegurarse de que no haya modales abiertos al iniciar

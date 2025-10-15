@@ -1,3 +1,12 @@
+/*
+  Proyecto: Itech Support
+  Autor: Juan Guillermo Ramírez C
+  Correo: jgrc20042507@gmail.com
+  GitHub: github.com/JG-DevMent/
+  Fecha: 2025-08-13
+  Versión: 1.0.0
+*/
+
 import React, { useState } from 'react';
 import './css/sb-admin-2.min.css';
 import './css/custom.css';
