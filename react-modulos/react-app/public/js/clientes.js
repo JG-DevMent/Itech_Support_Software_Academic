@@ -15,9 +15,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnBuscar = document.getElementById('btnCliente');
     const exportarBtn = document.getElementById('exportarClientes');
     const btnLimpiarBusqueda = document.getElementById('btnLimpiarBusqueda');
+    const contenedorPaginacion = document.getElementById('contenedorPaginacionClientes');
 
     let modoEdicion = false;
     let clienteEditandoId = null;
+    let paginacionClientes = null;
 
     async function obtenerClientes() {
         const response = await fetch(`${window.API_BASE_URL}/api/clientes`);
@@ -30,35 +32,48 @@ document.addEventListener('DOMContentLoaded', function () {
         clienteEditandoId = null;
     }
 
+    // Función para renderizar una fila de cliente
+    function renderizarFilaCliente(cliente, index, tbody) {
+        let correoFormateado = cliente.correo;
+        if (correoFormateado.length > 20) {
+            correoFormateado = `<span class="email-text">${correoFormateado}</span>`;
+        }
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td data-title="Nombre">${cliente.nombre}</td>
+            <td data-title="Cédula">${cliente.cedula}</td>
+            <td data-title="Teléfono">${cliente.telefono}</td>
+            <td data-title="Correo">${correoFormateado}</td>
+            <td data-title="Dirección">${cliente.direccion}</td>
+            <td data-title="Acciones">
+                <div class="btn-group-actions">
+                    <button class="btn btn-sm btn-warning editar-btn" data-id="${cliente.id}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger eliminar-btn" data-id="${cliente.id}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(row);
+    }
+
     async function renderizarTabla(clientes = null) {
         const lista = clientes || await obtenerClientes();
-        tablaBody.innerHTML = '';
-
-        lista.forEach((cliente) => {
-            let correoFormateado = cliente.correo;
-            if (correoFormateado.length > 20) {
-                correoFormateado = `<span class="email-text">${correoFormateado}</span>`;
-            }
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td data-title="Nombre">${cliente.nombre}</td>
-                <td data-title="Cédula">${cliente.cedula}</td>
-                <td data-title="Teléfono">${cliente.telefono}</td>
-                <td data-title="Correo">${correoFormateado}</td>
-                <td data-title="Dirección">${cliente.direccion}</td>
-                <td data-title="Acciones">
-                    <div class="btn-group-actions">
-                        <button class="btn btn-sm btn-warning editar-btn" data-id="${cliente.id}">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger eliminar-btn" data-id="${cliente.id}">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            `;
-            tablaBody.appendChild(row);
-        });
+        
+        // Inicializar o actualizar paginación
+        if (!paginacionClientes) {
+            paginacionClientes = new Paginacion({
+                datos: lista,
+                elementoTabla: tablaBody,
+                elementoControles: contenedorPaginacion,
+                filasPorPagina: 6,
+                funcionRenderizar: renderizarFilaCliente
+            });
+        } else {
+            paginacionClientes.setDatos(lista);
+        }
     }
 
     formCliente.addEventListener('submit', async (e) => {
@@ -159,7 +174,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Exportar a XLSX
     if (exportarBtn) {
         exportarBtn.addEventListener('click', async () => {
-            const clientes = await obtenerClientes();
+            // Obtener todos los clientes (no solo los de la página actual)
+            const clientes = paginacionClientes ? paginacionClientes.getDatosCompletos() : await obtenerClientes();
             if (clientes.length === 0) {
                 alert('No hay clientes para exportar.');
                 return;

@@ -29,7 +29,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let modoEdicion = false;
     let idEdicion = null;
     let clienteActual = { nombre: '', email: '', telefono: '' };
+    let paginacionReparaciones = null;
     const API_BASE = `${window.API_BASE_URL}/api`;
+    const contenedorPaginacion = document.getElementById('contenedorPaginacion');
 
     // ===================== FUNCIONES FETCH =====================
     async function cargarReparaciones() {
@@ -207,7 +209,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     window.editarReparacion = async function(index) {
-        const rep = listaReparaciones[index];
+        // Usar las reparaciones filtradas si existen, sino usar las completas
+        const reparacionesActuales = window._reparacionesFiltradas || listaReparaciones;
+        const rep = reparacionesActuales[index];
         modoEdicion = true;
         idEdicion = rep.id;
         document.getElementById('cliente').value = rep.cliente;
@@ -259,7 +263,9 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     window.eliminarReparacion = async function(index) {
-        const rep = listaReparaciones[index];
+        // Usar las reparaciones filtradas si existen, sino usar las completas
+        const reparacionesActuales = window._reparacionesFiltradas || listaReparaciones;
+        const rep = reparacionesActuales[index];
         if (confirm('¿Seguro que deseas eliminar esta reparación?')) {
             await eliminarReparacionBackend(rep.id);
             renderTabla();
@@ -298,66 +304,83 @@ document.addEventListener("DOMContentLoaded", () => {
         renderTablaFiltrada(filtradas);
     }
 
+    // Función para renderizar una fila de reparación
+    function renderizarFilaReparacion(rep, index, tbody) {
+        let costoMaterialesNum = Number(rep.costoMateriales);
+        if (isNaN(costoMaterialesNum)) costoMaterialesNum = 0;
+        const tieneMateriales = costoMaterialesNum > 0;
+        const infoMateriales = tieneMateriales ? `<br><small class="text-info">Materiales: $${costoMaterialesNum.toFixed(2)}</small>` : '';
+        let fechaMostrar = '';
+        if (rep.fecha_registro) {
+            const fecha = new Date(rep.fecha_registro);
+            const opciones = {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+                timeZone: 'America/Bogota'
+            };
+            fechaMostrar = fecha.toLocaleString('es-CO', opciones).replace(',', '');
+        }
+        const bloqueado = rep.estado === 'Completada' || rep.estado === 'Pagada';
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td data-title="#">${rep.id}</td>
+            <td data-title="Cliente">${rep.nombreCliente ? rep.nombreCliente : rep.cliente} (${rep.cliente})</td>
+            <td data-title="Dispositivo">${rep.dispositivo}</td>
+            <td data-title="Marca/Modelo">${rep.marcaModelo}</td>
+            <td data-title="IMEI/Serial">${rep.imei}</td>
+            <td data-title="Problema">${rep.problema}</td>
+            <td data-title="Descripción">${rep.descripcion}${infoMateriales}</td>
+            <td data-title="Costo">${rep.costo}</td>
+            <td data-title="Fecha">${fechaMostrar}</td>
+            <td data-title="Estado">${rep.estado}</td>
+            <td data-title="Acciones">
+                <div class="btn-group-actions">
+                    <button class="btn btn-sm btn-warning" onclick="editarReparacion(${index})" ${bloqueado ? 'disabled' : ''}>
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarReparacion(${index})" ${bloqueado ? 'disabled' : ''}>
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <button class="btn btn-sm btn-info" onclick="notificarCliente(${index})">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                    <button class="btn btn-sm btn-secondary" onclick="imprimirMateriales(${index})" title="Imprimir Materiales">
+                        <i class="fas fa-print"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(row);
+    }
+
     function renderTablaFiltrada(reparaciones) {
-        tablaCuerpo.innerHTML = '';
-        reparaciones.forEach((rep, index) => {
-            let costoMaterialesNum = Number(rep.costoMateriales);
-            if (isNaN(costoMaterialesNum)) costoMaterialesNum = 0;
-            const tieneMateriales = costoMaterialesNum > 0;
-            const infoMateriales = tieneMateriales ? `<br><small class="text-info">Materiales: $${costoMaterialesNum.toFixed(2)}</small>` : '';
-            /*const fechaMostrar = rep.fecha_registro || rep.fecha || '';*/
-            let fechaMostrar = '';
-            if (rep.fecha_registro) {
-                const fecha = new Date(rep.fecha_registro);
-                const opciones = {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true,
-                    timeZone: 'America/Bogota'
-                };
-                fechaMostrar = fecha.toLocaleString('es-CO', opciones).replace(',', '');
-            }
-            const bloqueado = rep.estado === 'Completada' || rep.estado === 'Pagada';
-            let row = `
-                <tr>
-                    <td data-title="#">${rep.id}</td>
-                    <td data-title="Cliente">${rep.nombreCliente ? rep.nombreCliente : rep.cliente} (${rep.cliente})</td>
-                    <td data-title="Dispositivo">${rep.dispositivo}</td>
-                    <td data-title="Marca/Modelo">${rep.marcaModelo}</td>
-                    <td data-title="IMEI/Serial">${rep.imei}</td>
-                    <td data-title="Problema">${rep.problema}</td>
-                    <td data-title="Descripción">${rep.descripcion}${infoMateriales}</td>
-                    <td data-title="Costo">${rep.costo}</td>
-                    <td data-title="Fecha">${fechaMostrar}</td>
-                    <td data-title="Estado">${rep.estado}</td>
-                    <td data-title="Acciones">
-                        <div class="btn-group-actions">
-                            <button class="btn btn-sm btn-warning" onclick="editarReparacion(${index})" ${bloqueado ? 'disabled' : ''}>
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="eliminarReparacion(${index})" ${bloqueado ? 'disabled' : ''}>
-                                <i class="fas fa-trash"></i>
-                            </button>
-                            <button class="btn btn-sm btn-info" onclick="notificarCliente(${index})">
-                                <i class="fas fa-bell"></i>
-                            </button>
-                            <button class="btn btn-sm btn-secondary" onclick="imprimirMateriales(${index})" title="Imprimir Materiales">
-                                <i class="fas fa-print"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-            tablaCuerpo.innerHTML += row;
-        });
+        // Guardar las reparaciones filtradas para que las funciones puedan encontrarlas por índice
+        // Necesitamos mantener una referencia temporal para los índices
+        window._reparacionesFiltradas = reparaciones;
+        
+        // Inicializar o actualizar paginación
+        if (!paginacionReparaciones) {
+            paginacionReparaciones = new Paginacion({
+                datos: reparaciones,
+                elementoTabla: tablaCuerpo,
+                elementoControles: contenedorPaginacion,
+                filasPorPagina: 6,
+                funcionRenderizar: renderizarFilaReparacion
+            });
+        } else {
+            paginacionReparaciones.setDatos(reparaciones);
+        }
     }
 
 // NUEVA VERSIÓN MEJORADA DE IMPRESIÓN
     window.imprimirMateriales = function(index) {
-    const rep = listaReparaciones[index];
+    // Usar las reparaciones filtradas si existen, sino usar las completas
+    const reparacionesActuales = window._reparacionesFiltradas || listaReparaciones;
+    const rep = reparacionesActuales[index];
     /*let fechaMostrar = rep.fecha_registro || rep.fecha || '';*/
     let fechaMostrar = '';
     if (rep.fecha_registro) {
@@ -523,19 +546,23 @@ document.addEventListener("DOMContentLoaded", () => {
     // Modifico renderTabla para que siempre aplique los filtros tras cargar
     async function renderTabla() {
         listaReparaciones = await cargarReparaciones();
+        // Inicializar reparaciones filtradas con todas las reparaciones
+        window._reparacionesFiltradas = listaReparaciones;
         aplicarFiltros();
     }
 
     // Función para exportar a Excel
     document.getElementById('btnExportar').addEventListener('click', function() {
         const wb = XLSX.utils.book_new();
+        // Obtener todos los datos (filtrados o completos según corresponda)
+        const datosExportar = paginacionReparaciones ? paginacionReparaciones.getDatosFiltrados() : listaReparaciones;
         // Extraer datos de la tabla
         const ws_data = [
             [
                 '#', 'Cliente', 'Dispositivo', 'Marca/Modelo', 'IMEI/Serial', 'Problema', 'Descripción', 'Costo', 'Fecha', 'Estado'
             ]
         ];
-        listaReparaciones.forEach((rep, index) => {
+        datosExportar.forEach((rep, index) => {
             ws_data.push([
                 index + 1,
                 (rep.nombreCliente ? rep.nombreCliente : rep.cliente) + ' (' + rep.cliente + ')',
@@ -556,7 +583,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ===================== NOTIFICACIÓN =====================
     window.notificarCliente = function(index) {
-        const rep = listaReparaciones[index];
+        // Usar las reparaciones filtradas si existen, sino usar las completas
+        const reparacionesActuales = window._reparacionesFiltradas || listaReparaciones;
+        const rep = reparacionesActuales[index];
         // Rellenar el modal de notificación con los datos del cliente y reparación
         document.getElementById('metodoNotificacion').value = 'email';
         document.getElementById('asuntoNotificacion').value = `Actualización de su reparación en ITECH SUPPORT`;
@@ -570,7 +599,8 @@ document.addEventListener("DOMContentLoaded", () => {
     btnNotificar.addEventListener('click', function() {
         // Si hay una reparación seleccionada en edición, notificar esa
         if (modoEdicion && idEdicion !== null) {
-            const index = listaReparaciones.findIndex(r => r.id === idEdicion);
+            const reparacionesActuales = window._reparacionesFiltradas || listaReparaciones;
+            const index = reparacionesActuales.findIndex(r => r.id === idEdicion);
             if (index !== -1) {
                 window.notificarCliente(index);
                 } else {
@@ -592,7 +622,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Nueva función global para cambio de estado
     window.cambiarEstadoReparacion = function(index) {
-        const rep = listaReparaciones[index];
+        // Usar las reparaciones filtradas si existen, sino usar las completas
+        const reparacionesActuales = window._reparacionesFiltradas || listaReparaciones;
+        const rep = reparacionesActuales[index];
         modoEdicion = true;
         idEdicion = rep.id;
         document.getElementById('cliente').value = rep.cliente;

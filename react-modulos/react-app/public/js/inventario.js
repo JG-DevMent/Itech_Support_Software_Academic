@@ -15,41 +15,60 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnRecontar = document.getElementById('btnRecontar');
   const btnGuardar = document.querySelector('#formInventario button.btn-primary');
   const btnLimpiarInventario = document.getElementById('btnLimpiarInventario');
+  const contenedorPaginacion = document.getElementById('contenedorPaginacionInventario');
 
   let idEditar = null;
   let inventarioCache = [];
+  let paginacionInventario = null;
+
+  // Función para renderizar una fila de inventario
+  function renderizarFilaInventario(item, index, tbody) {
+    const fila = document.createElement('tr');
+    fila.innerHTML = `
+        <td data-title="Producto">${item.nombre}</td>
+        <td data-title="Precio">${item.precio}</td>
+        <td data-title="Costo">${item.costo}</td>
+        <td data-title="SKU">${item.sku}</td>
+        <td data-title="IMEI">${item.imei}</td>
+        <td data-title="Garantía">${item.garantia}</td>
+        <td data-title="Existencias">${item.existencias}</td>
+        <td data-title="Acciones">
+            <div class="btn-group-actions">
+                <button class="btn btn-warning btn-sm editar" data-id="${item.id}">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-danger btn-sm eliminar" data-id="${item.id}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </td>
+    `;
+    tbody.appendChild(fila);
+  }
 
   async function cargarInventario(filtro = '') {
     try {
       const response = await fetch(`${window.API_BASE_URL}/api/inventario`);
       const inventario = await response.json();
       inventarioCache = inventario;
-      tablaBody.innerHTML = '';
-      inventario
-        .filter(item => item.nombre.toLowerCase().includes(filtro.toLowerCase()))
-        .forEach((item) => {
-          const fila = document.createElement('tr');
-          fila.innerHTML = `
-              <td data-title="Producto">${item.nombre}</td>
-              <td data-title="Precio">${item.precio}</td>
-              <td data-title="Costo">${item.costo}</td>
-              <td data-title="SKU">${item.sku}</td>
-              <td data-title="IMEI">${item.imei}</td>
-              <td data-title="Garantía">${item.garantia}</td>
-              <td data-title="Existencias">${item.existencias}</td>
-              <td data-title="Acciones">
-                  <div class="btn-group-actions">
-                      <button class="btn btn-warning btn-sm editar" data-id="${item.id}">
-                          <i class="fas fa-edit"></i>
-                      </button>
-                      <button class="btn btn-danger btn-sm eliminar" data-id="${item.id}">
-                          <i class="fas fa-trash"></i>
-                      </button>
-                  </div>
-              </td>
-          `;
-          tablaBody.appendChild(fila);
-        });
+      
+      // Filtrar inventario según el término de búsqueda
+      const inventarioFiltrado = filtro 
+        ? inventario.filter(item => item.nombre.toLowerCase().includes(filtro.toLowerCase()))
+        : inventario;
+      
+      // Inicializar o actualizar paginación
+      if (!paginacionInventario) {
+          paginacionInventario = new Paginacion({
+              datos: inventarioFiltrado,
+              elementoTabla: tablaBody,
+              elementoControles: contenedorPaginacion,
+              filasPorPagina: 6,
+              funcionRenderizar: renderizarFilaInventario
+          });
+      } else {
+          paginacionInventario.setDatos(inventarioFiltrado);
+      }
     } catch (error) {
       alert('Error cargando inventario desde el servidor.');
     }
@@ -156,12 +175,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   btnExportar.addEventListener('click', async () => {
     try {
-      const response = await fetch(`${window.API_BASE_URL}/api/inventario`);
-      const inventario = await response.json();
-      if (inventario.length === 0) return alert('No hay productos para exportar.');
+      // Obtener todos los datos (filtrados o completos según corresponda)
+      const inventarioExportar = paginacionInventario 
+        ? paginacionInventario.getDatosCompletos() 
+        : inventarioCache.length > 0 
+          ? inventarioCache 
+          : await (await fetch(`${window.API_BASE_URL}/api/inventario`)).json();
+      
+      if (inventarioExportar.length === 0) return alert('No hay productos para exportar.');
       const ws_data = [
         ['Producto', 'Precio', 'Costo', 'SKU', 'IMEI', 'Garantía', 'Existencias'],
-        ...inventario.map(i => [i.nombre, i.precio, i.costo, i.sku, i.imei, i.garantia, i.existencias])
+        ...inventarioExportar.map(i => [i.nombre, i.precio, i.costo, i.sku, i.imei, i.garantia, i.existencias])
       ];
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.aoa_to_sheet(ws_data);

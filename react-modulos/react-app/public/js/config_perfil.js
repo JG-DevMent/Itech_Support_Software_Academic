@@ -17,6 +17,10 @@ document.addEventListener('DOMContentLoaded', function () {
       window.location.href = '/login.html'; // ajusta ruta según tu login
       return;
     }
+
+    let paginacionUsuarios = null;
+    const tbody = document.getElementById('userTableBody');
+    const contenedorPaginacion = document.getElementById('contenedorPaginacionUsuarios');
   
     // Cargar usuarios al inicio
     cargarUsuarios();
@@ -121,29 +125,10 @@ document.addEventListener('DOMContentLoaded', function () {
         '<i class="fas fa-save"></i> Guardar Usuario';
     }
   
-    // Función para cargar usuarios
-    async function cargarUsuarios() {
-      try {
-        const response = await fetch(`${window.API_BASE_URL}/api/usuarios`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-  
-        if (!response.ok) throw new Error('No autorizado o error en el servidor');
-  
-        const usuarios = await response.json();
-        const tbody = document.getElementById('userTableBody');
-        tbody.innerHTML = '';
-  
-        if (!usuarios.length) {
-          const tr = document.createElement('tr');
-          tr.innerHTML = '<td colspan="5" class="text-center">No hay usuarios registrados</td>';
-          tbody.appendChild(tr);
-          return;
-        }
-  
-        usuarios.forEach((usuario) => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
+    // Función para renderizar una fila de usuario
+    function renderizarFilaUsuario(usuario, index, tbody) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
             <td data-title="Usuario">${usuario.username}</td>
             <td data-title="Correo">${usuario.email}</td>
             <td data-title="Teléfono">${usuario.telefono}</td>
@@ -158,26 +143,45 @@ document.addEventListener('DOMContentLoaded', function () {
                 </button>
               </div>
             </td>
-          `;
-          tbody.appendChild(tr);
-        });
-  
-        // Configurar botones de editar
-        document.querySelectorAll('.editar-btn').forEach(btn => {
-          btn.addEventListener('click', function () {
+        `;
+        tbody.appendChild(tr);
+
+        // Configurar botones de editar y eliminar para esta fila
+        tr.querySelector('.editar-btn').addEventListener('click', function () {
             const id = this.getAttribute('data-id');
             editarUsuario(id);
-          });
         });
-  
-        // Configurar botones de eliminar
-        document.querySelectorAll('.eliminar-btn').forEach(btn => {
-          btn.addEventListener('click', function () {
+
+        tr.querySelector('.eliminar-btn').addEventListener('click', function () {
             const id = this.getAttribute('data-id');
             eliminarUsuario(id);
-          });
         });
-  
+    }
+
+    // Función para cargar usuarios
+    async function cargarUsuarios() {
+      try {
+        const response = await fetch(`${window.API_BASE_URL}/api/usuarios`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error('No autorizado o error en el servidor');
+
+        const usuarios = await response.json();
+
+        // Inicializar o actualizar paginación
+        if (!paginacionUsuarios) {
+            paginacionUsuarios = new Paginacion({
+                datos: usuarios,
+                elementoTabla: tbody,
+                elementoControles: contenedorPaginacion,
+                filasPorPagina: 6,
+                funcionRenderizar: renderizarFilaUsuario
+            });
+        } else {
+            paginacionUsuarios.setDatos(usuarios);
+        }
+
       } catch (error) {
         alert('Error cargando usuarios desde el servidor.');
       }
