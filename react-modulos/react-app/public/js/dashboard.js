@@ -24,8 +24,10 @@ document.addEventListener('DOMContentLoaded', function() {
         fechaActual.textContent = hoy.toLocaleDateString('es-ES', opciones);
     }
 
-    // Simulamos datos dinámicos
-    actualizarDatosEstadisticas();
+    // Cargar datos reales de estadísticas
+    actualizarDatosEstadisticas().catch(error => {
+        console.error('Error al cargar estadísticas:', error);
+    });
     
     // Añadir efectos a las tarjetas
     animarTarjetas();
@@ -234,113 +236,368 @@ function reorganizarCuadricula() {
     }
 }
 
-// Función para simular datos dinámicos
-function actualizarDatosEstadisticas() {
-    // Obtener usuario actual de la sesión
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-    if (!currentUser || !currentUser.role) return;
+// Constante para la API
+const API_BASE = `${window.API_BASE_URL}/api`;
+
+// Función para obtener el primer y último día del mes
+function obtenerRangoMes(anio, mes) {
+    const primerDia = new Date(anio, mes - 1, 1);
+    const ultimoDia = new Date(anio, mes, 0);
+    return {
+        inicio: primerDia.toISOString().split('T')[0] + ' 00:00:00',
+        fin: ultimoDia.toISOString().split('T')[0] + ' 23:59:59'
+    };
+}
+
+// Función para calcular el porcentaje de cambio
+function calcularTendencia(valorActual, valorAnterior) {
+    if (valorAnterior === 0) {
+        return valorActual > 0 ? 100 : 0;
+    }
+    const cambio = ((valorActual - valorAnterior) / valorAnterior) * 100;
+    return Math.round(cambio);
+}
+
+// Función para obtener reparaciones activas
+async function obtenerReparacionesActivas() {
+    try {
+        const response = await fetch(`${API_BASE}/reparaciones`);
+        if (!response.ok) return 0;
+        const reparaciones = await response.json();
+        // Reparaciones que no estén completadas ni pagadas
+        const activas = reparaciones.filter(rep => {
+            const estado = (rep.estado || '').toLowerCase();
+            return estado !== 'completada' && estado !== 'pagada';
+        });
+        return activas.length;
+    } catch (error) {
+        console.error('Error obteniendo reparaciones activas:', error);
+        return 0;
+    }
+}
+
+// Función para obtener reparaciones completadas en un mes
+async function obtenerReparacionesCompletadas(anio, mes) {
+    try {
+        // Obtener todas las reparaciones y filtrar
+        const response = await fetch(`${API_BASE}/reparaciones`);
+        if (!response.ok) return [];
+        const todasReparaciones = await response.json();
+        const rango = obtenerRangoMes(anio, mes);
+        
+        // Filtrar por estado y fecha
+        return todasReparaciones.filter(rep => {
+            const estado = (rep.estado || '').toLowerCase();
+            const esCompletada = estado === 'completada' || estado === 'pagada';
+            
+            if (!esCompletada) return false;
+            
+            // Filtrar por fecha del mes
+            const fechaReparacion = new Date(rep.fecha_registro || rep.fecha || '');
+            if (isNaN(fechaReparacion.getTime())) return false;
+            
+            const fechaInicio = new Date(rango.inicio);
+            const fechaFin = new Date(rango.fin);
+            
+            return fechaReparacion >= fechaInicio && fechaReparacion <= fechaFin;
+        });
+    } catch (error) {
+        console.error('Error obteniendo reparaciones completadas:', error);
+        return [];
+    }
+}
+
+// Función para obtener clientes nuevos en un mes
+async function obtenerClientesNuevos(anio, mes) {
+    try {
+        const response = await fetch(`${API_BASE}/clientes`);
+        if (!response.ok) return [];
+        const clientes = await response.json();
+        const rango = obtenerRangoMes(anio, mes);
+        
+        return clientes.filter(cliente => {
+            if (!cliente.fecha_registro) return false;
+            const fechaRegistro = new Date(cliente.fecha_registro);
+            const fechaInicio = new Date(rango.inicio);
+            const fechaFin = new Date(rango.fin);
+            return fechaRegistro >= fechaInicio && fechaRegistro <= fechaFin;
+        });
+    } catch (error) {
+        console.error('Error obteniendo clientes nuevos:', error);
+        return [];
+    }
+}
+
+// Función para obtener ingresos del mes
+async function obtenerIngresosMes(anio, mes) {
+    try {
+        const response = await fetch(`${API_BASE}/facturas`);
+        if (!response.ok) return 0;
+        const facturas = await response.json();
+        const rango = obtenerRangoMes(anio, mes);
+        
+        const ingresos = facturas
+            .filter(factura => {
+                if (!factura.fecha_emision && !factura.fecha_registro) return false;
+                const fechaFactura = new Date(factura.fecha_emision || factura.fecha_registro);
+                const fechaInicio = new Date(rango.inicio);
+                const fechaFin = new Date(rango.fin);
+                return fechaFactura >= fechaInicio && fechaFactura <= fechaFin;
+            })
+            .reduce((suma, factura) => {
+                const total = parseFloat(factura.total || 0);
+                return suma + (isNaN(total) ? 0 : total);
+            }, 0);
+        
+        return ingresos;
+    } catch (error) {
+        console.error('Error obteniendo ingresos:', error);
+        return 0;
+    }
+}
+
+// Función para obtener datos reales de estadísticas
+async function obtenerDatosEstadisticas() {
+    const ahora = new Date();
+    const mesActual = ahora.getMonth() + 1;
+    const anioActual = ahora.getFullYear();
     
-    const userRole = currentUser.role;
+    // Mes anterior
+    const mesAnterior = mesActual === 1 ? 12 : mesActual - 1;
+    const anioAnterior = mesActual === 1 ? anioActual - 1 : anioActual;
     
-    // Simulación de actualización de datos (en un caso real, estos vendrían de una API o base de datos)
-    const datos = {
-        reparacionesActivas: {
-            valor: 12,
-            tendencia: 8,
-            positiva: true
-        },
-        reparacionesCompletadas: {
-            valor: 28,
-            tendencia: 12,
-            positiva: true
-        },
-        clientesNuevos: {
-            valor: 5,
-            tendencia: 3,
-            positiva: true
-        },
-        ingresosMes: {
-            valor: 8540,
-            tendencia: 15,
-            positiva: true
+    try {
+        // Obtener datos del mes actual
+        const [reparacionesActivas, completadasActual, clientesActual, ingresosActual] = await Promise.all([
+            obtenerReparacionesActivas(),
+            obtenerReparacionesCompletadas(anioActual, mesActual),
+            obtenerClientesNuevos(anioActual, mesActual),
+            obtenerIngresosMes(anioActual, mesActual)
+        ]);
+        
+        // Obtener datos del mes anterior para comparar
+        const [completadasAnterior, clientesAnterior, ingresosAnterior] = await Promise.all([
+            obtenerReparacionesCompletadas(anioAnterior, mesAnterior),
+            obtenerClientesNuevos(anioAnterior, mesAnterior),
+            obtenerIngresosMes(anioAnterior, mesAnterior)
+        ]);
+        
+        // Calcular tendencias
+        const tendenciaCompletadas = calcularTendencia(completadasActual.length, completadasAnterior.length);
+        const tendenciaClientes = calcularTendencia(clientesActual.length, clientesAnterior.length);
+        const tendenciaIngresos = calcularTendencia(ingresosActual, ingresosAnterior);
+        
+        return {
+            reparacionesActivas: {
+                valor: reparacionesActivas,
+                tendencia: 0, // No comparamos reparaciones activas con mes anterior
+                positiva: true
+            },
+            reparacionesCompletadas: {
+                valor: completadasActual.length,
+                tendencia: Math.abs(tendenciaCompletadas),
+                positiva: tendenciaCompletadas >= 0
+            },
+            clientesNuevos: {
+                valor: clientesActual.length,
+                tendencia: Math.abs(tendenciaClientes),
+                positiva: tendenciaClientes >= 0
+            },
+            ingresosMes: {
+                valor: ingresosActual,
+                tendencia: Math.abs(tendenciaIngresos),
+                positiva: tendenciaIngresos >= 0
+            }
+        };
+    } catch (error) {
+        console.error('Error obteniendo estadísticas:', error);
+        // Retornar valores por defecto en caso de error
+        return {
+            reparacionesActivas: { valor: 0, tendencia: 0, positiva: true },
+            reparacionesCompletadas: { valor: 0, tendencia: 0, positiva: true },
+            clientesNuevos: { valor: 0, tendencia: 0, positiva: true },
+            ingresosMes: { valor: 0, tendencia: 0, positiva: true }
+        };
+    }
+}
+
+// Función para actualizar datos de estadísticas con información real
+async function actualizarDatosEstadisticas() {
+    try {
+        // Obtener usuario actual de la sesión
+        let currentUser = null;
+        try {
+            const userStr = sessionStorage.getItem('currentUser');
+            if (userStr) {
+                currentUser = JSON.parse(userStr);
+            }
+        } catch (e) {
+            console.warn('No se pudo obtener usuario de sesión:', e);
         }
-    };
-    
-    // Configuración de visibilidad de cards según rol
-    const cardVisibility = {
-        'Administrador': ['card-reparaciones', 'card-completadas', 'card-clientes', 'card-ingresos'],
-        'Técnico': ['card-reparaciones', 'card-completadas', 'card-ingresos'],
-        'Vendedor': ['card-clientes', 'card-ingresos']
-    };
-    
-    // Obtener tarjetas visibles para este rol
-    const visibleCards = cardVisibility[userRole] || cardVisibility['Administrador'];
-    
-    // Mostrar/ocultar tarjetas según rol
-    const allCards = ['card-reparaciones', 'card-completadas', 'card-clientes', 'card-ingresos'];
-    allCards.forEach(cardId => {
-        const card = document.getElementById(cardId);
-        if (card) {
-            if (visibleCards.includes(cardId)) {
-                card.style.display = 'flex';
+        
+        // Obtener rol del usuario (compatibilidad con role y rol)
+        const userRole = currentUser ? (currentUser.role || currentUser.rol || 'Administrador') : 'Administrador';
+        
+        // Obtener datos reales de la API
+        const datos = await obtenerDatosEstadisticas();
+        
+        console.log('Datos obtenidos:', datos); // Debug
+        
+        // Configuración de visibilidad de cards según rol
+        const cardVisibility = {
+            'Administrador': ['card-reparaciones', 'card-completadas', 'card-clientes', 'card-ingresos'],
+            'Técnico': ['card-reparaciones', 'card-completadas', 'card-ingresos'],
+            'Vendedor': ['card-clientes', 'card-ingresos']
+        };
+        
+        // Obtener tarjetas visibles para este rol
+        const visibleCards = cardVisibility[userRole] || cardVisibility['Administrador'];
+        
+        // Mostrar/ocultar tarjetas según rol
+        const allCards = ['card-reparaciones', 'card-completadas', 'card-clientes', 'card-ingresos'];
+        allCards.forEach(cardId => {
+            const card = document.getElementById(cardId);
+            if (card) {
+                if (visibleCards.includes(cardId)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            }
+        });
+        
+        // Actualizar DOM con los valores para las tarjetas visibles
+        if (visibleCards.includes('card-reparaciones')) {
+            const elemento = document.getElementById('reparacionesActivas');
+            if (elemento) {
+                elemento.textContent = datos.reparacionesActivas.valor;
+                console.log('Actualizado reparacionesActivas:', datos.reparacionesActivas.valor); // Debug
+            }
+            
+            // Actualizar tendencia (si existe el elemento)
+            const card = document.getElementById('card-reparaciones');
+            if (card) {
+                const trendElement = card.querySelector('.summary-trend');
+                if (trendElement) {
+                    trendElement.innerHTML = `<i class="fas fa-info-circle"></i> Activas`;
+                    trendElement.classList.remove('positive', 'negative');
+                    trendElement.classList.add('positive');
+                }
+            }
+            
+            tippy('#card-reparaciones', {
+                content: `Tienes ${datos.reparacionesActivas.valor} reparaciones activas actualmente.`,
+                placement: 'bottom'
+            });
+        }
+        
+        if (visibleCards.includes('card-completadas')) {
+            const elemento = document.getElementById('reparacionesCompletadas');
+            if (elemento) {
+                elemento.textContent = datos.reparacionesCompletadas.valor;
+                console.log('Actualizado reparacionesCompletadas:', datos.reparacionesCompletadas.valor); // Debug
+            }
+            
+            // Actualizar tendencia
+            const card = document.getElementById('card-completadas');
+            if (card) {
+                const trendElement = card.querySelector('.summary-trend');
+                if (trendElement) {
+                    const icono = datos.reparacionesCompletadas.positiva ? 'fa-arrow-up' : 'fa-arrow-down';
+                    trendElement.innerHTML = `<i class="fas ${icono}"></i> ${datos.reparacionesCompletadas.tendencia}%`;
+                    trendElement.classList.remove('positive', 'negative');
+                    trendElement.classList.add(datos.reparacionesCompletadas.positiva ? 'positive' : 'negative');
+                }
+            }
+            
+            tippy('#card-completadas', {
+                content: `Has completado ${datos.reparacionesCompletadas.valor} reparaciones este mes. ${datos.reparacionesCompletadas.positiva ? 'Aumento' : 'Disminución'} del ${datos.reparacionesCompletadas.tendencia}% respecto al mes anterior.`,
+                placement: 'bottom'
+            });
+        }
+        
+        if (visibleCards.includes('card-clientes')) {
+            const elemento = document.getElementById('clientesNuevos');
+            if (elemento) {
+                elemento.textContent = datos.clientesNuevos.valor;
+                console.log('Actualizado clientesNuevos:', datos.clientesNuevos.valor); // Debug
+            }
+            
+            // Actualizar tendencia
+            const card = document.getElementById('card-clientes');
+            if (card) {
+                const trendElement = card.querySelector('.summary-trend');
+                if (trendElement) {
+                    const icono = datos.clientesNuevos.positiva ? 'fa-arrow-up' : 'fa-arrow-down';
+                    trendElement.innerHTML = `<i class="fas ${icono}"></i> ${datos.clientesNuevos.tendencia}%`;
+                    trendElement.classList.remove('positive', 'negative');
+                    trendElement.classList.add(datos.clientesNuevos.positiva ? 'positive' : 'negative');
+                }
+            }
+            
+            tippy('#card-clientes', {
+                content: `Has registrado ${datos.clientesNuevos.valor} clientes nuevos este mes. ${datos.clientesNuevos.positiva ? 'Aumento' : 'Disminución'} del ${datos.clientesNuevos.tendencia}% respecto al mes anterior.`,
+                placement: 'bottom'
+            });
+        }
+        
+        if (visibleCards.includes('card-ingresos')) {
+            const elemento = document.getElementById('ingresosMes');
+            if (elemento) {
+                elemento.textContent = '$' + datos.ingresosMes.valor.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                console.log('Actualizado ingresosMes:', datos.ingresosMes.valor); // Debug
+            }
+            
+            // Actualizar tendencia
+            const card = document.getElementById('card-ingresos');
+            if (card) {
+                const trendElement = card.querySelector('.summary-trend');
+                if (trendElement) {
+                    const icono = datos.ingresosMes.positiva ? 'fa-arrow-up' : 'fa-arrow-down';
+                    trendElement.innerHTML = `<i class="fas ${icono}"></i> ${datos.ingresosMes.tendencia}%`;
+                    trendElement.classList.remove('positive', 'negative');
+                    trendElement.classList.add(datos.ingresosMes.positiva ? 'positive' : 'negative');
+                }
+            }
+            
+            tippy('#card-ingresos', {
+                content: `Tus ingresos este mes suman $${datos.ingresosMes.valor.toLocaleString('es-CO')}. ${datos.ingresosMes.positiva ? 'Aumento' : 'Disminución'} del ${datos.ingresosMes.tendencia}% respecto al mes anterior.`,
+                placement: 'bottom'
+            });
+        }
+        
+        // Ajustar grid de estadísticas según número de tarjetas visibles
+        const dashboardSummary = document.querySelector('.dashboard-summary');
+        if (dashboardSummary) {
+            const visibleCardCount = visibleCards.length;
+            
+            // Usar atributos de datos para el CSS
+            dashboardSummary.setAttribute('data-visible-cards', visibleCardCount.toString());
+            
+            if (visibleCardCount <= 2) {
+                dashboardSummary.style.gridTemplateColumns = 'repeat(2, 1fr)';
+            } else if (visibleCardCount === 3) {
+                dashboardSummary.style.gridTemplateColumns = 'repeat(3, 1fr)';
             } else {
-                card.style.display = 'none';
+                dashboardSummary.style.gridTemplateColumns = 'repeat(4, 1fr)';
             }
         }
-    });
-    
-    // Actualizar DOM con los valores para las tarjetas visibles
-    if (visibleCards.includes('card-reparaciones')) {
-        document.getElementById('reparacionesActivas').textContent = datos.reparacionesActivas.valor;
+    } catch (error) {
+        console.error('Error en actualizarDatosEstadisticas:', error);
+        // Aún así intentar mostrar valores por defecto
+        const elementos = {
+            'reparacionesActivas': 0,
+            'reparacionesCompletadas': 0,
+            'clientesNuevos': 0,
+            'ingresosMes': '$0'
+        };
         
-        tippy('#card-reparaciones', {
-            content: `Tienes ${datos.reparacionesActivas.valor} reparaciones activas actualmente. ${datos.reparacionesActivas.positiva ? 'Aumento' : 'Disminución'} del ${datos.reparacionesActivas.tendencia}% respecto al mes anterior.`,
-            placement: 'bottom'
+        Object.keys(elementos).forEach(id => {
+            const elemento = document.getElementById(id);
+            if (elemento) {
+                elemento.textContent = elementos[id];
+            }
         });
-    }
-    
-    if (visibleCards.includes('card-completadas')) {
-        document.getElementById('reparacionesCompletadas').textContent = datos.reparacionesCompletadas.valor;
-        
-        tippy('#card-completadas', {
-            content: `Has completado ${datos.reparacionesCompletadas.valor} reparaciones este mes. ${datos.reparacionesCompletadas.positiva ? 'Aumento' : 'Disminución'} del ${datos.reparacionesCompletadas.tendencia}% respecto al mes anterior.`,
-            placement: 'bottom'
-        });
-    }
-    
-    if (visibleCards.includes('card-clientes')) {
-        document.getElementById('clientesNuevos').textContent = datos.clientesNuevos.valor;
-        
-        tippy('#card-clientes', {
-            content: `Has registrado ${datos.clientesNuevos.valor} clientes nuevos este mes. ${datos.clientesNuevos.positiva ? 'Aumento' : 'Disminución'} del ${datos.clientesNuevos.tendencia}% respecto al mes anterior.`,
-            placement: 'bottom'
-        });
-    }
-    
-    if (visibleCards.includes('card-ingresos')) {
-        document.getElementById('ingresosMes').textContent = '$' + datos.ingresosMes.valor.toLocaleString();
-        
-        tippy('#card-ingresos', {
-            content: `Tus ingresos este mes suman $${datos.ingresosMes.valor.toLocaleString()}. ${datos.ingresosMes.positiva ? 'Aumento' : 'Disminución'} del ${datos.ingresosMes.tendencia}% respecto al mes anterior.`,
-            placement: 'bottom'
-        });
-    }
-    
-    // Ajustar grid de estadísticas según número de tarjetas visibles
-    const dashboardSummary = document.querySelector('.dashboard-summary');
-    if (dashboardSummary) {
-        const visibleCardCount = visibleCards.length;
-        
-        // Usar atributos de datos para el CSS
-        dashboardSummary.setAttribute('data-visible-cards', visibleCardCount.toString());
-        
-        if (visibleCardCount <= 2) {
-            dashboardSummary.style.gridTemplateColumns = 'repeat(2, 1fr)';
-        } else if (visibleCardCount === 3) {
-            dashboardSummary.style.gridTemplateColumns = 'repeat(3, 1fr)';
-        } else {
-            dashboardSummary.style.gridTemplateColumns = 'repeat(4, 1fr)';
-        }
     }
 }
 

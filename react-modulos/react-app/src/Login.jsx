@@ -21,7 +21,8 @@ function Login() {
   const navigate = useNavigate();
 
   //Definimos la URL base de la API desde una variable global
-  const API_BASE_URL = window.API_BASE_URL || "http://localhost:4000";
+  const API_BASE_URL = window.API_BASE_URL || "http://192.168.1.7:4000";
+
 
   // Función que maneja el envío del formulario de login
   const handleSubmit = async (e) => {
