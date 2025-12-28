@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
           paginacionInventario.setDatos(inventarioFiltrado);
       }
     } catch (error) {
-      alert('Error cargando inventario desde el servidor.');
+      window.notificaciones.error('Error al cargar el inventario desde el servidor. Por favor, intente nuevamente.');
     }
   }
 
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
           body: JSON.stringify(nuevoArticulo)
         });
         if (!response.ok) throw new Error('Error actualizando producto');
-        alert('Producto actualizado correctamente');
+        window.notificaciones.exito('Producto actualizado correctamente.');
         idEditar = null;
       } else {
         const response = await fetch(`${window.API_BASE_URL}/api/inventario`, {
@@ -106,16 +106,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (!response.ok) {
           const error = await response.json();
-          alert(error.error || 'Error creando producto');
+          window.notificaciones.error(error.error || 'Error al crear el producto. Por favor, verifique los datos e intente nuevamente.');
           return;
         }
-        alert('Producto guardado correctamente');
+        window.notificaciones.exito('Producto guardado correctamente.');
       }
       await cargarInventario();
       $('#agregarArticuloModal').modal('hide');
       document.getElementById('formInventario').reset();
     } catch (error) {
-      alert('Error de conexión con el servidor.');
+      window.notificaciones.error('Error de conexión con el servidor. Por favor, verifique su conexión e intente nuevamente.');
     }
   });
 
@@ -130,15 +130,20 @@ document.addEventListener('DOMContentLoaded', () => {
   tablaBody.addEventListener('click', async (e) => {
     const id = e.target.closest('button')?.getAttribute('data-id');
     if (e.target.closest('.eliminar')) {
-      if (confirm('¿Seguro que deseas eliminar este artículo del inventario?')) {
+      const confirmado = await window.confirmar(
+        '¿Está seguro de que desea eliminar este artículo del inventario? Esta acción no se puede deshacer.',
+        'Confirmar eliminación'
+      );
+      if (confirmado) {
         try {
           const response = await fetch(`${window.API_BASE_URL}/api/inventario/${id}`, {
             method: 'DELETE'
           });
           if (!response.ok) throw new Error('Error eliminando producto');
+          window.notificaciones.exito('Producto eliminado correctamente del inventario.');
           await cargarInventario();
         } catch (error) {
-          alert('Error de conexión con el servidor.');
+          window.notificaciones.error('Error de conexión con el servidor. Por favor, verifique su conexión e intente nuevamente.');
         }
       }
     }
@@ -157,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
         idEditar = id;
         $('#agregarArticuloModal').modal('show');
       } catch (error) {
-        alert('Error al cargar producto para editar.');
+        window.notificaciones.error('Error al cargar el producto para editar. Por favor, intente nuevamente.');
       }
     }
   });
@@ -167,9 +172,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await fetch(`${window.API_BASE_URL}/api/inventario`);
       const inventario = await response.json();
       const total = inventario.reduce((sum, item) => sum + (parseInt(item.existencias) || 0), 0);
-      alert(`Total productos registrados: ${inventario.length} \nTotal unidades en inventario: ${total}`);
+      window.notificaciones.informacion(`Total productos registrados: ${inventario.length}<br>Total unidades en inventario: ${total}`, 6000);
     } catch (error) {
-      alert('Error al contar inventario.');
+      window.notificaciones.error('Error al contar el inventario. Por favor, intente nuevamente.');
     }
   });
 
@@ -182,7 +187,10 @@ document.addEventListener('DOMContentLoaded', () => {
           ? inventarioCache 
           : await (await fetch(`${window.API_BASE_URL}/api/inventario`)).json();
       
-      if (inventarioExportar.length === 0) return alert('No hay productos para exportar.');
+      if (inventarioExportar.length === 0) {
+        window.notificaciones.advertencia('No hay productos para exportar.');
+        return;
+      }
       const ws_data = [
         ['Producto', 'Precio', 'Costo', 'SKU', 'IMEI', 'Garantía', 'Existencias'],
         ...inventarioExportar.map(i => [i.nombre, i.precio, i.costo, i.sku, i.imei, i.garantia, i.existencias])
@@ -191,8 +199,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const ws = XLSX.utils.aoa_to_sheet(ws_data);
       XLSX.utils.book_append_sheet(wb, ws, 'Inventario');
       XLSX.writeFile(wb, 'Inventario_ITECHSUPPORT.xlsx');
+      window.notificaciones.exito(`Se exportaron ${inventarioExportar.length} producto(s) correctamente.`);
     } catch (error) {
-      alert('Error exportando inventario.');
+      window.notificaciones.error('Error al exportar el inventario. Por favor, intente nuevamente.');
     }
   });
 

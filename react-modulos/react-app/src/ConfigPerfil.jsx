@@ -53,7 +53,11 @@ function ConfigPerfil() {
       const data = await res.json();
       setUsuarios(data);
     } catch (error) {
-      alert('Error al cargar usuarios: ' + error.message);
+      if (window.notificaciones) {
+        window.notificaciones.error('Error al cargar usuarios: ' + error.message);
+      } else {
+        alert('Error al cargar usuarios: ' + error.message);
+      }
     }
   };
 
@@ -77,15 +81,27 @@ function ConfigPerfil() {
       });
 
       if (!res.ok) {
-        alert('Error al crear usuario');
+        if (window.notificaciones) {
+          window.notificaciones.error('Error al crear usuario. Por favor, verifique los datos e intente nuevamente.');
+        } else {
+          alert('Error al crear usuario');
+        }
         return;
       }
 
-      alert('Usuario creado correctamente');
+      if (window.notificaciones) {
+        window.notificaciones.exito('Usuario creado correctamente.');
+      } else {
+        alert('Usuario creado correctamente');
+      }
       setForm({ username: '', email: '', password: '', phone: '', role: '' });
       if (mostrarLista) fetchUsuarios();
     } catch (error) {
-      alert('Error de conexión');
+      if (window.notificaciones) {
+        window.notificaciones.error('Error de conexión con el servidor. Por favor, verifique su conexión a internet e intente nuevamente.');
+      } else {
+        alert('Error de conexión');
+      }
     }
   };
 

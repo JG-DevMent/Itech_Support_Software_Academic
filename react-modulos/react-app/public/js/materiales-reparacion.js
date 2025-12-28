@@ -261,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const existencias = parseInt(document.getElementById("existenciasDisponibles").textContent);
         
         if (isNaN(cantidad) || cantidad <= 0 || cantidad > existencias) {
-            alert("Por favor, ingrese una cantidad válida");
+            window.notificaciones.error("Por favor, ingrese una cantidad válida. La cantidad debe ser mayor a 0 y no exceder las existencias disponibles.");
             return;
         }
         

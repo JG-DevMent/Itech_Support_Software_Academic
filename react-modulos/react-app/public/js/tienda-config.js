@@ -50,6 +50,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         localStorage.setItem('storeConfig', JSON.stringify(config));
         
-        alert('Configuración de tienda guardada correctamente');
+        window.notificaciones.exito('Configuración de tienda guardada correctamente.');
     });
 }); 

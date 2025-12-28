@@ -31,8 +31,10 @@ document.addEventListener('DOMContentLoaded', function() {
       profileData.password = password; // En un sistema real, esto debería hashearse
     }
     localStorage.setItem('userProfile', JSON.stringify(profileData));
-    alert('Perfil actualizado correctamente.');
-    window.location.href = 'configuracion.html';
+    window.notificaciones.exito('Perfil actualizado correctamente.');
+    setTimeout(() => {
+        window.location.href = 'configuracion.html';
+    }, 1500);
   });
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -108,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const userExists = users.some(u => u.username === username);
                 
                 if (userExists) {
-                    alert('Ya existe un usuario con ese nombre. Por favor, utiliza otro nombre de usuario.');
+                    window.notificaciones.error('Ya existe un usuario con ese nombre. Por favor, utiliza otro nombre de usuario.');
                     return;
                 }
                 
@@ -128,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Guardar en localStorage
             localStorage.setItem('users', JSON.stringify(users));
             
-            alert(editingUserId !== null ? 'Usuario actualizado correctamente' : 'Usuario creado correctamente');
+            window.notificaciones.exito(editingUserId !== null ? 'Usuario actualizado correctamente.' : 'Usuario creado correctamente.');
             
             // Resetear formulario
             resetForm();
@@ -226,8 +228,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Eliminar usuario
-    function deleteUser(userId) {
-        if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
+    async function deleteUser(userId) {
+        const confirmado = await window.confirmar(
+            '¿Está seguro de que desea eliminar este usuario? Esta acción no se puede deshacer.',
+            'Confirmar eliminación'
+        );
+        if (confirmado) {
             let users = JSON.parse(localStorage.getItem('users')) || [];
             
             // Filtrar lista para eliminar el usuario
@@ -239,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Actualizar tabla
             loadUserTable();
             
-            alert('Usuario eliminado correctamente');
+            window.notificaciones.exito('Usuario eliminado correctamente.');
         }
     }
     

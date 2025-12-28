@@ -332,7 +332,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const repair = await fetchRepairById(repairId);
         hideLoading();
         if (!repair) {
-            alert('No se encontró ninguna reparación con el ID: ' + repairId);
+            window.notificaciones.error('No se encontró ninguna reparación con el ID: ' + repairId + '. Por favor, verifique el ID e intente nuevamente.');
             return;
         }
         // Obtener cliente desde la reparación
@@ -485,7 +485,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         if (!selectedMethod) {
-            alert('Por favor, seleccione un método de pago');
+            window.notificaciones.advertencia('Por favor, seleccione un método de pago para continuar.');
             return;
         }
         showLoading('Generando factura...');
@@ -567,10 +567,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (!ventasResp.ok) throw new Error(ventasData.error || 'Error al guardar los materiales/ventas');
                 }
                 hideLoading();
-                alert('Factura guardada correctamente en la base de datos.');
+                window.notificaciones.exito('Factura guardada correctamente en la base de datos.');
             } catch (err) {
                 hideLoading();
-                alert('Error al guardar la factura: ' + (err.message || err));
+                window.notificaciones.error('Error al guardar la factura: ' + (err.message || err));
                 return;
             }
             // --- Mostrar la factura como antes (vista y formato) ---
@@ -648,7 +648,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         setTimeout(() => {
             hideLoading();
-            alert('Factura enviada por correo electrónico a ' + document.getElementById('invoiceClientEmail').textContent);
+            window.notificaciones.exito('Factura enviada por correo electrónico a ' + document.getElementById('invoiceClientEmail').textContent);
         }, 1000);
     });
     
@@ -657,7 +657,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         setTimeout(() => {
             hideLoading();
-            alert('Factura guardada como PDF. Nombre del archivo: ' + document.getElementById('invoiceNumber').textContent + '.pdf');
+            window.notificaciones.exito('Factura guardada como PDF. Nombre del archivo: ' + document.getElementById('invoiceNumber').textContent + '.pdf');
         }, 1000);
     });
     
@@ -770,7 +770,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Función para mostrar los materiales de una reparación
     function mostrarMateriales(repair) {
         if (!repair.materiales || repair.materiales.length === 0) {
-            alert('Esta reparación no tiene materiales registrados.');
+            window.notificaciones.informacion('Esta reparación no tiene materiales registrados.');
             return;
         }
         

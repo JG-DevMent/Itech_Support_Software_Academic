@@ -35,8 +35,10 @@ document.addEventListener('DOMContentLoaded', function() {
         admin: document.getElementById('admin').value
       };
       localStorage.setItem('storeConfig', JSON.stringify(storeData));
-      alert('Configuración de la tienda actualizada correctamente.');
-      window.location.href = 'configuracion.html';
+      window.notificaciones.exito('Configuración de la tienda actualizada correctamente.');
+      setTimeout(() => {
+        window.location.href = 'configuracion.html';
+      }, 1500);
     });
   }
   
@@ -44,8 +46,10 @@ document.addEventListener('DOMContentLoaded', function() {
   function checkUserAuth() {
     const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
     if (!currentUser) {
-      alert('Debes iniciar sesión para acceder a esta página');
-      window.location.href = 'index.html';
+      window.notificaciones.error('Debes iniciar sesión para acceder a esta página.');
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 2000);
       return false;
     }
     return true;

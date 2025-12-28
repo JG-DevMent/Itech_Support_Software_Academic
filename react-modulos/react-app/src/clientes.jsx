@@ -34,7 +34,11 @@ function Clientes() {
       const data = await response.json();
       setClientes(data);
     } catch (error) {
-      alert('Error de conexión con el servidor.');
+      if (window.notificaciones) {
+        window.notificaciones.error('Error de conexión con el servidor. Por favor, verifique su conexión a internet e intente nuevamente.');
+      } else {
+        alert('Error de conexión con el servidor.');
+      }
     }
   };
 
@@ -58,7 +62,11 @@ function Clientes() {
           body: JSON.stringify(form)
         });
         if (!response.ok) throw new Error('Error actualizando cliente');
-        alert('Cliente actualizado correctamente');
+        if (window.notificaciones) {
+          window.notificaciones.exito('Cliente actualizado correctamente.');
+        } else {
+          alert('Cliente actualizado correctamente');
+        }
       } else {
         const response = await fetch(`${window.API_BASE_URL}/api/clientes`, {
           method: 'POST',
@@ -67,16 +75,28 @@ function Clientes() {
         });
         if (!response.ok) {
           const error = await response.json();
-          alert(error.error || 'Error creando cliente');
+          if (window.notificaciones) {
+            window.notificaciones.error(error.error || 'Error al crear el cliente. Por favor, verifique los datos e intente nuevamente.');
+          } else {
+            alert(error.error || 'Error creando cliente');
+          }
           return;
         }
-        alert('Cliente guardado correctamente');
+        if (window.notificaciones) {
+          window.notificaciones.exito('Cliente guardado correctamente.');
+        } else {
+          alert('Cliente guardado correctamente');
+        }
       }
       obtenerClientes();
       setModalVisible(false);
       limpiarFormulario();
     } catch (error) {
-      alert('Error de conexión con el servidor.');
+      if (window.notificaciones) {
+        window.notificaciones.error('Error de conexión con el servidor. Por favor, verifique su conexión a internet e intente nuevamente.');
+      } else {
+        alert('Error de conexión con el servidor.');
+      }
     }
   };
 
@@ -90,17 +110,32 @@ function Clientes() {
       setClienteEditandoId(id);
       setModalVisible(true);
     } catch (error) {
-      alert('Error al cargar cliente para editar.');
+      if (window.notificaciones) {
+        window.notificaciones.error('Error al cargar cliente para editar. Por favor, intente nuevamente.');
+      } else {
+        alert('Error al cargar cliente para editar.');
+      }
     }
   };
 
   const handleEliminar = async (id) => {
-    if (window.confirm('¿Seguro que deseas eliminar este cliente?')) {
+    const confirmarEliminar = async () => {
+      if (window.confirmar) {
+        return await window.confirmar('¿Está seguro de que desea eliminar este cliente? Esta acción no se puede deshacer.', 'Confirmar eliminación');
+      } else {
+        return window.confirm('¿Seguro que deseas eliminar este cliente?');
+      }
+    };
+    const confirmado = await confirmarEliminar();
+    if (confirmado) {
       try {
         const response = await fetch(`${window.API_BASE_URL}/api/clientes/${id}`, {
           method: 'DELETE'
         });
         if (!response.ok) throw new Error('Error eliminando cliente');
+        if (window.notificaciones) {
+          window.notificaciones.exito('Cliente eliminado correctamente.');
+        }
         obtenerClientes();
       } catch (error) {
         alert('Error de conexión con el servidor.');
@@ -119,13 +154,21 @@ function Clientes() {
       const filtrados = data.filter(cliente => cliente.cedula.toLowerCase().includes(busqueda.trim().toLowerCase()));
       setClientes(filtrados);
     } catch (error) {
-      alert('Error de conexión con el servidor.');
+      if (window.notificaciones) {
+        window.notificaciones.error('Error de conexión con el servidor. Por favor, verifique su conexión a internet e intente nuevamente.');
+      } else {
+        alert('Error de conexión con el servidor.');
+      }
     }
   };
 
   const handleExportar = () => {
     if (clientes.length === 0) {
-      alert('No hay clientes para exportar.');
+      if (window.notificaciones) {
+        window.notificaciones.advertencia('No hay clientes para exportar.');
+      } else {
+        alert('No hay clientes para exportar.');
+      }
       return;
     }
     const worksheet = XLSX.utils.json_to_sheet(clientes);

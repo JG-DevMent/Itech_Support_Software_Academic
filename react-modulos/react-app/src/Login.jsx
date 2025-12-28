@@ -36,7 +36,11 @@ function Login() {
       });
       if (!response.ok) {
         const errorData = await response.json();
-        alert(errorData.error || 'Usuario o contraseña incorrectos. Intente nuevamente.');
+        if (window.notificaciones) {
+          window.notificaciones.error(errorData.error || 'Usuario o contraseña incorrectos. Por favor, verifique sus credenciales e intente nuevamente.');
+        } else {
+          alert(errorData.error || 'Usuario o contraseña incorrectos. Intente nuevamente.');
+        }
         return;
       }
       
@@ -50,10 +54,22 @@ function Login() {
       const { token, ...userInfo } = userData;
       sessionStorage.setItem('currentUser', JSON.stringify(userInfo));
       
-      alert('¡Bienvenido ' + userInfo.username + '!');
-      window.location.href = '/home.html';
+      // Mostrar notificación de bienvenida especial
+      if (window.notificaciones) {
+        window.notificaciones.bienvenida(`¡Hola ${userInfo.username}! Has iniciado sesión correctamente.`);
+        setTimeout(() => {
+          window.location.href = '/home.html';
+        }, 2000);
+      } else {
+        alert('¡Bienvenido ' + userInfo.username + '!');
+        window.location.href = '/home.html';
+      }
     } catch (error) {
-      alert('Error de conexión con el servidor.');
+      if (window.notificaciones) {
+        window.notificaciones.error('Error de conexión con el servidor. Por favor, verifique su conexión a internet e intente nuevamente.');
+      } else {
+        alert('Error de conexión con el servidor.');
+      }
     }
   };
 

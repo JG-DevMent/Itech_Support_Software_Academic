@@ -13,8 +13,10 @@ document.addEventListener('DOMContentLoaded', function () {
   
     // Si no hay token, no debe permitir cargar usuarios
     if (!token) {
-      alert('No tienes sesión activa. Por favor inicia sesión.');
-      window.location.href = '/login.html'; // ajusta ruta según tu login
+      window.notificaciones.error('No tienes sesión activa. Por favor, inicia sesión para continuar.');
+      setTimeout(() => {
+        window.location.href = '/login.html'; // ajusta ruta según tu login
+      }, 2000);
       return;
     }
 
@@ -68,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Validar contraseña segura
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     if (!passwordRegex.test(usuario.password)) {
-        alert('La contraseña debe tener mínimo 8 caracteres, incluir al menos una mayúscula, una minúscula, un número y un carácter especial.');
+        window.notificaciones.error('La contraseña debe tener mínimo 8 caracteres, incluir al menos una mayúscula, una minúscula, un número y un carácter especial (@$!%*?&).');
         return;
     }
 
@@ -85,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function () {
           });
   
           if (!response.ok) throw new Error('Error actualizando usuario');
-          alert('Usuario actualizado correctamente');
+          window.notificaciones.exito('Usuario actualizado correctamente.');
         } else {
           // Crear usuario
           const response = await fetch(`${window.API_BASE_URL}/api/usuarios`, {
@@ -99,11 +101,11 @@ document.addEventListener('DOMContentLoaded', function () {
   
           if (!response.ok) {
             const error = await response.json();
-            alert(error.error || 'Error creando usuario');
+            window.notificaciones.error(error.error || 'Error al crear el usuario. Por favor, verifique los datos e intente nuevamente.');
             return;
           }
   
-          alert('Usuario guardado correctamente');
+          window.notificaciones.exito('Usuario guardado correctamente.');
         }
   
         resetForm();
@@ -112,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function () {
         profileForm.style.display = 'none';
   
       } catch (error) {
-        alert('Error de conexión con el servidor.');
+        window.notificaciones.error('Error de conexión con el servidor. Por favor, verifique su conexión e intente nuevamente.');
       }
     });
   
@@ -183,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
       } catch (error) {
-        alert('Error cargando usuarios desde el servidor.');
+        window.notificaciones.error('Error al cargar los usuarios desde el servidor. Por favor, intente nuevamente.');
       }
     }
   
@@ -213,13 +215,17 @@ document.addEventListener('DOMContentLoaded', function () {
         profileForm.scrollIntoView({ behavior: 'smooth' });
   
       } catch (error) {
-        alert('Error al cargar usuario para editar.');
+        window.notificaciones.error('Error al cargar el usuario para editar. Por favor, intente nuevamente.');
       }
     }
   
     // Función para eliminar usuario
     async function eliminarUsuario(id) {
-      if (confirm('¿Estás seguro de eliminar este usuario?')) {
+      const confirmado = await window.confirmar(
+        '¿Está seguro de que desea eliminar este usuario? Esta acción no se puede deshacer y el usuario perderá acceso al sistema.',
+        'Confirmar eliminación de usuario'
+      );
+      if (confirmado) {
         try {
           const response = await fetch(`${window.API_BASE_URL}/api/usuarios/${id}`, {
             method: 'DELETE',
@@ -229,10 +235,10 @@ document.addEventListener('DOMContentLoaded', function () {
           if (!response.ok) throw new Error('Error eliminando usuario');
   
           cargarUsuarios();
-          alert('Usuario eliminado correctamente');
+          window.notificaciones.exito('Usuario eliminado correctamente.');
   
         } catch (error) {
-          alert('Error de conexión con el servidor.');
+          window.notificaciones.error('Error de conexión con el servidor. Por favor, verifique su conexión e intente nuevamente.');
         }
       }
     }

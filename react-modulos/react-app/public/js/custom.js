@@ -23,8 +23,10 @@ document.addEventListener('DOMContentLoaded', function() {
             /*console.log('Usuario cargado desde sessionStorage:', currentUser);*/
 
             if (!currentUser) {
-                alert('Debes iniciar sesión para acceder a esta página');
-                window.location.href = '/';
+                window.notificaciones.error('Debes iniciar sesión para acceder a esta página.');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
                 return false;
             }
             
@@ -98,8 +100,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (restrictions && restrictions.restricted.includes(currentPage)) {
             // Si la página actual está restringida para este rol
             /*console.log('ACCESO DENEGADO: Página restringida para este rol');*/
-            alert('No tienes permiso para acceder a esta página');
-            window.location.href = 'home.html';
+            window.notificaciones.error('No tienes permiso para acceder a esta página.');
+            setTimeout(() => {
+                window.location.href = 'home.html';
+            }, 2000);
             return false;
         }
         
@@ -163,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         trigger.removeAttribute('data-target');
                         trigger.addEventListener('click', (e) => {
                             e.preventDefault();
-                            alert('No tienes permisos para agregar o modificar clientes');
+                            window.notificaciones.error('No tienes permisos para agregar o modificar clientes.');
                         });
                     }
                 });
@@ -174,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const originalSubmit = formCliente.onsubmit;
                     formCliente.onsubmit = function(e) {
                         e.preventDefault();
-                        alert('No tienes permisos para agregar o modificar clientes');
+                        window.notificaciones.error('No tienes permisos para agregar o modificar clientes.');
                         return false;
                     };
                 }
@@ -187,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         e.target.closest('.eliminar-btn')) {
                         e.preventDefault();
                         e.stopPropagation();
-                        alert('No tienes permisos para realizar esta acción');
+                        window.notificaciones.error('No tienes permisos para realizar esta acción.');
                     }
                 }, true); // Usar capturing para interceptar el evento antes
                 
@@ -195,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 $(document).on('show.bs.modal', '#agregarClienteModal', function (e) {
                     if (userRole === 'Técnico') {
                         e.preventDefault();
-                        alert('No tienes permisos para agregar o modificar clientes');
+                        window.notificaciones.error('No tienes permisos para agregar o modificar clientes.');
                     }
                 });
                 
@@ -354,7 +358,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnFiltrar = document.querySelector(".btn-filtrar");
     if (btnFiltrar) {
         btnFiltrar.addEventListener("click", () => {
-            alert("Aquí se aplicaría el filtro de fechas.");
+            window.notificaciones.informacion("La funcionalidad de filtro de fechas estará disponible próximamente.");
         });
     }
 });
@@ -367,7 +371,7 @@ function toggleChat() {
 
 // Código para el botón de filtrar fechas
 document.querySelector(".btn-filtrar")?.addEventListener("click", () => {
-  alert("Aquí se aplicaría el filtro de fechas.");
+  window.notificaciones.informacion("La funcionalidad de filtro de fechas estará disponible próximamente.");
 });
 
 function cerrarSesion() {

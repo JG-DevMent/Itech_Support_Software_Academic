@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             if (!response.ok) {
-                alert('Usuario o contraseña incorrectos. Intente nuevamente.');
+                window.notificaciones.error('Usuario o contraseña incorrectos. Por favor, verifique sus credenciales e intente nuevamente.');
                 return;
             }
 
@@ -38,10 +38,16 @@ document.addEventListener('DOMContentLoaded', function() {
             
             sessionStorage.setItem('currentUser', JSON.stringify(userData));
             /*console.log('Usuario guardado en sessionStorage:', userData);*/            
-            alert('¡Bienvenido ' + user.username + '!');
-            window.location.href = 'home.html';
+            
+            // Mostrar notificación de bienvenida especial
+            window.notificaciones.bienvenida(`¡Hola ${user.username}! Has iniciado sesión correctamente.`);
+            
+            // Redirigir después de un breve delay para que se vea la notificación
+            setTimeout(() => {
+                window.location.href = 'home.html';
+            }, 2000);
         } catch (error) {
-            alert('Error de conexión con el servidor.');
+            window.notificaciones.error('Error de conexión con el servidor. Por favor, verifique su conexión a internet e intente nuevamente.');
         }
     });
 }); 

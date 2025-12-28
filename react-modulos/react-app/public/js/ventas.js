@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
             XLSX.utils.book_append_sheet(wb, ws, 'Informe');
             XLSX.writeFile(wb, nombreArchivo);
         } else {
-            alert('No hay datos para exportar.');
+            window.notificaciones.advertencia('No hay datos para exportar en este informe.');
         }
         });
     });

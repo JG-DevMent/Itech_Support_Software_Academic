@@ -33,15 +33,30 @@ function ResetPassword() {
       });
       if (!response.ok) {
         // Si la respuesta no es exitosa, mostramos un mensaje de error
-        alert('No se pudo enviar el correo. Verifique el email.');
+        if (window.notificaciones) {
+          window.notificaciones.error('No se pudo enviar el correo. Por favor, verifique el email e intente nuevamente.');
+        } else {
+          alert('No se pudo enviar el correo. Verifique el email.');
+        }
         setLoading(false);
         return;
       }
       // Si la respuesta es exitosa, mostramos un mensaje de éxito
-      alert('Correo de restablecimiento enviado.');
-      navigate('/');
+      if (window.notificaciones) {
+        window.notificaciones.exito('Correo de restablecimiento enviado. Por favor, revise su bandeja de entrada.');
+        setTimeout(() => {
+          navigate('/');
+        }, 2000);
+      } else {
+        alert('Correo de restablecimiento enviado.');
+        navigate('/');
+      }
     } catch (error) {
-      alert('Error de conexión con el servidor.');
+      if (window.notificaciones) {
+        window.notificaciones.error('Error de conexión con el servidor. Por favor, verifique su conexión a internet e intente nuevamente.');
+      } else {
+        alert('Error de conexión con el servidor.');
+      }
     }
     setLoading(false);
   };

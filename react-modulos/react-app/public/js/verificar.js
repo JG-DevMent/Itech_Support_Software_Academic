@@ -36,7 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
     async function realizarBusqueda() {
         const valor = inputBusqueda.value.trim().toLowerCase();
         if (valor === "") {
-            resultadoDiv.innerHTML = "<p class=parafjs>⚠️ Por favor ingresa un IMEI o cédula para buscar.</p>";
+            window.notificaciones.advertencia('Por favor, ingrese un IMEI/Serial del dispositivo o la cédula del cliente para realizar la búsqueda.');
+            resultadoDiv.innerHTML = "";
             if (contenedorPaginacion) contenedorPaginacion.innerHTML = '';
             return;
         }
@@ -82,14 +83,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     paginacionVerificar.setDatos(resultados);
                 }
+                
+                // Mostrar notificación de éxito
+                window.notificaciones.exito(`Se encontraron ${resultados.length} reparación(es) con los datos ingresados.`);
             } else {
-                resultadoDiv.innerHTML = "<p class=parafjs>❌ No se encontró ninguna reparación con ese dato.</p>";
+                window.notificaciones.error('No se encontró ninguna reparación asociada a los datos ingresados. Por favor, verifique el IMEI/Serial o la cédula e intente nuevamente.');
+                resultadoDiv.innerHTML = "";
                 if (contenedorPaginacion) contenedorPaginacion.innerHTML = '';
                 tablaVerificar = null;
                 tbodyVerificar = null;
             }
         } catch (err) {
-            resultadoDiv.innerHTML = `<p class=parafjs>Error al buscar: ${err.message}</p>`;
+            window.notificaciones.error('Error al realizar la búsqueda. Por favor, verifique su conexión e intente nuevamente.');
+            resultadoDiv.innerHTML = "";
             if (contenedorPaginacion) contenedorPaginacion.innerHTML = '';
             tablaVerificar = null;
             tbodyVerificar = null;

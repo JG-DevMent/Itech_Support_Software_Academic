@@ -23,15 +23,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const userExists = users.some(user => user.email === email);
         
         if (userExists) {
-            alert('Se ha enviado un correo con instrucciones para restablecer tu contraseña. Por favor, revisa tu bandeja de entrada.');
+            window.notificaciones.exito('Se ha enviado un correo electrónico con las instrucciones para restablecer tu contraseña. Por favor, revisa tu bandeja de entrada y sigue los pasos indicados.');
             // En una implementación real, aquí se enviaría un correo
             
             // Redirigir al login después de unos segundos
             setTimeout(function() {
                 window.location.href = 'index.html';
-            }, 2000);
+            }, 3000);
         } else {
-            alert('No se encontró ninguna cuenta asociada a este correo electrónico.');
+            window.notificaciones.error('No se encontró ninguna cuenta asociada a este correo electrónico. Por favor, verifique el correo e intente nuevamente.');
         }
     });
 }); 

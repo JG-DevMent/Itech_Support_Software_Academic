@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     body: JSON.stringify(cliente)
                 });
                 if (!response.ok) throw new Error('Error actualizando cliente');
-                alert('Cliente actualizado correctamente');
+                window.notificaciones.exito('Cliente actualizado correctamente.');
             } else {
                 const response = await fetch(`${window.API_BASE_URL}/api/clientes`, {
                     method: 'POST',
@@ -102,31 +102,36 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
                 if (!response.ok) {
                     const error = await response.json();
-                    alert(error.error || 'Error creando cliente');
+                    window.notificaciones.error(error.error || 'Error al crear el cliente. Por favor, verifique los datos e intente nuevamente.');
                     return;
                 }
-                alert('Cliente guardado correctamente');
+                window.notificaciones.exito('Cliente guardado correctamente.');
             }
             await renderizarTabla();
             $('#agregarClienteModal').modal('hide');
             limpiarFormulario();
         } catch (error) {
-            alert('Error de conexión con el servidor.');
+            window.notificaciones.error('Error de conexión con el servidor. Por favor, verifique su conexión e intente nuevamente.');
         }
     });
 
     tablaBody.addEventListener('click', async (e) => {
         const id = e.target.dataset.id;
         if (e.target.classList.contains('eliminar-btn')) {
-            if (confirm('¿Seguro que deseas eliminar este cliente?')) {
+            const confirmado = await window.confirmar(
+                '¿Está seguro de que desea eliminar este cliente? Esta acción no se puede deshacer.',
+                'Confirmar eliminación'
+            );
+            if (confirmado) {
                 try {
                     const response = await fetch(`${window.API_BASE_URL}/api/clientes/${id}`, {
                         method: 'DELETE'
                     });
                     if (!response.ok) throw new Error('Error eliminando cliente');
+                    window.notificaciones.exito('Cliente eliminado correctamente.');
                     await renderizarTabla();
                 } catch (error) {
-                    alert('Error de conexión con el servidor.');
+                    window.notificaciones.error('Error de conexión con el servidor. Por favor, verifique su conexión e intente nuevamente.');
                 }
             }
         }
@@ -144,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 clienteEditandoId = id;
                 $('#agregarClienteModal').modal('show');
             } catch (error) {
-                alert('Error al cargar cliente para editar.');
+                window.notificaciones.error('Error al cargar el cliente para editar. Por favor, intente nuevamente.');
             }
         }
     });
@@ -177,13 +182,18 @@ document.addEventListener('DOMContentLoaded', function () {
             // Obtener todos los clientes (no solo los de la página actual)
             const clientes = paginacionClientes ? paginacionClientes.getDatosCompletos() : await obtenerClientes();
             if (clientes.length === 0) {
-                alert('No hay clientes para exportar.');
+                window.notificaciones.advertencia('No hay clientes para exportar.');
                 return;
             }
-            const worksheet = XLSX.utils.json_to_sheet(clientes);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, 'Clientes');
-            XLSX.writeFile(workbook, 'clientes.xlsx');
+            try {
+                const worksheet = XLSX.utils.json_to_sheet(clientes);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Clientes');
+                XLSX.writeFile(workbook, 'clientes.xlsx');
+                window.notificaciones.exito(`Se exportaron ${clientes.length} cliente(s) correctamente.`);
+            } catch (error) {
+                window.notificaciones.error('Error al exportar los clientes. Por favor, intente nuevamente.');
+            }
         });
     }
 

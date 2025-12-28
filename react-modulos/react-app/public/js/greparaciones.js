@@ -62,9 +62,13 @@ document.addEventListener("DOMContentLoaded", () => {
         toggleBtn.textContent = visible ? " Mostrar Filtros" : " ❌ Ocultar Filtros";
     });
     
-    btnLimpiarForm.addEventListener("click", function() {
+    btnLimpiarForm.addEventListener("click", async function() {
         if (modoEdicion) {
-            if (confirm("¿Está seguro que desea cancelar la edición? Los cambios no guardados se perderán.")) {
+            const confirmado = await window.confirmar(
+                "¿Está seguro que desea cancelar la edición? Los cambios no guardados se perderán.",
+                "Confirmar cancelación"
+            );
+            if (confirmado) {
                 modoEdicion = false;
                 idEdicion = null;
                 document.querySelector('button[type="submit"]').textContent = 'Registrar Reparación';
@@ -84,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btnBuscarCliente.addEventListener('click', async function() {
         const cedula = inputCliente.value.trim();
         if (!cedula) {
-            alert('Por favor, ingrese la cédula del cliente');
+            window.notificaciones.advertencia('Por favor, ingrese la cédula del cliente para buscar.');
             return;
         }
         const cliente = await buscarClientePorCedula(cedula);
@@ -128,13 +132,13 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             const estadoSeleccionado = document.getElementById('estado').value;
             if (!estadoSeleccionado || estadoSeleccionado === 'Seleccione un estado') {
-                alert('Por favor, seleccione un estado válido para la reparación.');
+                window.notificaciones.advertencia('Por favor, seleccione un estado válido para la reparación.');
                 return;
             }
             try {
                 const resp = await actualizarEstadoReparacion(idEdicion, estadoSeleccionado);
                 if (resp.mensaje) {
-                    alert('Estado actualizado correctamente.');
+                    window.notificaciones.exito('Estado de la reparación actualizado correctamente.');
                     form.reset();
                     infoCliente.innerHTML = '';
                     clienteActual = { nombre: '', email: '', telefono: '' };
@@ -145,10 +149,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     modoEdicion = false;
                     idEdicion = null;
             } else {
-                    alert('Error al actualizar estado: ' + (resp.error || 'Error desconocido'));
+                    window.notificaciones.error('Error al actualizar el estado: ' + (resp.error || 'Error desconocido'));
                 }
             } catch (err) {
-                alert('Error al actualizar estado: ' + (err.message || err));
+                window.notificaciones.error('Error al actualizar el estado: ' + (err.message || err));
             }
             return;
         }
@@ -165,7 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const costoMateriales = materialesSeleccionados.reduce((suma, producto) => suma + producto.subtotal, 0);
         const estadoSeleccionado = document.getElementById('estado').value;
         if (!estadoSeleccionado || estadoSeleccionado === 'Seleccione un estado') {
-            alert('Por favor, seleccione un estado válido para la reparación.');
+            window.notificaciones.advertencia('Por favor, seleccione un estado válido para la reparación.');
             return;
         }
         const datosReparacion = {
@@ -188,14 +192,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 await guardarReparacion(datosReparacion, idEdicion);
             modoEdicion = false;
                 idEdicion = null;
-                alert('Reparación actualizada exitosamente.');
+                window.notificaciones.exito('Reparación actualizada exitosamente.');
         } else {
                 const resp = await guardarReparacion(datosReparacion);
                 if (resp.error) {
-                    alert('Error al registrar reparación: ' + resp.error);
+                    window.notificaciones.error('Error al registrar la reparación: ' + resp.error);
                     return;
                 }
-                alert('Reparación registrada exitosamente.');
+                window.notificaciones.exito('Reparación registrada exitosamente.');
             }
             form.reset();
             infoCliente.innerHTML = '';
@@ -204,7 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
             await renderTabla();
             document.querySelector('button[type="submit"]').textContent = 'Registrar Reparación';
         } catch (err) {
-            alert('Error al registrar reparación: ' + (err.message || err));
+            window.notificaciones.error('Error al registrar la reparación: ' + (err.message || err));
         }
     });
 
@@ -266,10 +270,14 @@ document.addEventListener("DOMContentLoaded", () => {
         // Usar las reparaciones filtradas si existen, sino usar las completas
         const reparacionesActuales = window._reparacionesFiltradas || listaReparaciones;
         const rep = reparacionesActuales[index];
-        if (confirm('¿Seguro que deseas eliminar esta reparación?')) {
+        const confirmado = await window.confirmar(
+            '¿Está seguro de que desea eliminar esta reparación? Esta acción no se puede deshacer.',
+            'Confirmar eliminación'
+        );
+        if (confirmado) {
             await eliminarReparacionBackend(rep.id);
             renderTabla();
-            alert('Reparación eliminada correctamente.');
+            window.notificaciones.exito('Reparación eliminada correctamente.');
         }
     };
 
@@ -604,10 +612,10 @@ document.addEventListener("DOMContentLoaded", () => {
             if (index !== -1) {
                 window.notificarCliente(index);
                 } else {
-                alert('No hay reparación seleccionada para notificar.');
+                window.notificaciones.advertencia('No hay reparación seleccionada para notificar.');
             }
                 } else {
-            alert('Seleccione una reparación para notificar.');
+            window.notificaciones.advertencia('Por favor, seleccione una reparación para notificar al cliente.');
                 }
     });
             
@@ -616,7 +624,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Por ahora, solo simula el envío y cierra el modal
             $('#modalNotificacion').modal('hide');
         setTimeout(() => {
-            alert('Notificación enviada correctamente al cliente.');
+            window.notificaciones.exito('Notificación enviada correctamente al cliente.');
         }, 500);
     });
 
