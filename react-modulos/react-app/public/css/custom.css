@@ -2167,8 +2167,15 @@ h3 {
 
 /* Estilos para impresión */
 @media print {
-    .no-print, .no-print * {
+    /* Ocultar botones y elementos que no deben imprimirse (alta especificidad) */
+    .no-print,
+    .no-print *,
+    .invoice-actions,
+    .invoice-actions *,
+    #invoiceSection .invoice-actions,
+    #invoiceSection .no-print {
         display: none !important;
+        visibility: hidden !important;
     }
     
     /* Ocultar todo excepto la factura */
@@ -2679,12 +2686,6 @@ h3 {
     transition: all 0.4s ease;
 }
 
-#invoiceSection.hidden {
-    display: none;
-    opacity: 0;
-    transform: translateY(20px);
-}
-
 /* Estilos para la animación de carga */
 .loading-overlay {
     position: fixed;
@@ -2712,73 +2713,6 @@ h3 {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
-}
-
-/* Mejoras para impresión */
-@media print {
-    /* Ocultar todo lo que no debe imprimirse */
-    body * {
-        visibility: hidden;
-    }
-    
-    /* Solo mostrar el contenido de la factura */
-    #invoiceSection, #invoiceSection * {
-        visibility: visible;
-    }
-    
-    #invoiceSection {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        background: white;
-        padding: 15px;
-        box-shadow: none;
-        border: none;
-    }
-    
-    /* Ocultar elementos específicos dentro de la factura */
-    .no-print, .no-print * {
-        display: none !important;
-    }
-    
-    /* Ajustes para el diseño de impresión */
-    .invoice-header, .invoice-details, .invoice-table, .invoice-footer {
-        page-break-inside: avoid;
-        margin-bottom: 15px;
-    }
-    
-    /* Ajustes para las tablas */
-    .invoice-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    
-    .invoice-table th, .invoice-table td {
-        border: 1px solid #333;
-    }
-    
-    /* Ajustes para la fuente */
-    body {
-        font-size: 12pt;
-        line-height: 1.3;
-    }
-    
-    /* Asegurar que el código QR se vea bien */
-    #invoiceQrcode {
-        margin: 20px auto;
-        max-width: 150px;
-    }
-    
-    /* Optimizar espacio */
-    .invoice-details {
-        display: flex;
-        flex-wrap: wrap;
-    }
-    
-    .invoice-details-left, .invoice-details-right {
-        width: 50%;
-    }
 }
 
 /* Estilos para diferentes tamaños de pantalla */
@@ -2817,42 +2751,35 @@ h3 {
     }
 }
 
-/* Estilos específicos para impresión */
+/* Impresión: ocultar solo .no-print; el resto se oculta en bloques posteriores */
 @media print {
     @page {
-        size: auto;
-        margin: 10mm;
+        size: letter;
+        margin: 8mm;
     }
     
-    /* Ocultar todos los elementos excepto la factura */
-    body * {
-        visibility: hidden;
-    }
-    
-    /* Mostrar solo la factura */
-    #invoiceSection, #invoiceSection * {
-        visibility: visible;
-    }
-    
-    #invoiceSection {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        padding: 15px;
-        margin: 0;
-        background-color: white;
-    }
-    
-    /* Ocultar elementos que no deben imprimirse */
     .no-print {
         display: none !important;
     }
     
-    /* Ajustes para elementos específicos */
+    /* Dos columnas en paralelo: Datos del Cliente | Detalles de la Factura */
+    .invoice-details {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+    }
+    
     .invoice-details-left, .invoice-details-right {
-        width: 50%;
-        float: left;
+        width: 50% !important;
+        min-width: 0 !important;
+        flex: 0 0 50% !important;
+        float: none !important;
+        box-sizing: border-box;
+        padding: 0 8px 0 0;
+    }
+    
+    .invoice-details-right {
+        padding: 0 0 0 8px;
     }
     
     .invoice-table {
@@ -2877,8 +2804,8 @@ h3 {
 /* Estilos específicos para impresión */
 @media print {
     @page {
-        size: auto;
-        margin: 10mm;
+        size: letter;
+        margin: 8mm;
     }
     
     /* Ocultar elementos innecesarios */
@@ -2923,29 +2850,25 @@ h3 {
         box-shadow: none !important;
     }
     
-    /* Asegurar que la sección de factura esté visible */
+    /* Factura visible con el mismo layout que en pantalla (sin position absolute) */
     #screen3 {
         display: block !important;
         opacity: 1 !important;
         transform: none !important;
-        position: absolute !important;
-        top: 0 !important;
-        left: 0 !important;
+        position: relative !important;
     }
     
-    /* Asegurar que el contenido de la factura sea visible */
-    #invoiceSection, 
-    #invoiceSection * {
+    /* No forzar display:block en hijos (rompe tablas). Solo visibilidad si hace falta. */
+    #invoiceSection,
+    #invoiceSection .invoice-content {
         visibility: visible !important;
         opacity: 1 !important;
-        display: block !important;
     }
     
-    /* Ajustes específicos para el diseño de la factura */
+    /* Ajustes suaves para impresión sin cambiar el diseño */
     .invoice-container {
         border: none !important;
         box-shadow: none !important;
-        padding: 0 !important;
     }
     
     .invoice-header {
@@ -2962,46 +2885,62 @@ h3 {
     }
     
     .invoice-title {
-        font-size: 24px !important;
+        font-size: 22px !important;
         font-weight: bold !important;
         margin-bottom: 5px !important;
+        color: #4e73df !important;
     }
     
     .invoice-company {
-        font-size: 20px !important;
-        margin-bottom: 5px !important;
+        font-size: 18px !important;
+        font-weight: bold !important;
+        margin-bottom: 4px !important;
+        color: #000 !important;
     }
     
     .invoice-tagline {
         font-style: italic !important;
         margin-bottom: 10px !important;
+        color: #333 !important;
     }
     
+    /* Dos columnas en paralelo (modelo): Datos del Cliente | Detalles de la Factura */
     .invoice-details {
         display: flex !important;
-        flex-wrap: wrap !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
         page-break-inside: avoid !important;
         margin-bottom: 20px !important;
     }
     
     .invoice-details-left, .invoice-details-right {
         width: 50% !important;
+        min-width: 0 !important;
+        flex: 0 0 50% !important;
         padding: 0 10px !important;
         box-sizing: border-box !important;
     }
     
+    /* Modelo: encabezados de columnas en azul claro */
     .invoice-details h3 {
-        color: #000 !important;
+        color: #1a1a1a !important;
         font-size: 16px !important;
-        border-bottom: 1px solid #ccc !important;
-        padding-bottom: 5px !important;
-        margin-bottom: 10px !important;
+        background-color: #69b4fa !important;
+        padding: 8px 10px !important;
+        margin: 0 0 10px 0 !important;
+        border: none !important;
+        border-bottom: 1px solid #9fc5d4 !important;
     }
     
     .invoice-details p {
         margin-bottom: 5px !important;
         font-size: 12px !important;
         line-height: 1.4 !important;
+        color: #000 !important;
+    }
+    
+    .invoice-details p span {
+        color: #000 !important;
     }
     
     .invoice-table {
@@ -3011,18 +2950,32 @@ h3 {
         page-break-inside: avoid !important;
     }
     
-    .invoice-table th,
-    .invoice-table td {
-        border: 1px solid #000 !important;
+    .invoice-table thead th {
+        background-color: #69b4fa !important;
+        color: #1a1a1a !important;
+        border: 1px solid #9fc5d4 !important;
         padding: 8px !important;
-        text-align: left !important;
         font-size: 12px !important;
     }
     
-    .invoice-table th {
+    .invoice-table td {
+        border: 1px solid #ccc !important;
+        padding: 8px !important;
+        text-align: left !important;
+        font-size: 12px !important;
+        color: #000 !important;
+    }
+    
+    .invoice-table tfoot th {
         background-color: #f0f0f0 !important;
         color: #000 !important;
         font-weight: bold !important;
+        text-align: right !important;
+    }
+    
+    .invoice-table tfoot td {
+        font-weight: bold !important;
+        text-align: right !important;
     }
     
     .invoice-table tfoot tr {
@@ -3042,12 +2995,18 @@ h3 {
         height: auto !important;
     }
     
+    /* Modelo: línea fina azul claro en el pie */
     .invoice-footer {
         page-break-inside: avoid !important;
-        border-top: 2px solid #000 !important;
-        padding-top: 15px !important;
-        margin-top: 20px !important;
+        border-top: 1px solid #69b4fa !important;
+        padding-top: 12px !important;
+        margin-top: 18px !important;
         text-align: center !important;
+    }
+    
+    .invoice-footer p {
+        color: #000000 !important;
+        font-size: 12px !important;
     }
     
     .invoice-footer p {
@@ -4015,124 +3974,59 @@ canvas {
     color: var(--primary) !important;
 }
 
-/* Optimizaciones para impresión */
+/* Impresión: mismo diseño que en pantalla, márgenes reducidos como el modelo */
 @media print {
-    /* Ocultar todo excepto la factura */
-    body * {
-        visibility: hidden !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    
-    /* Solo mostrar el contenido de la factura */
-    #invoiceSection, 
-    #invoiceSection * {
-        visibility: visible !important;
-    }
-    
-    /* Posicionamiento para la factura */
-    #invoiceSection {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 100% !important;
-        padding: 15px !important;
-        margin: 0 !important;
-        background-color: white !important;
-        box-shadow: none !important;
-        border: none !important;
-    }
-    
-    /* Ocultar elementos que no deben imprimirse */
-    .no-print, 
-    .no-print * {
-        display: none !important;
-        visibility: hidden !important;
-    }
-    
-    /* Forzar que la página se imprima en una única hoja */
-    html, body {
-        height: 99% !important;
-        overflow: hidden !important;
-        background-color: white !important;
-        page-break-after: avoid !important;
-        page-break-before: avoid !important;
-    }
-    
-    /* Ajustes específicos para componentes de la factura */
-    .invoice-container {
-        padding: 10px !important;
-        border: none !important;
-        box-shadow: none !important;
-        max-width: 100% !important;
-    }
-    
-    .invoice-header {
-        padding-bottom: 10px !important;
-        margin-bottom: 10px !important;
-    }
-    
-    .invoice-logo img {
-        max-height: 80px !important;
-    }
-    
-    .invoice-title {
-        font-size: 1.5rem !important;
-    }
-    
-    .invoice-company {
-        font-size: 1.2rem !important;
-    }
-    
-    .invoice-tagline {
-        font-size: 0.9rem !important;
-    }
-    
-    .invoice-details {
-        margin-bottom: 10px !important;
-    }
-    
-    .invoice-details p {
-        margin-bottom: 3px !important;
-        font-size: 0.8rem !important;
-    }
-    
-    .invoice-table {
-        margin-bottom: 10px !important;
-    }
-    
-    .invoice-table th, 
-    .invoice-table td {
-        padding: 5px 8px !important;
-        font-size: 0.8rem !important;
-    }
-    
-    .invoice-table th {
-        background-color: #f0f0f0 !important;
-        color: black !important;
-    }
-    
-    #invoiceQrcode {
-        margin: 10px auto !important;
-        max-width: 120px !important;
-    }
-    
-    .invoice-footer {
-        margin-top: 10px !important;
-        padding-top: 5px !important;
-        border-top: 1px solid #333 !important;
-    }
-    
-    .invoice-footer p {
-        margin-bottom: 3px !important;
-        font-size: 0.8rem !important;
-    }
-    
-    /* Eliminar todos los márgenes y padding de la página */
     @page {
+        size: letter !important;
+        margin: 8mm !important;
+    }
+    
+    /* Ocultar solo lo que no debe imprimirse (display:none). No tocar el layout de la factura. */
+    .sidebar,
+    .navbar-title,
+    .btn-toggle-sidebar,
+    .card-body > h1.text-h1,
+    #screen1,
+    #screen2,
+    #screen3 > div.col-md-8,
+    .invoice-actions,
+    .no-print {
+        display: none !important;
+    }
+    
+    /* Mostrar solo la factura con flujo normal */
+    html, body {
+        background: #fff !important;
         margin: 0 !important;
         padding: 0 !important;
-        size: auto !important;
+    }
+    
+    #wrapper,
+    #content-wrapper,
+    #content,
+    .card-box-center,
+    .card-body,
+    .pos-system,
+    #screen3,
+    #invoiceSection {
+        display: block !important;
+        position: relative !important;
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: #fff !important;
+    }
+    
+    /* Contenedor más ancho en impresión: menos espacio blanco a los lados (como el modelo) */
+    #invoiceSection.invoice-container {
+        max-width: 95% !important;
+        width: 95% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        padding: 0.5rem 0.75rem !important;
     }
 }
 
@@ -4259,34 +4153,27 @@ canvas {
         box-shadow: none !important;
     }
     
+    /* Dos columnas en paralelo en impresión */
     .invoice-details {
-        display: block !important;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
         margin-bottom: 20px !important;
     }
     
     .invoice-details-left, 
     .invoice-details-right {
         width: 50% !important;
-        float: left !important;
+        min-width: 0 !important;
+        flex: 0 0 50% !important;
+        float: none !important;
         box-sizing: border-box !important;
     }
 }
 
-/* Mejoras específicas para impresión */
+/* Mejoras específicas para impresión (sin visibility hidden para no distorsionar) */
 @media print {
-    /* Ocultar todos los elementos excepto la factura */
-    body * {
-        visibility: hidden !important;
-    }
-    
-    /* Mostrar solo el contenido de la factura */
-    #invoiceSection, 
-    #invoiceSection * {
-        visibility: visible !important;
-        display: block !important;
-    }
-    
-    /* Ocultar elementos específicos que no deben imprimirse */
+    /* Ocultar elementos que no deben imprimirse */
     .navbar-nav,
     .navbar-title,
     .btn-toggle-sidebar,
@@ -4299,21 +4186,11 @@ canvas {
         display: none !important;
     }
     
-    /* Ajustes para el contenedor de la factura */
-    #invoiceSection {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 100% !important;
-        padding: 20px !important;
-        margin: 0 !important;
-        background-color: white !important;
-    }
-    
-    /* Ajustes para los detalles de la factura */
+    /* Dos columnas en paralelo: Datos del Cliente | Detalles de la Factura (como el modelo) */
     .invoice-details {
         display: flex !important;
-        flex-wrap: wrap !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
         margin-bottom: 20px !important;
         clear: both !important;
     }
@@ -4321,7 +4198,9 @@ canvas {
     .invoice-details-left,
     .invoice-details-right {
         width: 50% !important;
-        float: left !important;
+        min-width: 0 !important;
+        flex: 0 0 50% !important;
+        float: none !important;
         box-sizing: border-box !important;
         padding: 10px !important;
     }
@@ -4346,15 +4225,26 @@ canvas {
     /* Ajustes para la tabla */
     .invoice-table {
         width: 100% !important;
+        table-layout: fixed !important;
         margin: 20px 0 !important;
         page-break-inside: avoid !important;
+        clear: both !important;
     }
     
-    .invoice-table th,
-    .invoice-table td {
+    .invoice-table thead th,
+    .invoice-table tbody th,
+    .invoice-table tbody td {
         padding: 8px !important;
         text-align: left !important;
         border: 1px solid #000 !important;
+    }
+    
+    .invoice-table tfoot th,
+    .invoice-table tfoot td {
+        padding: 8px !important;
+        text-align: right !important;
+        border: 1px solid #000 !important;
+        vertical-align: middle !important;
     }
     
     /* Ajustes para el código QR */
@@ -4373,10 +4263,10 @@ canvas {
         page-break-inside: avoid !important;
     }
     
-    /* Ajustes de página */
+    /* Ajustes de página: márgenes reducidos como el modelo */
     @page {
-        margin: 0.5cm !important;
-        size: auto !important;
+        size: letter !important;
+        margin: 8mm !important;
     }
     
     /* Asegurar que el contenido de la factura sea visible */

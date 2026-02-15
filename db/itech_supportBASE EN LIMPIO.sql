@@ -97,7 +97,8 @@ CREATE TABLE `facturas` (
   `metodo_pago` varchar(50) NOT NULL,
   `estado` enum('Pendiente','Pagada','Anulada') NOT NULL DEFAULT 'Pendiente',
   `fecha_registro` timestamp NOT NULL DEFAULT current_timestamp(),
-  `fecha_actualizacion` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `fecha_actualizacion` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `contador_impresiones` int NOT NULL DEFAULT '0',
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

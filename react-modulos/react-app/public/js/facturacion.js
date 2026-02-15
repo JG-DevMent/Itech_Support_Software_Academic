@@ -39,7 +39,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const invoiceSection = document.getElementById('invoiceSection');
     const printButton = document.getElementById('printButton');
     const emailButton = document.getElementById('emailButton');
-    const downloadButton = document.getElementById('downloadButton');
     const newTransactionButton = document.getElementById('newTransactionButton');
     const paymentInstruction = document.querySelector('.payment-instruction');
     
@@ -649,15 +648,6 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             hideLoading();
             window.notificaciones.exito('Factura enviada por correo electrónico a ' + document.getElementById('invoiceClientEmail').textContent);
-        }, 1000);
-    });
-    
-    downloadButton.addEventListener('click', function() {
-        showLoading('Generando PDF...');
-        
-        setTimeout(() => {
-            hideLoading();
-            window.notificaciones.exito('Factura guardada como PDF. Nombre del archivo: ' + document.getElementById('invoiceNumber').textContent + '.pdf');
         }, 1000);
     });
     

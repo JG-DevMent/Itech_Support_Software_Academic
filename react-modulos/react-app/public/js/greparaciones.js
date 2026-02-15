@@ -17,7 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const buscarInput = document.getElementById("buscarInput");
     const toggleBtn = document.getElementById("toggleFiltrosBtn");
     const contenedorFiltros = document.getElementById("contenedorFiltros");
-    const btnNotificar = document.getElementById("btnNotificar");
     const btnLimpiarForm = document.getElementById("btnLimpiarForm");
     const btnEnviarNotificacion = document.getElementById("btnEnviarNotificacion");
     const btnBuscarCliente = document.getElementById("btnBuscarCliente");
@@ -260,7 +259,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         document.getElementById('btnMaterialesModal').disabled = disabled;
         document.getElementById('btnLimpiarForm').disabled = disabled;
-        document.getElementById('btnNotificar').disabled = disabled;
         if (disabled) {
             infoCliente.innerHTML += '<br><span style="color:#c00;font-weight:bold;">Esta reparación está completada y no puede ser editada.</span>';
         }
@@ -603,21 +601,6 @@ document.addEventListener("DOMContentLoaded", () => {
         // Guardar el índice de la reparación seleccionada para usarlo al enviar
         window._reparacionNotificarIndex = index;
     };
-
-    btnNotificar.addEventListener('click', function() {
-        // Si hay una reparación seleccionada en edición, notificar esa
-        if (modoEdicion && idEdicion !== null) {
-            const reparacionesActuales = window._reparacionesFiltradas || listaReparaciones;
-            const index = reparacionesActuales.findIndex(r => r.id === idEdicion);
-            if (index !== -1) {
-                window.notificarCliente(index);
-                } else {
-                window.notificaciones.advertencia('No hay reparación seleccionada para notificar.');
-            }
-                } else {
-            window.notificaciones.advertencia('Por favor, seleccione una reparación para notificar al cliente.');
-                }
-    });
             
     btnEnviarNotificacion.addEventListener('click', function() {
         // Aquí puedes implementar el envío real (correo, SMS, etc.)
@@ -662,7 +645,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('estado').disabled = false;
         document.getElementById('btnMaterialesModal').disabled = true;
         document.getElementById('btnLimpiarForm').disabled = false;
-        document.getElementById('btnNotificar').disabled = true;
         document.querySelector('button[type="submit"]').textContent = 'Cambiar Estado';
         // Guardar modo especial para submit
         window._soloCambioEstado = true;
