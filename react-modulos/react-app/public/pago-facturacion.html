@@ -104,20 +104,23 @@
                         <div class="pos-system">
                             <!-- Panel lateral izquierdo (búsqueda y lista) -->
                             <div class="pos-sidebar" id="screen1">
-                                <div class="col-md-4 col-sm-12 mx-auto mb-2">
-                                    <div class="pos-search-panel ">
+                                <div class="col-md-6 col-sm-12 mx-auto mb-2">
+                                    <!-- Reimpresión: buscar factura por ID de reparación ya facturada -->
+                                    <div class="pos-search-panel">
+                                        <h5 class="mb-3"><i class="fas fa-print"></i> Impresión de Factura</h5>
+                                        <p class="small text-muted mb-2">Consulte e imprima una reparación ya completada.</p>
                                         <form id="formBusquedaFacturacion" autocomplete="off">
-                                            <div class="form-group mb-3">
-                                                <label for="repairId" class="font-weight-bold">ID de Reparación <span class="required-mark">*</span></label>
+                                            <div class="form-group">
+                                                <label for="repairId" class="font-weight-bold">ID de Reparación Completada <span class="required-mark">*</span></label>
                                                 <div class="input-group input-group-lg">
                                                     <div class="input-group-prepend">
                                                         <span class="input-group-text bg-white"><i class="fas fa-tools"></i></span>
                                                     </div>
-                                                    <input type="number" id="repairId" class="form-control" placeholder="ID de reparación" required>
+                                                    <input type="number" id="repairId" class="form-control" placeholder="ID de la reparación completada" required>
                                                 </div>
                                                 <div class="invalid-feedback" id="repairIdError"></div>
                                             </div>
-                                            <button id="searchButton" class="btnfactus btn-block btn-lg mt-3" type="button" style="font-weight:bold;"><i class="fas fa-search"></i> Buscar Reparación</button>
+                                            <button id="searchButton" class="btnfactus btn-lg" type="button"><i class="fas fa-search"></i> Buscar Reparación</button>
                                         </form>
                                         
                                         <div class="pos-history">
@@ -131,6 +134,22 @@
                                                 </button>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="pos-search-panel">
+                                        <h5 class="mb-3"><i class="fas fa-print"></i> Reimpresión de Factura</h5>
+                                        <p class="small text-muted mb-2">Consulte e imprima de nuevo una factura ya generada.</p>
+                                        <div class="form-group">
+                                            <label for="reprintRepairId" class="font-weight-bold">ID de Reparación Facturada <span class="required-mark">*</span></label>
+                                            <div class="input-group input-group-lg">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-white"><i class="fas fa-file-invoice"></i></span>
+                                                </div>
+                                                <input type="number" id="reprintRepairId" class="form-control" placeholder="ID de la reparación facturada" required>
+                                            </div>
+                                        </div>
+                                        <button id="searchInvoiceButton" class="btnfactus btn-lg" type="button">
+                                            <i class="fas fa-search"></i> Buscar Factura
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -349,6 +368,7 @@
                                     <div class="invoice-content">
                                         <div class="invoice-header">
                                             <div id="invoiceLogo" class="text-center mb-3"></div>
+                                            <div id="invoiceReimpresionBadge" class="invoice-reimpresion-badge hidden mb-2"></div>
                                             <div id="invoiceTitle" class="invoice-title">Factura de Servicio</div>
                                             <div id="invoiceCompany" class="invoice-company">Itech Support</div>
                                             <div id="invoiceTagline" class="invoice-tagline">Se más seguro con nosotros.</div>

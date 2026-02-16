@@ -41,6 +41,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const emailButton = document.getElementById('emailButton');
     const newTransactionButton = document.getElementById('newTransactionButton');
     const paymentInstruction = document.querySelector('.payment-instruction');
+    const reprintRepairIdInput = document.getElementById('reprintRepairId');
+    const searchInvoiceButton = document.getElementById('searchInvoiceButton');
+    const invoiceReimpresionBadge = document.getElementById('invoiceReimpresionBadge');
+    
+    // ID de la factura actual (para registrar impresiones y reimpresiones)
+    let currentFacturaId = null;
     
     // Elementos de resumen de pago
     const summaryClientName = document.getElementById('summaryClientName');
@@ -233,6 +239,30 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (e) { return []; }
     }
     
+    // Obtener factura por ID de reparación (para reimpresión)
+    async function fetchFacturaByReparacionId(repairId) {
+        try {
+            const res = await fetch(`${window.API_BASE_URL}/api/facturas/reparacion/${repairId}`);
+            if (!res.ok) return null;
+            return await res.json();
+        } catch (e) { return null; }
+    }
+    
+    // Registrar impresión en la BD (incrementar contador_impresiones)
+    async function registrarImpresionFactura(facturaId) {
+        if (!facturaId) return;
+        try {
+            const res = await fetch(`${window.API_BASE_URL}/api/facturas/${facturaId}/impresion`, {
+                method: 'PATCH'
+            });
+            if (res.ok) {
+                const data = await res.json();
+                return data.contador_impresiones;
+            }
+        } catch (e) { console.error('Error al registrar impresión:', e); }
+        return null;
+    }
+    
     // Reemplazar findRepairById y findClientById para usar fetch
     async function fetchRepairById(repairId) {
         try {
@@ -376,6 +406,88 @@ document.addEventListener('DOMContentLoaded', function() {
         // Cambiar a la pantalla de detalles
         transitionToScreen(screen1, screen2);
     });
+    
+    // Buscar factura por ID de reparación (reimpresión)
+    if (searchInvoiceButton && reprintRepairIdInput) {
+        searchInvoiceButton.addEventListener('click', async function() {
+            const repairId = reprintRepairIdInput.value.trim();
+            if (!repairId) {
+                window.notificaciones.advertencia('Ingrese el ID de la reparación facturada.');
+                return;
+            }
+            showLoading('Buscando factura...');
+            const factura = await fetchFacturaByReparacionId(repairId);
+            hideLoading();
+            if (!factura) {
+                window.notificaciones.error('No se encontró ninguna factura para la reparación #' + repairId + '.');
+                return;
+            }
+            currentFacturaId = factura.id;
+            const receiptConfig = JSON.parse(localStorage.getItem('receiptConfig')) || {};
+            const taxRate = receiptConfig.taxRate || 19;
+            const currencySymbol = receiptConfig.currency || '$';
+            let repair = null;
+            try {
+                repair = await fetchRepairById(factura.reparacion_id);
+            } catch (e) {}
+            let clientAddress = '';
+            try {
+                const client = await fetchClientByCedula(factura.cliente);
+                if (client) clientAddress = client.direccion || '';
+            } catch (e) {}
+            const fechaEmision = factura.fecha_emision ? new Date(factura.fecha_emision).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '';
+            if (invoiceReimpresionBadge) {
+                const contador = factura.contador_impresiones != null ? factura.contador_impresiones : 0;
+                const texto = contador === 0 ? 'Reimpresión' : 'Reimpresión (Impresión #' + (contador + 1) + ')';
+                invoiceReimpresionBadge.textContent = texto;
+                invoiceReimpresionBadge.classList.remove('hidden');
+                invoiceReimpresionBadge.style.display = 'inline-block';
+            }
+            if (receiptConfig.logoURL) {
+                document.getElementById('invoiceLogo').innerHTML = '<img src="' + receiptConfig.logoURL + '" alt="Logo" class="invoice-logo">';
+            } else {
+                document.getElementById('invoiceLogo').innerHTML = '<img src="img/logo-itech-support.png" alt="Logo" class="invoice-logo">';
+            }
+            document.getElementById('invoiceTitle').textContent = receiptConfig.receiptTitle || 'Factura de Servicio';
+            document.getElementById('invoiceCompany').textContent = receiptConfig.companyName || 'Itech Support';
+            document.getElementById('invoiceTagline').textContent = receiptConfig.companyTagline || 'Se más seguro con nosotros.';
+            document.getElementById('invoiceTaxRate').textContent = taxRate;
+            document.getElementById('invoiceClientName').textContent = factura.nombre_cliente || '';
+            document.getElementById('invoiceClientId').textContent = factura.cliente || '';
+            document.getElementById('invoiceClientPhone').textContent = factura.telefono_cliente || '';
+            document.getElementById('invoiceClientEmail').textContent = factura.email_cliente || '';
+            document.getElementById('invoiceClientAddress').textContent = clientAddress;
+            document.getElementById('invoiceNumber').textContent = factura.numero_factura || '';
+            document.getElementById('invoiceDate').textContent = fechaEmision;
+            document.getElementById('invoicePaymentMethod').textContent = factura.metodo_pago || '';
+            document.getElementById('invoiceSubtotal').textContent = Number(factura.subtotal).toLocaleString('es-CO');
+            document.getElementById('invoiceTax').textContent = Number(factura.impuesto).toLocaleString('es-CO');
+            document.getElementById('invoiceTotal').textContent = Number(factura.total).toLocaleString('es-CO');
+            const tableBody = document.getElementById('invoiceTableBody');
+            tableBody.innerHTML = '';
+            const issue = repair ? (repair.problema || 'Servicio de reparación') : 'Servicio de reparación';
+            const device = repair ? (repair.dispositivo || '') + (repair.marcaModelo ? ' ' + repair.marcaModelo : '') : '';
+            const imei = repair ? (repair.imei || '') : '';
+            const row = document.createElement('tr');
+            row.innerHTML = '<td>' + issue + '</td><td>' + device + '</td><td>' + imei + '</td><td>' + currencySymbol + ' ' + Number(factura.subtotal).toLocaleString('es-CO') + '</td>';
+            tableBody.appendChild(row);
+            document.querySelectorAll('.currency-symbol').forEach(function(el) { el.textContent = currencySymbol; });
+            document.getElementById('invoiceFooterText').textContent = receiptConfig.footerText || 'Gracias por su preferencia';
+            const qrContainer = document.getElementById('invoiceQrcode');
+            qrContainer.innerHTML = '';
+            if (receiptConfig.showQRCode !== 'false') {
+                const qrData = 'Factura: ' + factura.numero_factura + '\nCliente: ' + factura.nombre_cliente + '\nCédula: ' + factura.cliente + '\nTotal: ' + currencySymbol + ' ' + Number(factura.total).toLocaleString('es-CO') + '\nFecha: ' + fechaEmision;
+                createQRCode(qrContainer, qrData);
+            }
+            var paymentPanel = document.querySelector('#screen3 > div.col-md-8');
+            if (paymentPanel) paymentPanel.style.display = 'none';
+            invoiceSection.style.display = 'block';
+            invoiceSection.classList.remove('hidden');
+            transitionToScreen(screen1, screen3);
+            invoiceSection.scrollIntoView({ behavior: 'smooth' });
+            window.notificaciones.exito('Factura cargada. Puede imprimirla de nuevo.');
+        });
+    }
     
     backToScreen1Button.addEventListener('click', function() {
         transitionToScreen(screen2, screen1);
@@ -567,6 +679,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 hideLoading();
                 window.notificaciones.exito('Factura guardada correctamente en la base de datos.');
+                currentFacturaId = facturaData.id;
+                if (invoiceReimpresionBadge) {
+                    invoiceReimpresionBadge.classList.add('hidden');
+                    invoiceReimpresionBadge.style.display = 'none';
+                }
             } catch (err) {
                 hideLoading();
                 window.notificaciones.error('Error al guardar la factura: ' + (err.message || err));
@@ -638,6 +755,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 invoiceSection.classList.remove('hidden');
             }, 50);
             invoiceSection.scrollIntoView({ behavior: 'smooth' });
+            var paymentPanel = document.querySelector('#screen3 > div.col-md-8');
+            if (paymentPanel) paymentPanel.style.display = '';
         }, 1500);
     });
     
@@ -652,17 +771,20 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     newTransactionButton.addEventListener('click', function() {
-        // Volver a la pantalla 1 con transición suave
+        currentFacturaId = null;
+        if (invoiceReimpresionBadge) {
+            invoiceReimpresionBadge.classList.add('hidden');
+            invoiceReimpresionBadge.textContent = '';
+        }
+        var paymentPanel = document.querySelector('#screen3 > div.col-md-8');
+        if (paymentPanel) paymentPanel.style.display = '';
         transitionToScreen(screen3, screen1);
-        
-        // Limpiar campos
         clientIdInput.value = '';
         repairIdInput.value = '';
-        clientIdInput.focus();
-        
-        // Ocultar factura
+        if (reprintRepairIdInput) reprintRepairIdInput.value = '';
+        if (clientIdInput) clientIdInput.focus();
         invoiceSection.classList.add('hidden');
-        setTimeout(() => {
+        setTimeout(function() {
             invoiceSection.style.display = 'none';
         }, 300);
     });
@@ -706,7 +828,15 @@ document.addEventListener('DOMContentLoaded', function() {
             // Imprimir
             window.print();
             
-            // Revertir cambios que se hayan hecho solo para impresión
+            // Registrar impresión en BD (incrementar contador_impresiones)
+            if (currentFacturaId) {
+                registrarImpresionFactura(currentFacturaId).then(function(nuevoContador) {
+                    if (nuevoContador != null && window.notificaciones && window.notificaciones.informacion) {
+                        window.notificaciones.informacion('Impresión registrada. Total impresiones: ' + nuevoContador, 3000);
+                    }
+                });
+            }
+            
             window.scrollTo(0, scrollPos);
         }, 500);
     });
@@ -905,6 +1035,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'Enter') {
             e.preventDefault();
             searchButton.click();
+        }
+    });
+
+    // Permitir reimprimir con Enter en el input de ID de reparación para reimpresión
+    reprintRepairIdInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            searchInvoiceButton.click();
         }
     });
 });

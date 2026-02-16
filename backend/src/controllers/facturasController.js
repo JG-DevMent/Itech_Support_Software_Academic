@@ -21,6 +21,30 @@ exports.obtenerFacturaPorId = async (req, res) => {
   }
 };
 
+exports.obtenerFacturaPorReparacion = async (req, res) => {
+  try {
+    const reparacionId = req.params.reparacion_id;
+    const factura = await facturasModel.obtenerPorReparacionId(reparacionId);
+    if (!factura) return res.status(404).json({ error: 'No existe factura para esta reparación' });
+    res.json(factura);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener factura' });
+  }
+};
+
+exports.registrarImpresion = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const factura = await facturasModel.obtenerPorId(id);
+    if (!factura) return res.status(404).json({ error: 'Factura no encontrada' });
+    await facturasModel.incrementarImpresiones(id);
+    const actualizada = await facturasModel.obtenerPorId(id);
+    res.json({ contador_impresiones: actualizada.contador_impresiones });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al registrar impresión' });
+  }
+};
+
 exports.crearFactura = async (req, res) => {
   const connection = await pool.getConnection();
   try {

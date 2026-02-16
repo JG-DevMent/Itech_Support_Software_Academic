@@ -11,6 +11,19 @@ module.exports = {
     return rows[0];
   },
 
+  async obtenerPorReparacionId(reparacionId) {
+    const [rows] = await pool.query('SELECT * FROM facturas WHERE reparacion_id = ? ORDER BY fecha_registro DESC LIMIT 1', [reparacionId]);
+    return rows[0];
+  },
+
+  async incrementarImpresiones(id) {
+    const [result] = await pool.query(
+      'UPDATE facturas SET contador_impresiones = contador_impresiones + 1 WHERE id = ?',
+      [id]
+    );
+    return result.affectedRows > 0;
+  },
+
   async crear(factura, connection = pool) {
     if (!factura.numero_factura || !factura.cliente || !factura.nombre_cliente || !factura.fecha_emision || !factura.subtotal || !factura.impuesto || !factura.total || !factura.metodo_pago) {
       throw new Error('Faltan campos obligatorios');
